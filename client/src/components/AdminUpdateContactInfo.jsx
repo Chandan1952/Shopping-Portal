@@ -17,7 +17,7 @@ const UpdateContactInfo = () => {
     useEffect(() => {
       const verifyAdminSession = async () => {
         try {
-          const response = await axios.get("http://localhost:5000/admin-verify", { withCredentials: true });
+          const response = await axios.get("https://shopping-portal-wptg.onrender.com/admin-verify", { withCredentials: true });
           if (!response.data.isAdmin) {
             navigate("/admin-login", { replace: true });
           }
@@ -33,7 +33,7 @@ const UpdateContactInfo = () => {
 
   useEffect(() => {
     // Fetch current contact details
-    fetch("http://localhost:5000/contact-details")
+    fetch("https://shopping-portal-wptg.onrender.com/contact-details")
       .then((response) => response.json())
       .then((data) => setContactInfo(data))
       .catch((error) => console.error("Error fetching contact info:", error));
@@ -44,7 +44,7 @@ const UpdateContactInfo = () => {
   };
 
   const handleUpdate = () => {
-    fetch("http://localhost:5000/update-contact", {
+    fetch("https://shopping-portal-wptg.onrender.com/update-contact", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(contactInfo),
