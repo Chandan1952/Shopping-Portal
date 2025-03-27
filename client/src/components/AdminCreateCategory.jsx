@@ -64,7 +64,7 @@ export default function AdminCreateCategory() {
     useEffect(() => {
       const verifyAdminSession = async () => {
         try {
-          const response = await axios.get("http://localhost:5000/admin-verify", { withCredentials: true });
+          const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { withCredentials: true });
           if (!response.data.isAdmin) {
             navigate("/admin-login", { replace: true });
           }
@@ -97,7 +97,7 @@ export default function AdminCreateCategory() {
     formData.append("discount", discount);
 
     try {
-      const response = await axios.post("http://localhost:5000/categories", formData, {
+      const response = await axios.post("https://shopping-portal-backend.onrender.com/categories", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
