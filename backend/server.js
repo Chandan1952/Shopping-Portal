@@ -1,42 +1,48 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const session = require("express-session");
-const cors = require("cors"); 
+const MongoStore = require("connect-mongo");
+const cors = require("cors");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
-// require("dotenv").config(); // Load environment variables
 
 const app = express();
 
-// ✅ CORS (Fix Frontend URL)
+// ✅ CORS Setup
 app.use(
   cors({
-    origin: "http://localhost:3000", // Ensure correct frontend URL
-    credentials: true, // Allow cookies/session sharing
+    origin: "http://localhost:3000",
+    credentials: true,
   })
 );
 
 // ✅ Middleware
-app.use(express.urlencoded({ extended: true })); // Parse form data
-app.use(express.json()); // Parse JSON data
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+// ✅ Session Middleware (MongoDB Store)
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "yourSecretKey",
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false }  // Set to true if using HTTPS
-
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI,
+      collectionName: "sessions",
+      ttl: 14 * 24 * 60 * 60, // 14 days
+    }),
+    cookie: { secure: false },
   })
 );
 
-const MONGO_URI = "mongodb+srv://chandan1952:Chandan%401596@cluster0.dnvhw.mongodb.net/shopping-portal?retryWrites=true&w=majority";
-mongoose.connect(MONGO_URI)
+// ✅ MongoDB Connection
+mongoose
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ MongoDB Connection Error:", err));
-
-
 
 
 
