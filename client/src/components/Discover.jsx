@@ -10,7 +10,7 @@ export default function Discover() {
   // Fetch images from API
   useEffect(() => {
     axios
-      .get("http://localhost:5000/carousel-images")
+      .get("https://shopping-portal-backend.onrender.com/carousel-images")
       .then((res) => setImages(res.data.images))
       .catch((err) => console.error("Error fetching images:", err));
   }, []);
