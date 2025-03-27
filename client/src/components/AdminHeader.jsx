@@ -11,7 +11,7 @@ const AdminHeader = () => {
     useEffect(() => {
       const verifyAdminSession = async () => {
         try {
-          const response = await axios.get("http://localhost:5000/admin-verify", { withCredentials: true });
+          const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { withCredentials: true });
           if (!response.data.isAdmin) {
             navigate("/admin-login", { replace: true });
           }
@@ -29,7 +29,7 @@ const AdminHeader = () => {
   // Fetch admin details
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/admin", { withCredentials: true })
+      .get("https://shopping-portal-backend.onrender.com/api/admin", { withCredentials: true })
       .then((response) => setAdmin(response.data))
       .catch((error) => console.error("Error fetching admin details:", error));
   }, []);
@@ -37,7 +37,7 @@ const AdminHeader = () => {
   // Logout function
   const handleLogout = async () => {
     try {
-      await axios.post("http://localhost:5000/admin-logout", {}, { withCredentials: true });
+      await axios.post("https://shopping-portal-backend.onrender.com/admin-logout", {}, { withCredentials: true });
       setAdmin(null);
       alert("Successfully logged out!");
       navigate("/");
