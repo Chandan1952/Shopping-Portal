@@ -18,7 +18,7 @@ export default function UploadBrand() {
     useEffect(() => {
       const verifyAdminSession = async () => {
         try {
-          const response = await axios.get("http://localhost:5000/admin-verify", { withCredentials: true });
+          const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { withCredentials: true });
           if (!response.data.isAdmin) {
             navigate("/admin-login", { replace: true });
           }
@@ -45,7 +45,7 @@ export default function UploadBrand() {
     formData.append("img", image); // Append image
 
     try {
-      const response = await axios.post("http://localhost:5000/api/brands", formData, {
+      const response = await axios.post("https://shopping-portal-backend.onrender.com/api/brands", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       alert("Brand image uploaded successfully!");
