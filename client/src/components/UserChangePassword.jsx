@@ -50,7 +50,7 @@ export default function UpdatePassword() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/auth/check", { credentials: "include" })
+    fetch("https://shopping-portal-wptg.onrender.com/api/auth/check", { credentials: "include" })
         .catch(() => console.error("Authentication check failed"));
 }, []);
 
@@ -62,7 +62,7 @@ export default function UpdatePassword() {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/change-password", {
+      const response = await fetch("https://shopping-portal-wptg.onrender.com/api/change-password", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
