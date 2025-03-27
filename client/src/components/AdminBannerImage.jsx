@@ -14,7 +14,7 @@ export default function AdminBannerImage() {
   useEffect(() => {
     const verifyAdminSession = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/admin-verify", { withCredentials: true });
+        const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { withCredentials: true });
         if (!response.data.isAdmin) {
           navigate("/admin-login", { replace: true });
         }
@@ -40,7 +40,7 @@ export default function AdminBannerImage() {
     formData.append("image", image);
   
     try {
-      await axios.post("http://localhost:5000/upload", formData, { // ✅ Removed unused `res`
+      await axios.post("https://shopping-portal-backend.onrender.com/upload", formData, { // ✅ Removed unused `res`
         headers: { "Content-Type": "multipart/form-data" },
       });
   
