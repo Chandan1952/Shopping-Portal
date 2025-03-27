@@ -22,7 +22,7 @@ const AdminEditUser = () => {
       useEffect(() => {
         const verifyAdminSession = async () => {
           try {
-            const response = await axios.get("http://localhost:5000/admin-verify", { withCredentials: true });
+            const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { withCredentials: true });
             if (!response.data.isAdmin) {
               navigate("/admin-login", { replace: true });
             }
@@ -38,7 +38,7 @@ const AdminEditUser = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/get-user/${id}`, { withCredentials: true });
+        const response = await axios.get(`https://shopping-portal-backend.onrender.com/get-user/${id}`, { withCredentials: true });
         setUser(response.data);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -53,7 +53,7 @@ const AdminEditUser = () => {
 
   const handleSave = async () => {
     try {
-      await axios.put(`http://localhost:5000/update-user/${id}`, user, { withCredentials: true });
+      await axios.put(`https://shopping-portal-backend.onrender.com/update-user/${id}`, user, { withCredentials: true });
       alert("User updated successfully!");
       navigate("/admin-manageusers");
     } catch (error) {
