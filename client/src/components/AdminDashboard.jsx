@@ -4,7 +4,7 @@ import AdminHeader from "./AdminHeader";
 import AdminSidebar from "./AdminSidebar";
 import axios from "axios";
 
-const BASE_URL = "http://localhost:5000"; // Backend URL
+const BASE_URL = "https://shopping-portal-backend.onrender.com"; // Backend URL
 
 const DashboardCard = ({ title, count, color }) => {
   return (
