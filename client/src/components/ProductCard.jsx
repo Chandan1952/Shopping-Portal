@@ -85,7 +85,7 @@ const ProductCard = ({ product, wishlist, onToggleWishlist, onAddToCart }) => {
     const [isHovered, setIsHovered] = useState(false);
 
     const imageUrl = product.image
-        ? (product.image.startsWith("/uploads/") ? `https://shopping-portal-wptg.onrender.com${product.image}` : product.image)
+        ? (product.image.startsWith("/uploads/") ? `https://localhost:3000${product.image}` : product.image)
         : "https://via.placeholder.com/240";
 
     const isWishlisted = wishlist.includes(product._id);
