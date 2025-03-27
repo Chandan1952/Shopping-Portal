@@ -18,7 +18,7 @@ const AdminManageOrders = () => {
   useEffect(() => {
     const verifyAdminSession = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/admin-verify", { withCredentials: true });
+        const response = await axios.get("https://shopping-portal-wptg.onrender.com/admin-verify", { withCredentials: true });
         if (!response.data.isAdmin) {
           navigate("/admin-login", { replace: true });
         }
@@ -37,7 +37,7 @@ const AdminManageOrders = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/admin/orders", {
+      const response = await fetch("https://shopping-portal-wptg.onrender.com/api/admin/orders", {
         method: "GET",
         credentials: "include", // ✅ Allows cookies to be sent
         headers: {
@@ -61,7 +61,7 @@ const AdminManageOrders = () => {
   const handleApproveOrder = async (orderId) => {
     setActionLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/orders/${orderId}/approve`, { method: "PUT" });
+      const response = await fetch(`https://shopping-portal-wptg.onrender.com/api/orders/${orderId}/approve`, { method: "PUT" });
       if (!response.ok) throw new Error("Failed to approve order");
 
       setOrders(orders.map(order => order._id === orderId ? { ...order, status: "Approved" } : order));
@@ -76,7 +76,7 @@ const AdminManageOrders = () => {
   const handleMarkShipped = async (orderId) => {
     setActionLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/orders/${orderId}/shipped`, { method: "PUT" });
+      const response = await fetch(`https://shopping-portal-wptg.onrender.com/api/orders/${orderId}/shipped`, { method: "PUT" });
       if (!response.ok) throw new Error("Failed to update order status");
 
       setOrders(orders.map(order => order._id === orderId ? { ...order, status: "Shipped" } : order));
@@ -91,7 +91,7 @@ const AdminManageOrders = () => {
   const handleApproveReturn = async (orderId) => {
     setActionLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/orders/${orderId}/approve-return`, { method: "PUT" });
+      const response = await fetch(`https://shopping-portal-wptg.onrender.com/api/orders/${orderId}/approve-return`, { method: "PUT" });
       if (!response.ok) throw new Error("Failed to approve return request");
 
       setOrders(orders.map(order => order._id === orderId ? { ...order, status: "Return Approved" } : order));
@@ -106,7 +106,7 @@ const AdminManageOrders = () => {
   const handleCancelReturn = async (orderId) => {
     setActionLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/orders/${orderId}/cancel-return`, { method: "PUT" });
+      const response = await fetch(`https://shopping-portal-wptg.onrender.com/api/orders/${orderId}/cancel-return`, { method: "PUT" });
       if (!response.ok) throw new Error("Failed to cancel return request");
 
       setOrders(orders.map(order => order._id === orderId ? { ...order, status: "Return Denied" } : order));
@@ -123,7 +123,7 @@ const AdminManageOrders = () => {
 
     setActionLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/orders/${orderId}`, { method: "DELETE" });
+      const response = await fetch(`https://shopping-portal-wptg.onrender.com/api/orders/${orderId}`, { method: "DELETE" });
       if (!response.ok) throw new Error("Failed to delete order");
 
       setOrders(orders.filter(order => order._id !== orderId));
