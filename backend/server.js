@@ -14,7 +14,7 @@ const app = express();
 // ✅ CORS Setup
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "https://shopping-portal-wptg.onrender.com",
     credentials: true,
   })
 );
