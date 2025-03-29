@@ -319,15 +319,10 @@ app.post("/admin-login", async (req, res) => {
 });
 
 
-// ✅ Verify Admin Session
-app.get("/admin-verify", (req, res) => {
-  if (req.session.adminEmail === ADMIN_EMAIL) {
-    return res.json({ isAdmin: true, email: ADMIN_EMAIL });
-  }
-  return res.status(401).json({ error: "Unauthorized" });
+// ✅ Verify admin session
+app.get("/admin-verify", isAuthenticated, (req, res) => {
+  res.json({ isAdmin: true, email: req.session.adminEmail });
 });
-
-
 
 
 // **Middleware to Check Admin Session**
