@@ -119,6 +119,7 @@ export default function LoginForm({ isOpen, onClose, onSwitch, setUser }) {
 
 
       // Close the login modal
+      setUser(data.user); // ✅ Update user state in Header
       onClose();
 
       // ✅ Redirect user to dashboard
