@@ -138,7 +138,7 @@ export default function SignupForm({ isOpen, onClose, onSwitch }) {
     }
   
     try {
-      const response = await fetch("https://shopping-portal-wptg.onrender.com/submit", {
+      const response = await fetch("https://shopping-portal-backend.onrender.com/submit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
