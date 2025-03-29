@@ -48,9 +48,12 @@ function AdminDashboard() {
   const verifyAdminSession = async () => {
     try {
       const response = await axios.get(`${BASE_URL}/admin-verify`, { withCredentials: true });
+
       if (response.data.isAdmin) {
         setAdmin({ email: response.data.email });
-        fetchStats(); // ✅ Fetch stats only after verification
+
+        // ✅ Fetch stats only after authentication
+        fetchStats();  
       } else {
         navigate("/admin-login", { replace: true });
       }
@@ -59,32 +62,28 @@ function AdminDashboard() {
     }
   };
 
+  const fetchStats = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/admin-dashboard`, { withCredentials: true });
+      const fetchedStats = response.data.stats || {};
+
+      const formattedStats = [
+        { title: "Banner", count: fetchedStats.Image || 0, color: "#1E3A8A" },
+        { title: "Brands", count: fetchedStats.Brand || 0, color: "#10B981" },
+        { title: "Products", count: fetchedStats.Product || 0, color: "#EAB308" },
+        { title: "Categories", count: fetchedStats.Category || 0, color: "#EF4444" },
+      ];
+
+      setStats(formattedStats);
+    } catch {
+      setError("Failed to fetch stats.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   verifyAdminSession();
-}, [navigate]);
-
-    const fetchStats = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}/admin-dashboard`, { withCredentials: true });
-        const fetchedStats = response.data.stats || {};
-
-        const formattedStats = [
-          { title: "Banner", count: fetchedStats.Image || 0, color: "#1E3A8A" },
-          { title: "Brands", count: fetchedStats.Brand || 0, color: "#10B981" },
-          { title: "Products", count: fetchedStats.Product || 0, color: "#EAB308" },
-          { title: "Categories", count: fetchedStats.Category || 0, color: "#EF4444" },
-        ];
-
-        setStats(formattedStats);
-      } catch {
-        setError("Failed to fetch stats.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    verifyAdminSession();
-    fetchStats();
-  }, [navigate]);
+}, [navigate]); // ✅ Keep only `navigate` as a dependency
 
   return (
     <div style={styles.app}>
