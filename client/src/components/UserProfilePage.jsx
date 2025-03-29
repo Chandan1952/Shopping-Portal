@@ -11,13 +11,13 @@ const UserProfilePage = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("https://shopping-portal-wptg.onrender.com/api/auth/check", { credentials: "include" })
+    fetch("https://shopping-portal-backend.onrender.com/api/auth/check", { credentials: "include" })
         .catch(() => console.error("Authentication check failed"));
 }, []);
 
 
   useEffect(() => {
-    fetch("https://shopping-portal-wptg.onrender.com/api/user", {
+    fetch("https://shopping-portal-backend.onrender.com/api/user", {
       credentials: "include", // ✅ Ensures session-based authentication works
     })
       .then((res) => {
@@ -35,7 +35,7 @@ const UserProfilePage = () => {
 
   const handleSave = async () => {
     try {
-        const response = await fetch(`https://shopping-portal-wptg.onrender.com/update-users/${user._id}`, {
+        const response = await fetch(`https://shopping-portal-backend.onrender.com/update-users/${user._id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
