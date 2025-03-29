@@ -12,7 +12,7 @@ const Wishlist = () => {
     useEffect(() => {
         const fetchWishlist = async () => {
             try {
-                const response = await fetch("https://shopping-portal-wptg.onrender.com/api/wishlist");
+                const response = await fetch("https://shopping-portal-backend.onrender.com/api/wishlist");
                 if (!response.ok) throw new Error("Failed to fetch wishlist");
                 const data = await response.json();
                 setWishlist(data);
@@ -28,7 +28,7 @@ const Wishlist = () => {
 
     const handleRemove = async (productId) => {
         try {
-            const response = await fetch(`https://shopping-portal-wptg.onrender.com/api/wishlist/${productId}`, { method: "DELETE" });
+            const response = await fetch(`https://shopping-portal-backend.onrender.com/api/wishlist/${productId}`, { method: "DELETE" });
             if (!response.ok) throw new Error("Failed to remove item");
             setWishlist(wishlist.filter(item => item.productId !== productId));
             alert("❌ Removed from Wishlist!");
@@ -39,7 +39,7 @@ const Wishlist = () => {
 
     const handleMoveToCart = async (item) => {
         try {
-            const response = await fetch("https://shopping-portal-wptg.onrender.com/api/cart", {
+            const response = await fetch("https://shopping-portal-backend.onrender.com/api/cart", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -99,7 +99,7 @@ const Wishlist = () => {
                                 onMouseLeave={() => setHoveredItem(null)}
                             >
                                 <img
-                                    src={item.image.startsWith("/uploads/") ? `https://shopping-portal-wptg.onrender.com${item.image}` : item.image || "https://via.placeholder.com/150"}
+                                    src={item.image.startsWith("/uploads/") ? `https://shopping-portal-backend.onrender.com${item.image}` : item.image || "https://via.placeholder.com/150"}
                                     alt={item.name}
                                     style={{
                                         width: "100%",
