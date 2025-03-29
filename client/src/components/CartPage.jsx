@@ -14,7 +14,7 @@ const CartPage = () => {
 
 
   useEffect(() => {
-    fetch("https://shopping-portal-wptg.onrender.com/api/user", {
+    fetch("https://shopping-portal-backend.onrender.com/api/user", {
       credentials: "include", // ✅ Ensures session-based authentication works
     })
       .then((res) => {
@@ -29,7 +29,7 @@ const CartPage = () => {
 
     // Check if user is authenticated
     useEffect(() => {
-        fetch("https://shopping-portal-wptg.onrender.com/api/auth/check", { credentials: "include" })
+        fetch("https://shopping-portal-backend.onrender.com/api/auth/check", { credentials: "include" })
             .then((res) => res.json())
             .then((data) => {
                 setIsAuthenticated(data.isAuthenticated);
@@ -39,7 +39,7 @@ const CartPage = () => {
 
     // Fetch Cart Items
     useEffect(() => {
-        fetch("https://shopping-portal-wptg.onrender.com/api/cart", { credentials: "include" })
+        fetch("https://shopping-portal-backend.onrender.com/api/cart", { credentials: "include" })
             .then((res) => res.json())
             .then((data) => {
                 if (Array.isArray(data)) {
@@ -59,7 +59,7 @@ const CartPage = () => {
     // Update Cart Quantity
     const updateCart = async (id, change) => {
         try {
-            const response = await fetch(`https://shopping-portal-wptg.onrender.com/api/cart/${id}`, {
+            const response = await fetch(`https://shopping-portal-backend.onrender.com/api/cart/${id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ change }),
@@ -90,7 +90,7 @@ const CartPage = () => {
     const removeItem = async (id) => {
         setCart(cart.filter((item) => item._id !== id));
         try {
-            await fetch(`https://shopping-portal-wptg.onrender.com/api/cart/${id}`, { method: "DELETE", credentials: "include" });
+            await fetch(`https://shopping-portal-backend.onrender.com/api/cart/${id}`, { method: "DELETE", credentials: "include" });
         } catch (error) {
             console.error("Error removing item:", error);
         }
@@ -114,7 +114,7 @@ const CartPage = () => {
         }
 
         try {
-            const response = await fetch("https://shopping-portal-wptg.onrender.com/api/orders/place", {
+            const response = await fetch("https://shopping-portal-backend.onrender.com/api/orders/place", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -158,7 +158,7 @@ const CartPage = () => {
                     cart.map((item) => (
                         <div key={item._id} style={styles.cartItem}>
                             <img
-                                src={item.image.startsWith("/uploads/") ? `https://shopping-portal-wptg.onrender.com${item.image}` : item.image || "https://via.placeholder.com/100"}
+                                src={item.image.startsWith("/uploads/") ? `https://shopping-portal-backend.onrender.com${item.image}` : item.image || "https://via.placeholder.com/100"}
                                 alt={item.name}
                                 style={styles.image}
                                 onError={(e) => (e.target.src = "https://via.placeholder.com/100")}
