@@ -16,7 +16,7 @@ export default function AdminManageCategory() {
       useEffect(() => {
         const verifyAdminSession = async () => {
           try {
-            const response = await axios.get("https://shopping-portal-wptg.onrender.com/admin-verify", { withCredentials: true });
+            const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { withCredentials: true });
             if (!response.data.isAdmin) {
               navigate("/admin-login", { replace: true });
             }
@@ -35,7 +35,7 @@ export default function AdminManageCategory() {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get("https://shopping-portal-wptg.onrender.com/categories");
+      const res = await axios.get("https://shopping-portal-backend.onrender.com/categories");
       setCategories(res.data);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -44,7 +44,7 @@ export default function AdminManageCategory() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`https://shopping-portal-wptg.onrender.com/categories/${id}`);
+      await axios.delete(`https://shopping-portal-backend.onrender.com/categories/${id}`);
       setCategories(categories.filter((category) => category._id !== id));
     } catch (error) {
       console.error("Error deleting category:", error);
@@ -59,7 +59,7 @@ export default function AdminManageCategory() {
 
   const handleUpdate = async (id) => {
     try {
-      await axios.put(`https://shopping-portal-wptg.onrender.com/categories/${id}`, {
+      await axios.put(`https://shopping-portal-backend.onrender.com/categories/${id}`, {
         title: editedTitle,
         discount: editedDiscount,
       });
@@ -95,7 +95,7 @@ export default function AdminManageCategory() {
             {categories.map((category) => (
               <tr key={category._id}>
                 <td>
-                  <img src={`https://shopping-portal-wptg.onrender.com${category.img}`} alt={category.title} width="80" />
+                  <img src={`https://shopping-portal-backend.onrender.com${category.img}`} alt={category.title} width="80" />
                 </td>
 
                 {editingCategoryId === category._id ? (
