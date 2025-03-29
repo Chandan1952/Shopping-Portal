@@ -13,11 +13,11 @@ import {
   FaTags,
   FaUsers,
   FaCog,
+
 } from "react-icons/fa";
 
-const BASE_URL = "https://shopping-portal-backend.onrender.com";
-
 const AdminSidebar = () => {
+  
   const [dropdowns, setDropdowns] = useState({
     banner: false,
     brand: false,
@@ -34,154 +34,215 @@ const AdminSidebar = () => {
     }));
   };
 
-  // ✅ Verify Admin Session
-  useEffect(() => {
-    const verifyAdminSession = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}/admin-verify`, { withCredentials: true });
-
-        if (!response.data.isAdmin) {
+ // ✅ Verify Admin Session
+    useEffect(() => {
+      const verifyAdminSession = async () => {
+        try {
+          const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { withCredentials: true });
+          if (!response.data.isAdmin) {
+            navigate("/admin-login", { replace: true });
+          }
+        } catch {
           navigate("/admin-login", { replace: true });
         }
-      } catch {
-        navigate("/admin-login", { replace: true });
-      }
-    };
+      };
+  
+      verifyAdminSession(); // ✅ Call the function inside useEffect
+    }, [navigate]); // ✅ Add navigate as a dependency
+  
 
-    verifyAdminSession();
-  }, [navigate]);
 
-  // ✅ Logout Function
   const handleLogout = async () => {
     try {
-      await axios.post(`${BASE_URL}/admin-logout`, {}, { withCredentials: true });
+      const response = await fetch("https://shopping-portal-backend.onrender.com/admin-logout", {
+        method: "POST",
+        credentials: "include",
+      });
 
-      localStorage.removeItem("authToken");
-      navigate("/admin-login");
-    } catch {
-      alert("Logout failed. Please try again.");
+      if (response.ok) {
+        alert("Logged out successfully!");
+        localStorage.removeItem("authToken");
+        navigate("/admin-login"); // Change if needed
+      } else {
+        alert("Logout failed. Please try again.");
+      }
+    } catch (error) {
+      alert("Error logging out.");
     }
   };
 
   return (
     <div style={styles.sidebar}>
-      <NavLink to="/admin-dashboard" className="nav-link">
+
+      {/* Dashboard */}
+      <NavLink to="/admin-dashboard" style={styles.link} activeStyle={styles.activeLink}>
         <FaTachometerAlt /> Dashboard
       </NavLink>
 
       {/* Banner Dropdown */}
       <div style={styles.dropdown} onClick={() => toggleDropdown("banner")}>
-        <span>
+        <span style={styles.dropdownLabel}>
           <FaBook /> Banner
         </span>
         {dropdowns.banner ? <FaChevronUp /> : <FaChevronDown />}
       </div>
       {dropdowns.banner && (
         <div style={styles.dropdownMenu}>
-          <NavLink to="/admin-Banner" className="dropdown-link">Create Banner</NavLink>
-          <NavLink to="/admin-managebanner" className="dropdown-link">Manage Banner</NavLink>
+          <NavLink to="/admin-Banner" style={styles.dropdownLink}>
+            Create Banner
+          </NavLink>
+          <NavLink to="/admin-managebanner" style={styles.dropdownLink}>
+            Manage Banner
+          </NavLink>
         </div>
       )}
 
       {/* Brand Dropdown */}
       <div style={styles.dropdown} onClick={() => toggleDropdown("brand")}>
-        <span>
+        <span style={styles.dropdownLabel}>
           <FaQuestionCircle /> Brand
         </span>
         {dropdowns.brand ? <FaChevronUp /> : <FaChevronDown />}
       </div>
       {dropdowns.brand && (
         <div style={styles.dropdownMenu}>
-          <NavLink to="/admin-brand" className="dropdown-link">Create Brand</NavLink>
-          <NavLink to="/admin-managebrand" className="dropdown-link">Manage Brand</NavLink>
+          <NavLink to="/admin-brand" style={styles.dropdownLink}>
+            Create Brand
+          </NavLink>
+          <NavLink to="/admin-managebrand" style={styles.dropdownLink}>
+            Manage Brand
+          </NavLink>
+         
         </div>
       )}
 
       {/* Product Dropdown */}
       <div style={styles.dropdown} onClick={() => toggleDropdown("product")}>
-        <span>
+        <span style={styles.dropdownLabel}>
           <FaBox /> Product
         </span>
         {dropdowns.product ? <FaChevronUp /> : <FaChevronDown />}
       </div>
       {dropdowns.product && (
         <div style={styles.dropdownMenu}>
-          <NavLink to="/admin-createproduct" className="dropdown-link">Create Product</NavLink>
-          <NavLink to="/admin-manageproduct" className="dropdown-link">Manage Product</NavLink>
+          <NavLink to="/admin-createproduct" style={styles.dropdownLink}>
+            Create Product
+          </NavLink>
+          <NavLink to="/admin-manageproduct" style={styles.dropdownLink}>
+            Manage Product
+          </NavLink>
         </div>
       )}
 
       {/* Category Dropdown */}
       <div style={styles.dropdown} onClick={() => toggleDropdown("category")}>
-        <span>
+        <span style={styles.dropdownLabel}>
           <FaTags /> Category
         </span>
         {dropdowns.category ? <FaChevronUp /> : <FaChevronDown />}
       </div>
       {dropdowns.category && (
         <div style={styles.dropdownMenu}>
-          <NavLink to="/admin-createcategory" className="dropdown-link">Create Category</NavLink>
-          <NavLink to="/admin-managecategory" className="dropdown-link">Manage Category</NavLink>
+          <NavLink to="/admin-createcategory" style={styles.dropdownLink}>
+            Create Category
+          </NavLink>
+          <NavLink to="/admin-managecategory" style={styles.dropdownLink}>
+            Manage Category
+          </NavLink>
         </div>
       )}
 
-      {/* Other Links */}
-      <NavLink to="/adminmanageusers" className="nav-link">
+<NavLink to="/adminmanageusers" style={styles.link}>
         <FaUsers /> Registered Users
       </NavLink>
 
-      <NavLink to="/admin-manageorder" className="nav-link">
+      <NavLink to="/admin-manageorder" style={styles.link}>
         <FaUsers /> Manage Order
       </NavLink>
 
-      <NavLink to="/admin-updatedcontactinfo" className="nav-link">
+      <NavLink to="/admin-updatedcontactinfo" style={styles.link}>
         <FaCog /> Updated Contact Info
       </NavLink>
 
-      <NavLink to="/admin-managequery" className="nav-link">
+      <NavLink to="/admin-managequery" style={styles.link}>
         <FaUsers /> Manage Contact Query
       </NavLink>
 
-      <NavLink to="/admin-managegiftcard" className="nav-link">
+      <NavLink to="/admin-managegiftcard" style={styles.link}>
         <FaUsers /> Manage Gift Cards
       </NavLink>
 
-      {/* Bottom Links */}
+
+      {/* Change Password & Logout */}
       <div style={styles.bottomLinks}>
-        <NavLink to="/admin-changepassword" className="nav-link">
+        <NavLink to="/admin-changepassword" style={styles.link} activeStyle={styles.activeLink}>
           <FaKey /> Change Password
         </NavLink>
-        <div style={styles.logout} onClick={handleLogout}>
+        <div style={styles.link} onClick={handleLogout}>
           <FaSignOutAlt /> Logout
         </div>
+
+
+
       </div>
     </div>
   );
 };
 
-// ✅ Styles using CSS classes instead of inline styles for better maintainability
 const styles = {
   sidebar: {
     width: "220px",
-    height: "100vh",
+    height: "90vh",
     backgroundColor: "#1E1E2F",
     color: "white",
     display: "flex",
     flexDirection: "column",
-    paddingTop: "65px",
+    paddingTop:"65px",
     position: "fixed",
     left: "0",
     top: "0",
     boxShadow: "2px 0 5px rgba(0, 0, 0, 0.1)",
+    transition: "0.3s",
+  },
+  title: {
+    fontSize: "22px",
+    fontWeight: "bold",
+    padding: "15px 10px",
+    textAlign: "center",
+    borderBottom: "2px solid #35354D",
+  },
+  link: {
+    textDecoration: "none",
+    color: "white",
+    padding: "12px",
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    transition: "background 0.3s, padding-left 0.3s",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize:"15px"
+  },
+  activeLink: {
+    backgroundColor: "#35354D",
+    paddingLeft: "20px",
+    borderRadius: "6px",
   },
   dropdown: {
     display: "flex",
     justifyContent: "space-between",
     cursor: "pointer",
     padding: "12px",
-    color: "#fff",
-    fontSize: "14px",
+    borderRadius: "6px",
     transition: "background 0.3s",
+    color: "#fff",
+    fontSize:"13px"
+
+  },
+  dropdownLabel: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
   },
   dropdownMenu: {
     display: "flex",
@@ -190,19 +251,23 @@ const styles = {
     backgroundColor: "#2A2A3A",
     borderRadius: "6px",
     padding: "6px",
+    transition: "height 0.3s ease-in-out",
+  },
+  dropdownLink: {
+    textDecoration: "none",
+    color: "#ddd",
+    padding: "10px",
+    transition: "background 0.3s, padding-left 0.3s",
+    borderRadius: "6px",
+  },
+  dropdownLinkHover: {
+    backgroundColor: "#404050",
+    paddingLeft: "15px",
   },
   bottomLinks: {
     marginTop: "auto",
     borderTop: "2px solid #35354D",
     paddingTop: "15px",
-  },
-  logout: {
-    cursor: "pointer",
-    color: "red",
-    padding: "12px",
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
   },
 };
 
