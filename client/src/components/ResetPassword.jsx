@@ -33,7 +33,7 @@ const ResetPassword = () => {
     }
 
     try {
-      const response = await fetch("https://shopping-portal-wptg.onrender.com/reset-password", {
+      const response = await fetch("https://shopping-portal-backend.onrender.com/reset-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
