@@ -157,8 +157,9 @@ export default function SignupForm({ isOpen, onClose, onSwitch, setUser }) {
     setUser(data.user); 
 
     // Close signup modal and open login form immediately
-    onClose();
-    onSwitch();
+onSwitch(); // Open Login Form
+onClose(); // Close Signup Modal
+
   } catch (error) {
     setError(error.message);
   }
