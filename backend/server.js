@@ -34,9 +34,13 @@ app.use(
       collectionName: "sessions",
       ttl: 14 * 24 * 60 * 60, // 14 days
     }),
-    cookie: { secure: false },
+    cookie: { 
+      secure: process.env.NODE_ENV === "production", // true if in production (HTTPS)
+      httpOnly: true 
+    }
   })
 );
+
 
 // ✅ MongoDB Connection
 mongoose
@@ -295,42 +299,35 @@ app.post("/logout", (req, res) => {
 
 //*********************ADMIN-DASHBOARD-PAGE************************
 
-// Hardcoded admin credentials
-let admins = [
-  { email: "admin@gmail.com", password: bcrypt.hashSync("admin", 10) },
-];
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH; // Store hashed password
 
-
-// **Admin Login (Stores in Session)**
 app.post("/admin-login", async (req, res) => {
   const { email, password } = req.body;
-  const admin = admins.find(user => user.email === email);
 
-  if (!admin || !(await bcrypt.compare(password, admin.password))) {
-    return res.status(401).json({ error: "Invalid email or password" });
+  if (email !== ADMIN_EMAIL) {
+    return res.status(401).json({ error: "Invalid credentials" });
   }
 
-  req.session.adminEmail = email;
-  return res.json({ message: "Login successful" });
+  const passwordMatch = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
+  if (!passwordMatch) {
+    return res.status(401).json({ error: "Invalid credentials" });
+  }
+
+  req.session.adminEmail = ADMIN_EMAIL;  // ✅ Store admin session
+  res.status(200).json({ message: "Login successful" });
 });
 
 
-// **Check Admin Session**
+// ✅ Verify Admin Session
 app.get("/admin-verify", (req, res) => {
-  if (req.session.adminEmail) {
-    return res.json({ isAdmin: true, email: req.session.adminEmail });
+  if (req.session.adminEmail === ADMIN_EMAIL) {
+    return res.json({ isAdmin: true, email: ADMIN_EMAIL });
   }
   return res.status(401).json({ error: "Unauthorized" });
 });
 
 
-// **Check Admin Session**
-app.get("/api/admin", (req, res) => {
-  if (!req.session.adminEmail) {
-    return res.status(401).json({ error: "Unauthorized access" });
-  }
-  res.json({ name: "Admin", email: req.session.adminEmail });
-});
 
 
 // **Middleware to Check Admin Session**
@@ -340,8 +337,6 @@ const isAuthenticated = (req, res, next) => {
   }
   next();
 };
-
-
 
 // **Admin Dashboard Statistics Route**
 app.get("/admin-dashboard", isAuthenticated, async (req, res) => {
