@@ -138,14 +138,18 @@ export default function SignupForm({ isOpen, onClose, onSwitch, setUser }) {
   }
 
   try {
-    const response = await fetch("https://shopping-portal-backend.onrender.com/signup", {
+    const response = await fetch("https://shopping-portal-backend.onrender.com/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
     });
 
-    const data = await response.json();
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("Unexpected response from the server. Please try again later.");
+    }
 
+    const data = await response.json();
     if (!response.ok) {
       throw new Error(data.error || "Signup failed. Please try again.");
     }
@@ -153,13 +157,8 @@ export default function SignupForm({ isOpen, onClose, onSwitch, setUser }) {
     setSuccess("User Registration Successful!");
     alert("User Registration Successful!");
 
-    // ✅ Update the user state in Header
-    setUser(data.user); 
-
-    // Close signup modal and open login form immediately
-onSwitch(); // Open Login Form
-onClose(); // Close Signup Modal
-
+    onSwitch(); // Open Login Form
+    onClose(); // Close Signup Modal
   } catch (error) {
     setError(error.message);
   }
