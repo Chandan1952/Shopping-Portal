@@ -52,7 +52,7 @@ export default function ShopByCategory() {
 
   useEffect(() => {
     axios
-      .get("https://shopping-portal-wptg.onrender.com/categories") // Fetch from backend
+      .get("https://shopping-portal-backend.onrender.com/categories") // Fetch from backend
       .then((res) => setCategories(res.data))
       .catch((err) => console.error("Error fetching categories:", err));
   }, []);
@@ -72,7 +72,7 @@ export default function ShopByCategory() {
             onMouseLeave={() => setHovered(null)}
           >
             <img
-              src={`https://shopping-portal-wptg.onrender.com${category.img}`}
+              src={`https://shopping-portal-backend.onrender.com${category.img}`}
               alt={category.title}
               style={{
                 ...styles.categoryImg,
