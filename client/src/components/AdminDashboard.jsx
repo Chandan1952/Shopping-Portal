@@ -45,18 +45,18 @@ function AdminDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const verifyAdminSession = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}/admin-verify`, { withCredentials: true });
-        if (response.data.isAdmin) {
-          setAdmin({ email: response.data.email });
-        } else {
-          navigate("/admin-login", { replace: true });
-        }
-      } catch {
-        navigate("/admin-login", { replace: true });
-      }
-    };
+    // const verifyAdminSession = async () => {
+    //   try {
+    //     const response = await axios.get(`${BASE_URL}/admin-verify`, { withCredentials: true });
+    //     if (response.data.isAdmin) {
+    //       setAdmin({ email: response.data.email });
+    //     } else {
+    //       navigate("/admin-login", { replace: true });
+    //     }
+    //   } catch {
+    //     navigate("/admin-login", { replace: true });
+    //   }
+    // };
 
     const fetchStats = async () => {
       try {
@@ -78,7 +78,7 @@ function AdminDashboard() {
       }
     };
 
-    verifyAdminSession();
+    // verifyAdminSession();
     fetchStats();
   }, [navigate]);
 
