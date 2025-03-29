@@ -2,47 +2,39 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+const BASE_URL = "https://shopping-portal-backend.onrender.com";
+
 const AdminHeader = () => {
   const [admin, setAdmin] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const navigate = useNavigate(); 
-  
- // ✅ Verify Admin Session
-    useEffect(() => {
-      const verifyAdminSession = async () => {
-        try {
-          const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { withCredentials: true });
-          if (!response.data.isAdmin) {
-            navigate("/admin-login", { replace: true });
-          }
-        } catch {
+  const navigate = useNavigate();
+
+  // ✅ Fetch admin session and details in a single request
+  useEffect(() => {
+    const fetchAdminData = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/admin-verify`, { withCredentials: true });
+
+        if (response.data.isAdmin) {
+          setAdmin({ name: "Admin", email: response.data.email }); // Default name since API lacks it
+        } else {
           navigate("/admin-login", { replace: true });
         }
-      };
-  
-      verifyAdminSession(); // ✅ Call the function inside useEffect
-    }, [navigate]); // ✅ Add navigate as a dependency
-  
+      } catch {
+        navigate("/admin-login", { replace: true });
+      }
+    };
 
+    fetchAdminData();
+  }, [navigate]);
 
-
-  // Fetch admin details
-  useEffect(() => {
-    axios
-      .get("https://shopping-portal-backend.onrender.com/api/admin", { withCredentials: true })
-      .then((response) => setAdmin(response.data))
-      .catch((error) => console.error("Error fetching admin details:", error));
-  }, []);
-
-  // Logout function
+  // ✅ Logout function
   const handleLogout = async () => {
     try {
-      await axios.post("https://shopping-portal-backend.onrender.com/admin-logout", {}, { withCredentials: true });
+      await axios.post(`${BASE_URL}/admin-logout`, {}, { withCredentials: true });
       setAdmin(null);
-      alert("Successfully logged out!");
-      navigate("/");
-    } catch (error) {
-      console.error("Error during logout:", error);
+      navigate("/admin-login");
+    } catch {
       alert("Logout failed. Please try again.");
     }
   };
@@ -59,7 +51,7 @@ const AdminHeader = () => {
             onMouseLeave={() => setDropdownOpen(false)}
           >
             <button style={styles.profileButton}>
-              {admin && admin.name ? admin.name.charAt(0).toUpperCase() : "A"}
+              {admin?.name ? admin.name.charAt(0).toUpperCase() : "A"}
             </button>
             <div
               style={{
@@ -79,7 +71,7 @@ const AdminHeader = () => {
                 <>
                   <h3 style={styles.dropdownContentText}>Welcome!</h3>
                   <p style={styles.dropdownContentParagraph}>
-                    Please <a href="/adminlogin">login</a> to continue.
+                    Please <a href="/admin-login">login</a> to continue.
                   </p>
                 </>
               )}
@@ -96,17 +88,17 @@ const AdminHeader = () => {
 
 const styles = {
   header: {
-    position: "fixed", // ✅ Fixed at the top
+    position: "fixed",
     top: 0,
     left: 0,
-    width: "97%", // ✅ Full width
+    width: "97%",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: "#333",
     color: "white",
     padding: "13px 20px",
-    zIndex: 1000, // ✅ Ensures it stays above other elements
+    zIndex: 1000,
   },
   headerLeft: {
     fontSize: "20px",
