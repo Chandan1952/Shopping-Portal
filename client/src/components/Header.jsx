@@ -124,7 +124,7 @@ export default function Header() {
               </div>
             )}
           </div>
-          <AuthModal isOpen={isAuthOpen} onClose={() => setAuthOpen(false)} />
+          <AuthModal isOpen={isAuthOpen} onClose={() => setAuthOpen(false)} setUser={setUser} />
 
           {/* Wishlist and Cart Icons */}
           <Link to="/wishlist" className="cart-link">
