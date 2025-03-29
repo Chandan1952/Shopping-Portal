@@ -9,7 +9,7 @@ const ContactUs = () => {
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
-    fetch("https://shopping-portal-wptg.onrender.com/contact-details")
+    fetch("https://shopping-portal-backend.onrender.com/contact-details")
       .then((response) => response.json())
       .then((data) => setContactDetails(data))
       .catch((error) => console.error("Error fetching contact details:", error));
@@ -31,7 +31,7 @@ const ContactUs = () => {
     }
 
     try {
-      const response = await fetch("https://shopping-portal-wptg.onrender.com/api/queries", {
+      const response = await fetch("https://shopping-portal-backend.onrender.com/api/queries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
