@@ -289,14 +289,71 @@ export default function Header() {
             }
           }
 
-          @media (max-width: 768px) {
-            .search-container {
-              width: 50%;
-            }
+          /* General Mobile Styles */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+  }
 
-            .icons-container {
-              gap: 10px;
-            }
+  .logo {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+
+  .nav-links {
+    display: none; /* Hide navigation links by default on mobile */
+    flex-direction: column;
+    width: 100%;
+    text-align: center;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    padding: 10px 0;
+  }
+
+  .nav-links.active {
+    display: flex; /* Show navigation when active */
+  }
+
+  .nav-links span {
+    padding: 10px;
+    font-size: 18px;
+  }
+
+  .menu-toggle {
+    display: block;
+    font-size: 24px;
+    cursor: pointer;
+  }
+
+  .search-container {
+    width: 90%;
+    margin-bottom: 10px;
+  }
+
+  .icons-container {
+    gap: 10px;
+    font-size: 18px;
+  }
+
+  .profile-dropdown {
+    min-width: 180px;
+    right: 50%;
+    transform: translateX(50%);
+  }
+}
+
+/* Tablet View Adjustments */
+@media (max-width: 1024px) {
+  .search-container {
+    width: 60%;
+  }
+}
+
           }
         `}
       </style>
