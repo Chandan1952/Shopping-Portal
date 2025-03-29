@@ -66,7 +66,7 @@ export default function ManageQueries() {
       useEffect(() => {
         const verifyAdminSession = async () => {
           try {
-            const response = await axios.get("https://shopping-portal-wptg.onrender.com/admin-verify", { withCredentials: true });
+            const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { withCredentials: true });
             if (!response.data.isAdmin) {
               navigate("/admin-login", { replace: true });
             }
@@ -85,7 +85,7 @@ export default function ManageQueries() {
 
   const fetchQueries = async () => {
     try {
-      const response = await fetch("https://shopping-portal-wptg.onrender.com/api/allqueries");
+      const response = await fetch("https://shopping-portal-backend.onrender.com/api/allqueries");
       const data = await response.json();
       setQueries(data);
     } catch (error) {
@@ -95,7 +95,7 @@ export default function ManageQueries() {
 
   const updateQueryStatus = async (id, newStatus) => {
     try {
-      const response = await fetch(`https://shopping-portal-wptg.onrender.com/api/query/${id}`, {
+      const response = await fetch(`https://shopping-portal-backend.onrender.com/api/query/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
