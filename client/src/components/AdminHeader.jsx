@@ -11,22 +11,22 @@ const AdminHeader = () => {
 
   // ✅ Fetch admin session and details in a single request
   useEffect(() => {
-  //   const fetchAdminData = async () => {
-  //     try {
-  //       const response = await axios.get(`${BASE_URL}/admin-verify`, { withCredentials: true });
+    const fetchAdminData = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/admin-verify`, { withCredentials: true });
 
-  //       if (response.data.isAdmin) {
-  //         setAdmin({ name: "Admin", email: response.data.email }); // Default name since API lacks it
-  //       } else {
-  //         navigate("/admin-login", { replace: true });
-  //       }
-  //     } catch {
-  //       navigate("/admin-login", { replace: true });
-  //     }
-  //   };
+        if (response.data.isAdmin) {
+          setAdmin({ name: "Admin", email: response.data.email }); // Default name since API lacks it
+        } else {
+          navigate("/admin-login", { replace: true });
+        }
+      } catch {
+        navigate("/admin-login", { replace: true });
+      }
+    };
 
-  //   fetchAdminData();
-  // }, [navigate]);
+    fetchAdminData();
+  }, [navigate]); // ✅ Add `navigate` as a dependency
 
   // ✅ Logout function
   const handleLogout = async () => {
