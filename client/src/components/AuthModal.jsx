@@ -50,9 +50,18 @@ const AuthModal = ({ isOpen, onClose }) => {
 
         {/* Render Login or Signup Form */}
         {mode === "login" ? (
-          <LoginForm isOpen={isOpen} onClose={onClose} onSwitch={() => setMode("signup")} setUser={setUser} />
+          <LoginForm
+            isOpen={isOpen}
+            onClose={onClose}
+            onSwitch={() => setMode("signup")}
+          />
         ) : (
-          <SignupForm isOpen={isOpen} onClose={onClose} onSwitch={() => setMode("login")} setUser={setUser} />
+          <SignupForm
+            isOpen={isOpen}
+            onClose={onClose}
+            onSwitch={() => setMode("login")}
+            setUser={setUser} // ✅ Pass setUser to SignupForm
+          />
         )}
       </div>
     </div>
