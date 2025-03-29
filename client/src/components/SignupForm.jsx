@@ -73,10 +73,9 @@ const styles = {
     textDecoration: "none",
     fontSize: "14px",
   },
-  label:{
+  label: {
     fontSize: "14px",
   },
-
   errorMessage: {
     color: "red",
     fontSize: "14px",
@@ -89,12 +88,13 @@ const styles = {
   },
 };
 
-export default function SignupForm({ isOpen, onClose, onSwitch }) {
+export default function SignupForm({ isOpen, onClose, onSwitch, setUser }) {
   const [formData, setFormData] = useState({
     fullName: "",
     mobileNumber: "",
     email: "",
     password: "",
+    confirmPassword: "",
     agreeToTerms: false,
   });
 
@@ -130,142 +130,57 @@ export default function SignupForm({ isOpen, onClose, onSwitch }) {
     e.preventDefault();
     setError("");
     setSuccess("");
-  
+
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
-  
+
     try {
       const response = await fetch("https://shopping-portal-backend.onrender.com/submit", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          fullName: formData.fullName,
-          phone: formData.mobileNumber,
-          email: formData.email,
-          password: formData.password,
-          confirmPassword: formData.confirmPassword,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
-  
+
       const data = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(data.error || "Signup failed. Please try again.");
       }
-        
+
       localStorage.setItem("user", JSON.stringify(data));
+      setUser(data); // ✅ Correct usage
 
       setSuccess("User Registration Successful!");
       alert("User Registration Successful!");
-  
-      // Close signup modal and open login form immediately
-      setUser(data);
+
       onClose();
-      onSwitch();
+      onSwitch(); // Switch to login
     } catch (error) {
       setError(error.message);
     }
   };
-  
 
   return (
     <div style={styles.modalOverlay}>
       <div style={styles.modalContent}>
-        {/* Close Button */}
         <button style={styles.closeButton} onClick={onClose}>
           <FaTimes />
         </button>
-
         <h2>Sign Up</h2>
-
-        {/* Display Error or Success Message */}
         {error && <p style={styles.errorMessage}>{error}</p>}
         {success && <p style={styles.successMessage}>{success}</p>}
 
-        {/* Signup Form */}
         <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            name="fullName"
-            placeholder="Full Name"
-            value={formData.fullName}
-            onChange={handleChange}
-            style={styles.input}
-            required
-          />
-          <input
-            type="tel"
-            name="mobileNumber"
-            placeholder="Mobile Number"
-            value={formData.mobileNumber}
-            onChange={handleChange}
-            style={styles.input}
-            required
-          />
-          <input
-            type="email"
-            name="email"
-            placeholder="Email Address"
-            value={formData.email}
-            onChange={handleChange}
-            style={styles.input}
-            required
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            style={styles.input}
-            required
-          />
-          <input
-            type="password"
-            name="confirmPassword"
-            placeholder="Confirm Password"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            style={styles.input}
-            required
-          />
+          <input type="text" name="fullName" placeholder="Full Name" value={formData.fullName} onChange={handleChange} style={styles.input} required />
+          <input type="tel" name="mobileNumber" placeholder="Mobile Number" value={formData.mobileNumber} onChange={handleChange} style={styles.input} required />
+          <input type="email" name="email" placeholder="Email Address" value={formData.email} onChange={handleChange} style={styles.input} required />
+          <input type="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange} style={styles.input} required />
+          <input type="password" name="confirmPassword" placeholder="Confirm Password" value={formData.confirmPassword} onChange={handleChange} style={styles.input} required />
 
-          {/* Checkbox */}
-          <div style={styles.checkboxContainer}>
-            <input
-              type="checkbox"
-              name="agreeToTerms"
-              checked={formData.agreeToTerms}
-              onChange={handleChange}
-            />
-            <label style={styles.label} >
-              I agree with{" "}
-              <span style={styles.link}>Terms and Conditions</span>
-            </label>
-          </div>
-
-          {/* Signup Button */}
-          <button
-            type="submit"
-            style={{
-              ...styles.signupButton,
-              ...(formData.agreeToTerms
-                ? styles.signupButtonEnabled
-                : styles.signupButtonDisabled),
-            }}
-            disabled={!formData.agreeToTerms} // Button is disabled if checkbox is not checked
-          >
-            Sign Up
-          </button>
-
-          {/* Switch to Login */}
-          <span style={styles.link} onClick={onSwitch}>
-            Already have an account? Login
-          </span>
+          <button type="submit" style={styles.signupButton} disabled={!formData.agreeToTerms}>Sign Up</button>
+          <span style={styles.link} onClick={onSwitch}>Already have an account? Login</span>
         </form>
       </div>
     </div>
