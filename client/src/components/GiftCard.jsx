@@ -8,7 +8,7 @@ const GiftCard = () => {
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
-    fetch("https://shopping-portal-wptg.onrender.com/api/auth/check", { credentials: "include" })
+    fetch("https://shopping-portal-backend.onrender.com/api/auth/check", { credentials: "include" })
         .catch(() => console.error("Authentication check failed"));
 }, []);
 
