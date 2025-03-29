@@ -89,7 +89,7 @@ const styles = {
   },
 };
 
-export default function SignupForm({ isOpen, onClose, onSwitch }) {
+export default function SignupForm({ isOpen, onClose, onSwitch, setUser }) {
   const [formData, setFormData] = useState({
     fullName: "",
     mobileNumber: "",
@@ -127,48 +127,42 @@ export default function SignupForm({ isOpen, onClose, onSwitch }) {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
-  
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
-      return;
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+  setSuccess("");
+
+  if (formData.password !== formData.confirmPassword) {
+    setError("Passwords do not match.");
+    return;
+  }
+
+  try {
+    const response = await fetch("https://shopping-portal-backend.onrender.com/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Signup failed. Please try again.");
     }
-  
-    try {
-      const response = await fetch("https://shopping-portal-backend.onrender.com/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          fullName: formData.fullName,
-          phone: formData.mobileNumber,
-          email: formData.email,
-          password: formData.password,
-          confirmPassword: formData.confirmPassword,
-        }),
-      });
-  
-      const data = await response.json();
-  
-      if (!response.ok) {
-        throw new Error(data.error || "Signup failed. Please try again.");
-      }
-  
-      setSuccess("User Registration Successful!");
-      alert("User Registration Successful!");
-  
-      // Close signup modal and open login form immediately
-      onClose();
-      onSwitch();
-    } catch (error) {
-      setError(error.message);
-    }
-  };
-  
+
+    setSuccess("User Registration Successful!");
+    alert("User Registration Successful!");
+
+    // ✅ Update the user state in Header
+    setUser(data.user); 
+
+    // Close signup modal and open login form immediately
+    onClose();
+    onSwitch();
+  } catch (error) {
+    setError(error.message);
+  }
+};
 
   return (
     <div style={styles.modalOverlay}>
