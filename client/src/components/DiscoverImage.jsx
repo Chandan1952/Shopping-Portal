@@ -11,7 +11,7 @@ export default function BrandsSection() {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const response = await axios.get("https://shopping-portal-wptg.onrender.com/api/brands");
+        const response = await axios.get("https://shopping-portal-backend.onrender.com/api/brands");
         setBrands(response.data);
       } catch (err) {
         setError("Failed to load brands");
@@ -82,7 +82,7 @@ function BrandCard({ brand }) {
     >
       {brand?.img ? (
         <img
-          src={`https://shopping-portal-wptg.onrender.com${brand.img}`}
+          src={`https://shopping-portal-backend.onrender.com${brand.img}`}
           alt={brand?.brand || "Brand"}
           style={styles.brandImg}
         />
