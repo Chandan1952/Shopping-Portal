@@ -95,7 +95,6 @@ export default function SignupForm({ isOpen, onClose, onSwitch }) {
     mobileNumber: "",
     email: "",
     password: "",
-    confirmPassword: "",
     agreeToTerms: false,
   });
 
@@ -157,11 +156,14 @@ export default function SignupForm({ isOpen, onClose, onSwitch }) {
       if (!response.ok) {
         throw new Error(data.error || "Signup failed. Please try again.");
       }
-  
+        
+      localStorage.setItem("user", JSON.stringify(data));
+
       setSuccess("User Registration Successful!");
       alert("User Registration Successful!");
   
       // Close signup modal and open login form immediately
+      setUser(data);
       onClose();
       onSwitch();
     } catch (error) {
