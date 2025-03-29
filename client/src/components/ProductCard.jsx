@@ -85,7 +85,7 @@ const ProductCard = ({ product, wishlist, onToggleWishlist, onAddToCart }) => {
     const [isHovered, setIsHovered] = useState(false);
 
     const imageUrl = product.image
-        ? (product.image.startsWith("/uploads/") ? `https://localhost:3000${product.image}` : product.image)
+        ? (product.image.startsWith("/uploads/") ? `https://shopping-portal-backend.onrender.com${product.image}` : product.image)
         : "https://via.placeholder.com/240";
 
     const isWishlisted = wishlist.includes(product._id);
@@ -171,8 +171,8 @@ const ProductList = () => {
                 setLoading(true);
                 setError(null);
                 const url = category
-                    ? `https://shopping-portal-wptg.onrender.com/api/products?category=${category}`
-                    : "https://shopping-portal-wptg.onrender.com/api/products";
+                    ? `https://shopping-portal-backend.onrender.com/api/products?category=${category}`
+                    : "https://shopping-portal-backend.onrender.com/api/products";
 
                 const response = await fetch(url);
                 if (!response.ok) throw new Error(`Server Error: ${response.statusText}`);
@@ -206,7 +206,7 @@ const ProductList = () => {
             const isAlreadyWishlisted = wishlist.includes(product._id);
             const method = isAlreadyWishlisted ? "DELETE" : "POST";
 
-            const response = await fetch("https://shopping-portal-wptg.onrender.com/api/wishlist", {
+            const response = await fetch("https://shopping-portal-backend.onrender.com/api/wishlist", {
                 method,
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 
