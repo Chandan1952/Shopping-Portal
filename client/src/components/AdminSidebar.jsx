@@ -36,19 +36,19 @@ const AdminSidebar = () => {
 
  // ✅ Verify Admin Session
     useEffect(() => {
-    //   const verifyAdminSession = async () => {
-    //     try {
-    //       const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { withCredentials: true });
-    //       if (!response.data.isAdmin) {
-    //         navigate("/admin-login", { replace: true });
-    //       }
-    //     } catch {
-    //       navigate("/admin-login", { replace: true });
-    //     }
-    //   };
+      const verifyAdminSession = async () => {
+        try {
+          const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { withCredentials: true });
+          if (!response.data.isAdmin) {
+            navigate("/admin-login", { replace: true });
+          }
+        } catch {
+          navigate("/admin-login", { replace: true });
+        }
+      };
   
-    //   verifyAdminSession(); // ✅ Call the function inside useEffect
-    // }, [navigate]); // ✅ Add navigate as a dependency
+      verifyAdminSession(); // ✅ Call the function inside useEffect
+    }, [navigate]); // ✅ Add navigate as a dependency
   
 
 
