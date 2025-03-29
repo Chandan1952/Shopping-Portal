@@ -19,7 +19,7 @@ const AdminManageUsers = () => {
       useEffect(() => {
         const verifyAdminSession = async () => {
           try {
-            const response = await axios.get("https://shopping-portal-wptg.onrender.com/admin-verify", { withCredentials: true });
+            const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { withCredentials: true });
             if (!response.data.isAdmin) {
               navigate("/admin-login", { replace: true });
             }
@@ -37,7 +37,7 @@ const AdminManageUsers = () => {
     const fetchUsers = async () => {
       try {
         const response = await axios.get(
-          `https://shopping-portal-wptg.onrender.com/admin-manageprofile?page=${currentPage}&limit=${limit}`,
+          `https://shopping-portal-backend.onrender.com/admin-manageprofile?page=${currentPage}&limit=${limit}`,
           { withCredentials: true }
         );
         setUsers(response.data?.users || []);
@@ -57,7 +57,7 @@ const AdminManageUsers = () => {
     if (!window.confirm("Are you sure you want to delete this user permanently?")) return;
 
     try {
-      await axios.delete(`https://shopping-portal-wptg.onrender.com/delete/${userId}`, {
+      await axios.delete(`https://shopping-portal-backend.onrender.com/delete/${userId}`, {
         withCredentials: true,
       });
       setUsers(users.filter((user) => user._id !== userId));
