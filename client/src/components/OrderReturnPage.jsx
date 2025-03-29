@@ -11,13 +11,13 @@ export default function OrderReturnPage() {
     const [expandedOrders, setExpandedOrders] = useState({});
 
     useEffect(() => {
-        fetch("https://shopping-portal-wptg.onrender.com/api/auth/check", { credentials: "include" })
+        fetch("https://shopping-portal-backend.onrender.com/api/auth/check", { credentials: "include" })
             .catch(() => console.error("Authentication check failed"));
     }, []);
     
 
     useEffect(() => {
-        fetch("https://shopping-portal-wptg.onrender.com/api/orders", { credentials: "include" })
+        fetch("https://shopping-portal-backend.onrender.com/api/orders", { credentials: "include" })
             .then((res) => res.json())
             .then((data) => setOrders(data))
             .catch((error) => console.error("❌ Error fetching orders:", error));
@@ -32,7 +32,7 @@ export default function OrderReturnPage() {
         if (!window.confirm("Are you sure you want to cancel this return request?")) return;
 
         try {
-            const response = await fetch(`https://shopping-portal-wptg.onrender.com/api/orders/${orderId}/cancel-return`, {
+            const response = await fetch(`https://shopping-portal-backend.onrender.com/api/orders/${orderId}/cancel-return`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -63,7 +63,7 @@ export default function OrderReturnPage() {
         }
 
         try {
-            const response = await fetch("https://shopping-portal-wptg.onrender.com/api/orders/return", {
+            const response = await fetch("https://shopping-portal-backend.onrender.com/api/orders/return", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -76,7 +76,7 @@ export default function OrderReturnPage() {
                 setReturnReason("");
 
                 // ✅ Fetch updated orders after submitting return request
-                const updatedOrders = await fetch("https://shopping-portal-wptg.onrender.com/api/orders", { credentials: "include" })
+                const updatedOrders = await fetch("https://shopping-portal-backend.onrender.com/api/orders", { credentials: "include" })
                     .then((res) => res.json());
                 setOrders(updatedOrders);
             } else {
@@ -126,7 +126,7 @@ export default function OrderReturnPage() {
                                                 <img
                                                     src={
                                                         item.image?.startsWith("/uploads/")
-                                                            ? `https://shopping-portal-wptg.onrender.com${item.image}`
+                                                            ? `https://shopping-portal-backend.onrender.com${item.image}`
                                                             : item.image || "https://via.placeholder.com/100"
                                                     }
                                                     alt={item.name}
