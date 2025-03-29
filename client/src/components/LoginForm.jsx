@@ -93,12 +93,14 @@ export default function LoginForm({ isOpen, onClose, onSwitch, setUser }) {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
 
-    try {
-      const response = await fetch("https://shopping-portal-backend.onrender.com/user-login", {
+  try {
+    const response = await fetch(
+      "https://shopping-portal-backend.onrender.com/user-login",
+      {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -106,27 +108,32 @@ export default function LoginForm({ isOpen, onClose, onSwitch, setUser }) {
           password: formData.password,
         }),
         credentials: "include",
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed. Please try again.");
       }
+    );
 
-      // Store user data in localStorage
-      localStorage.setItem("user", JSON.stringify(data));
+    const data = await response.json();
+    console.log("Login Response:", data); // ✅ Debugging API response
 
-
-      // Close the login modal
-      onClose();
-
-      // ✅ Redirect user to dashboard
-      window.location.reload();
-    } catch (error) {
-      setError(error.message);
+    if (!response.ok) {
+      throw new Error(data.message || "Login failed. Please try again.");
     }
-  };
+
+    if (!data.token) {
+      throw new Error("No token received. Login may have failed.");
+    }
+
+    // ✅ Store user data in localStorage
+    localStorage.setItem("user", JSON.stringify(data));
+
+    // ✅ Close the login modal
+    onClose();
+
+    // ✅ Reload to update auth state
+    window.location.reload();
+  } catch (error) {
+    setError(error.message);
+  }
+};
 
   return (
     <div style={styles.modalOverlay}>
