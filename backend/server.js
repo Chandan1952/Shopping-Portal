@@ -319,19 +319,18 @@ app.post("/admin-login", async (req, res) => {
 });
 
 
-// ✅ Verify admin session
-app.get("/admin-verify", isAuthenticated, (req, res) => {
-  res.json({ isAdmin: true, email: req.session.adminEmail });
-});
-
-
-// **Middleware to Check Admin Session**
+// ✅ Middleware to Check Admin Session
 const isAuthenticated = (req, res, next) => {
   if (!req.session.adminEmail) {
     return res.status(401).json({ error: "Unauthorized access" });
   }
   next();
 };
+
+// ✅ Now, define routes after the middleware
+app.get("/admin-verify", isAuthenticated, (req, res) => {
+  res.json({ isAdmin: true, email: req.session.adminEmail });
+});
 
 // **Admin Dashboard Statistics Route**
 app.get("/admin-dashboard", isAuthenticated, async (req, res) => {
