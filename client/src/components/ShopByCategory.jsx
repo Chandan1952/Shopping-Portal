@@ -3,34 +3,39 @@ import axios from "axios";
 
 const styles = {
   section: {
-    margin: "30px 0",
+    margin: "30px auto",
     padding: "20px",
     backgroundColor: "#fff",
     textAlign: "center",
+    maxWidth: "1200px",
   },
   title: {
-    fontSize: "24px",
+    fontSize: "26px",
     fontWeight: "bold",
-    marginBottom: "10px",
+    marginBottom: "20px",
+    color: "#333",
   },
   categoryGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "20px",
+    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+    gap: "15px",
     justifyContent: "center",
-    padding: "20px",
+    padding: "10px",
   },
   categoryCard: {
     position: "relative",
     textAlign: "center",
-    borderRadius: "8px",
+    borderRadius: "10px",
     overflow: "hidden",
     cursor: "pointer",
     transition: "transform 0.3s ease-in-out",
+    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.15)",
   },
   categoryImg: {
     width: "100%",
-    borderRadius: "8px",
+    height: "220px",
+    borderRadius: "10px",
+    objectFit: "cover",
     transition: "transform 0.3s ease-in-out",
   },
   overlay: {
@@ -39,7 +44,7 @@ const styles = {
     width: "100%",
     background: "rgba(255, 0, 0, 0.8)",
     color: "#fff",
-    padding: "10px",
+    padding: "12px",
     fontSize: "16px",
     fontWeight: "bold",
     transition: "opacity 0.3s ease-in-out",
@@ -52,7 +57,7 @@ export default function ShopByCategory() {
 
   useEffect(() => {
     axios
-      .get("https://shopping-portal-backend.onrender.com/categories") // Fetch from backend
+      .get("https://shopping-portal-backend.onrender.com/categories")
       .then((res) => setCategories(res.data))
       .catch((err) => console.error("Error fetching categories:", err));
   }, []);
@@ -70,10 +75,12 @@ export default function ShopByCategory() {
             }}
             onMouseEnter={() => setHovered(category._id)}
             onMouseLeave={() => setHovered(null)}
+            onClick={() => console.log(`Navigate to ${category.title}`)}
           >
             <img
               src={`https://shopping-portal-backend.onrender.com${category.img}`}
               alt={category.title}
+              loading="lazy"
               style={{
                 ...styles.categoryImg,
                 transform: hovered === category._id ? "scale(1.1)" : "scale(1)",
@@ -82,7 +89,7 @@ export default function ShopByCategory() {
             <div
               style={{
                 ...styles.overlay,
-                opacity: hovered === category._id ? 1 : 0.8,
+                opacity: hovered === category._id ? 1 : 0.9,
               }}
             >
               {category.title} <br /> {category.discount}
