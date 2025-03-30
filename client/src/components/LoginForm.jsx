@@ -98,7 +98,7 @@ export default function LoginForm({ isOpen, onClose, onSwitch, setUser }) {
 
   try {
     const response = await fetch(
-      "https://car-rental-portal-backend.onrender.com/login", // Ensure correct API endpoint
+      "https://shopping-portal-backend.onrender.com/login", // Ensure correct API endpoint
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
