@@ -176,7 +176,7 @@ app.post('/reset-password', async function (req, res) {
 
 
 // Route for handling "User-login" form submissions
-app.post('/user-login', async function (req, res) {
+app.post('/login', async function (req, res) {
   const { email, password } = req.body;
 
   try {
