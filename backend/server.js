@@ -37,9 +37,10 @@ app.use(
       collectionName: "sessions",
       ttl: 14 * 24 * 60 * 60, // 14 days
     }),
-    cookie: { 
-      secure: process.env.NODE_ENV === "production", // true if in production (HTTPS)
-      httpOnly: true 
+    cookie: {
+      secure: process.env.NODE_ENV === "production", // Set to false for local development
+      httpOnly: true,
+      sameSite: "none", // ✅ Allows cross-site cookies
     }
   })
 );
