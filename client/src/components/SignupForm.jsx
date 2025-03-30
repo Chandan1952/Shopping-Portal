@@ -5,57 +5,62 @@ import axios from "axios";
 const styles = {
   modalOverlay: {
     position: "fixed",
-    top: "0",
-    left: "0",
+    top: 0,
+    left: 0,
     width: "100%",
     height: "100%",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    zIndex: "1000",
+    zIndex: 1000,
+    padding: "20px",
   },
   modalContent: {
-    backgroundColor: "white",
-    padding: "20px",
-    borderRadius: "8px",
-    width: "350px",
+    backgroundColor: "#fff",
+    padding: "25px",
+    borderRadius: "10px",
+    width: "100%",
+    maxWidth: "400px",
     boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.3)",
     position: "relative",
     textAlign: "center",
   },
   closeButton: {
     position: "absolute",
-    top: "10px",
-    right: "10px",
+    top: "12px",
+    right: "12px",
     cursor: "pointer",
-    fontSize: "18px",
-    color: "gray",
+    fontSize: "20px",
+    color: "#555",
     background: "none",
     border: "none",
   },
   input: {
-    width: "98%",
-    padding: "10px",
+    width: "100%",
+    padding: "12px",
     margin: "8px 0",
     border: "1px solid #ccc",
-    borderRadius: "5px",
+    borderRadius: "6px",
+    fontSize: "14px",
   },
   checkboxContainer: {
     display: "flex",
     alignItems: "center",
-    gap: "5px",
-    marginTop: "10px",
+    justifyContent: "start",
+    gap: "8px",
+    fontSize: "14px",
+    margin: "10px 0",
   },
   signupButton: {
     width: "100%",
-    padding: "10px",
-    borderRadius: "5px",
+    padding: "12px",
+    borderRadius: "6px",
     fontSize: "16px",
-    cursor: "pointer",
+    fontWeight: "bold",
     border: "none",
-    marginTop: "10px",
-    transition: "background 0.3s ease",
+    marginTop: "12px",
+    transition: "0.3s",
   },
   signupButtonDisabled: {
     backgroundColor: "gray",
@@ -68,21 +73,22 @@ const styles = {
     cursor: "pointer",
   },
   link: {
-    color: "red",
+    color: "#d32f2f",
     cursor: "pointer",
     textAlign: "center",
-    marginTop: "10px",
+    marginTop: "12px",
+    fontSize: "14px",
     textDecoration: "none",
   },
   errorMessage: {
     color: "red",
     fontSize: "14px",
-    marginTop: "5px",
+    marginBottom: "10px",
   },
   successMessage: {
     color: "green",
     fontSize: "14px",
-    marginTop: "5px",
+    marginBottom: "10px",
   },
 };
 
@@ -135,7 +141,7 @@ export default function SignupForm({ isOpen, onClose, onSwitch }) {
     }
 
     try {
-     const response = await axios.post(
+      const response = await axios.post(
         "https://shopping-portal-backend.onrender.com/submit",
         {
           fullName: formData.fullName,
@@ -149,7 +155,7 @@ export default function SignupForm({ isOpen, onClose, onSwitch }) {
 
       setSuccess("User Registration Successful!");
       alert("User Registration Successful!");
-      localStorage.setItem("user", JSON.stringify(response.data.user)); // Store user in localStorage
+      localStorage.setItem("user", JSON.stringify(response.data.user));
 
       onClose();
       onSwitch();
@@ -162,18 +168,15 @@ export default function SignupForm({ isOpen, onClose, onSwitch }) {
   return (
     <div style={styles.modalOverlay}>
       <div style={styles.modalContent}>
-        {/* Close Button */}
         <button style={styles.closeButton} onClick={onClose}>
           <FaTimes />
         </button>
 
-        <h2>Sign Up</h2>
+        <h2 style={{ marginBottom: "15px", fontSize: "22px" }}>Sign Up</h2>
 
-        {/* Display Error or Success Message */}
         {error && <p style={styles.errorMessage}>{error}</p>}
         {success && <p style={styles.successMessage}>{success}</p>}
 
-        {/* Signup Form */}
         <form onSubmit={handleSubmit}>
           <input
             type="text"
@@ -221,7 +224,6 @@ export default function SignupForm({ isOpen, onClose, onSwitch }) {
             required
           />
 
-          {/* Checkbox */}
           <div style={styles.checkboxContainer}>
             <input
               type="checkbox"
@@ -230,12 +232,10 @@ export default function SignupForm({ isOpen, onClose, onSwitch }) {
               onChange={handleChange}
             />
             <label>
-              I agree with{" "}
-              <span style={styles.link}>Terms and Conditions</span>
+              I agree with <span style={styles.link}>Terms and Conditions</span>
             </label>
           </div>
 
-          {/* Signup Button */}
           <button
             type="submit"
             style={{
@@ -244,12 +244,11 @@ export default function SignupForm({ isOpen, onClose, onSwitch }) {
                 ? styles.signupButtonEnabled
                 : styles.signupButtonDisabled),
             }}
-            disabled={!formData.agreeToTerms} // Button is disabled if checkbox is not checked
+            disabled={!formData.agreeToTerms}
           >
             Sign Up
           </button>
 
-          {/* Switch to Login */}
           <span style={styles.link} onClick={onSwitch}>
             Already have an account? Login
           </span>
