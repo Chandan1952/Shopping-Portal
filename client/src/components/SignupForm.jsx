@@ -37,7 +37,7 @@ const styles = {
     border: "none",
   },
   input: {
-    width: "100%",
+    width: "90%",
     padding: "12px",
     margin: "8px 0",
     border: "1px solid #ccc",
