@@ -14,10 +14,13 @@ const app = express();
 // ✅ CORS Setup
 app.use(
   cors({
-    origin: "https://shopping-portal-client.onrender.com",
-    credentials: true,
+    origin: "https://shopping-portal-client.onrender.com", // ✅ Correct Frontend URL
+    credentials: true, // ✅ Allows session cookies to be sent
+    methods: ["GET", "POST", "PUT", "DELETE"], // ✅ Ensure all methods are allowed
+    allowedHeaders: ["Content-Type", "Authorization"], // ✅ Explicitly allow headers
   })
 );
+
 
 // ✅ Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -180,32 +183,27 @@ app.post('/login', async function (req, res) {
   const { email, password } = req.body;
 
   try {
-    // Input Validation
     if (!email || !password) {
       return res.status(400).json({ status: 'error', message: 'Email and password are required.' });
     }
 
-    // Find user by email
     const foundUser = await User.findOne({ email });
-
-    // If user not found
     if (!foundUser) {
       return res.status(400).json({ status: 'error', message: 'Email not found.' });
     }
 
-    // Verify password
     const isPasswordMatch = await bcrypt.compare(password, foundUser.password);
-
     if (!isPasswordMatch) {
       return res.status(400).json({ status: 'error', message: 'Incorrect password.' });
     }
 
-    // Successful login
-    req.session.userId = foundUser._id; // Store user ID in session
-    req.session.username = foundUser.fullName; // Store user ID in session
+    // ✅ Store User Session
+    req.session.userId = foundUser._id;  
+    req.session.username = foundUser.fullName;
     req.session.userEmail = foundUser.email;
 
-    // Send success response
+    console.log("🔹 Session after login:", req.session); // ✅ Debugging
+
     res.status(200).json({ status: 'success', message: 'Login successful', userId: foundUser._id, userEmail: foundUser.email });
   } catch (error) {
     console.error(error);
