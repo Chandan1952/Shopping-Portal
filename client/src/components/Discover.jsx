@@ -75,7 +75,7 @@ export default function Discover() {
               style={{
                 width: "100%",
                 height: "80vh",
-                objectFit: "cover",
+                objectFit: "contain",
                 flexShrink: 0,
                 "@media (max-width: 768px)": {
                   height: "50vh",
