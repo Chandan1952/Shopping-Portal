@@ -7,14 +7,17 @@ export default function Header() {
   const [isAuthOpen, setAuthOpen] = useState(false);
   const [profileDropdown, setProfileDropdown] = useState(false);
   const [user, setUser] = useState(null);
+  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
-
+  // Fetch User Data
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch("https://shopping-portal-backend.onrender.com/api/user", { credentials: "include" });
+        const response = await fetch("https://shopping-portal-backend.onrender.com/api/user", {
+          credentials: "include",
+        });
         const data = await response.json();
         if (response.ok) {
           setUser(data);
@@ -28,6 +31,7 @@ export default function Header() {
     fetchUser();
   }, []);
 
+  // Logout Function
   const handleLogout = async () => {
     try {
       const response = await fetch("https://shopping-portal-backend.onrender.com/logout", {
@@ -36,8 +40,11 @@ export default function Header() {
       });
 
       if (response.ok) {
+        localStorage.removeItem("user");
+        sessionStorage.removeItem("user");
         setUser(null);
         navigate("/");
+        window.location.reload(); // Ensure UI refresh
       } else {
         console.error("Logout failed");
       }
@@ -46,6 +53,7 @@ export default function Header() {
     }
   };
 
+  // Close profile dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -58,11 +66,11 @@ export default function Header() {
     };
   }, []);
 
-
+  // Category Navigation
   const handleCategoryClick = (category) => {
-    navigate(`/products?category=${category.toLowerCase()}`); // ✅ Ensure lowercase query
+    navigate(`/products?category=${category.toLowerCase()}`);
+    setMobileMenuOpen(false); // Close mobile menu on selection
   };
-
 
   return (
     <>
@@ -70,9 +78,13 @@ export default function Header() {
         {/* Logo */}
         <Link to="/" className="logo">Myntra</Link>
 
+        {/* Mobile Menu Button */}
+        <div className="menu-toggle" onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}>
+          ☰
+        </div>
 
         {/* Navigation Links */}
-        <nav className="nav-links">
+        <nav className={`nav-links ${isMobileMenuOpen ? "active" : ""}`}>
           <span onClick={() => handleCategoryClick("Mens")}>Men</span>
           <span onClick={() => handleCategoryClick("Women")}>Women</span>
           <span onClick={() => handleCategoryClick("Kids")}>Kids</span>
@@ -86,15 +98,9 @@ export default function Header() {
         </div>
 
         {/* Icons - Profile, Wishlist, Cart */}
-        {/* Icons */}
         <div className="icons-container">
-          {/* Profile Dropdown with Hover Effect */}
-          <div
-            className="icon profile-container"
-            ref={dropdownRef}
-            onMouseEnter={() => setProfileDropdown(true)}
-            onMouseLeave={() => setProfileDropdown(false)}
-          >
+          {/* Profile Dropdown */}
+          <div className="icon profile-container" ref={dropdownRef} onClick={() => setProfileDropdown(!profileDropdown)}>
             <FaUser />
             {profileDropdown && (
               <div className="profile-dropdown">
@@ -110,12 +116,6 @@ export default function Header() {
                     <Link to="/contact" className="dropdown-item">Contact Us</Link>
                     <Link to="/myntra-insider" className="dropdown-item highlight">Myntra Insider</Link>
                     <hr />
-                    <Link to="/myntra-credit" className="dropdown-item">Myntra Credit</Link>
-                    <Link to="/coupons" className="dropdown-item">Coupons</Link>
-                    <Link to="/saved-cards" className="dropdown-item">Saved Cards</Link>
-                    <Link to="/saved-vpa" className="dropdown-item">Saved VPA</Link>
-                    <Link to="/saved-addresses" className="dropdown-item">Saved Addresses</Link>
-                    <hr />
                     <button onClick={handleLogout} className="logout-button">Logout</button>
                   </>
                 ) : (
@@ -126,7 +126,7 @@ export default function Header() {
           </div>
           <AuthModal isOpen={isAuthOpen} onClose={() => setAuthOpen(false)} setUser={setUser} />
 
-          {/* Wishlist and Cart Icons */}
+          {/* Wishlist and Cart */}
           <Link to="/wishlist" className="cart-link">
             <FaHeart className="icon" />
           </Link>
@@ -136,9 +136,6 @@ export default function Header() {
           </Link>
         </div>
       </header>
-
-
-
 
       {/* Styles */}
       <style>
@@ -157,7 +154,12 @@ export default function Header() {
             font-size: 24px;
             font-weight: bold;
             text-decoration: none;
+          }
 
+          .menu-toggle {
+            display: none;
+            font-size: 24px;
+            cursor: pointer;
           }
 
           .nav-links {
@@ -165,11 +167,8 @@ export default function Header() {
             gap: 20px;
             color: #333;
             font-weight: bold;
-            transition: color 0.3s ease;
             cursor: pointer;
           }
-
-       
 
           .nav-links span:hover {
             color: #ff3f6c;
@@ -185,7 +184,6 @@ export default function Header() {
             padding: 8px 10px 8px 35px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            outline: none;
           }
 
           .search-icon {
@@ -201,16 +199,6 @@ export default function Header() {
             display: flex;
             gap: 20px;
             font-size: 22px;
-            position: relative;
-          }
-
-          .icon {
-            cursor: pointer;
-            transition: color 0.2s ease-in-out;
-          }
-
-          .icon:hover {
-            color: #ff3f6c;
           }
 
           .profile-dropdown {
@@ -225,135 +213,31 @@ export default function Header() {
             display: flex;
             flex-direction: column;
             z-index: 100;
-            animation: fadeIn 0.2s ease-in-out;
-          }
-
-          .dropdown-item {
-            padding: 5px 15px;
-            color: #555;
-            text-decoration: none;
-            transition: background 0.2s;
-            font-size: 12px;
-          }
-
-          .dropdown-item:hover {
-            background-color: #f2f2f2;
-          }
-
-          .bold {
-            font-weight: bold;
-            text-align: center;
-          }
-
-          .highlight {
-            color: red;
-            font-weight: bold;
           }
 
           .logout-button {
             color: white;
-            text-align: center;
-            border: none;
             background: red;
             width: 100%;
             padding: 10px;
             cursor: pointer;
           }
-          .logout-button:hover{
-            color: black;
 
-            } 
-          .auth-button {
-            width: 100%;
-            padding: 10px;
-            background-color: #ff3f6c;
-            color: white;
-            border: none;
-            cursor: pointer;
-            text-align: center;
-            transition: background 0.2s ease-in-out;
-          }
-
-          .auth-button:hover {
-            background-color: #e7365f;
-          }
-
-          @keyframes fadeIn {
-            from {
-              opacity: 0;
-              transform: translateY(-10px);
+          @media (max-width: 768px) {
+            .menu-toggle {
+              display: block;
             }
-            to {
-              opacity: 1;
-              transform: translateY(0);
+
+            .nav-links {
+              display: none;
+              flex-direction: column;
+              width: 100%;
+              text-align: center;
             }
-          }
 
-          /* General Mobile Styles */
-@media (max-width: 768px) {
-  .header {
-    flex-direction: column;
-    align-items: center;
-    padding: 10px;
-  }
-
-  .logo {
-    font-size: 20px;
-    margin-bottom: 10px;
-  }
-
-  .nav-links {
-    display: none; /* Hide navigation links by default on mobile */
-    flex-direction: column;
-    width: 100%;
-    text-align: center;
-    position: absolute;
-    top: 60px;
-    left: 0;
-    background: white;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    padding: 10px 0;
-  }
-
-  .nav-links.active {
-    display: flex; /* Show navigation when active */
-  }
-
-  .nav-links span {
-    padding: 10px;
-    font-size: 18px;
-  }
-
-  .menu-toggle {
-    display: block;
-    font-size: 24px;
-    cursor: pointer;
-  }
-
-  .search-container {
-    width: 90%;
-    margin-bottom: 10px;
-  }
-
-  .icons-container {
-    gap: 10px;
-    font-size: 18px;
-  }
-
-  .profile-dropdown {
-    min-width: 180px;
-    right: 50%;
-    transform: translateX(50%);
-  }
-}
-
-/* Tablet View Adjustments */
-@media (max-width: 1024px) {
-  .search-container {
-    width: 60%;
-  }
-}
-
+            .nav-links.active {
+              display: flex;
+            }
           }
         `}
       </style>
