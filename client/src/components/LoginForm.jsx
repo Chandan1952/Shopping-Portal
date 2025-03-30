@@ -111,54 +111,52 @@ export default function LoginForm({ isOpen, onClose, onSwitch, setUser }) {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+  e.preventDefault();
+  setError("");
 
-    try {
-      const response = await fetch(
-        "https://shopping-portal-backend.onrender.com/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password,
-          }),
-          credentials: "include",
-        }
-      );
-
-      const text = await response.text();
-      console.log("Server response:", text);
-
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        throw new Error("Unexpected response from server. Please try again.");
+  try {
+    const response = await fetch(
+      "https://shopping-portal-backend.onrender.com/login",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+        credentials: "include",
       }
+    );
 
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed. Please try again.");
-      }
-
-      if (formData.rememberMe) {
-        localStorage.setItem("user", JSON.stringify(data));
-      } else {
-        sessionStorage.setItem("user", JSON.stringify(data));
-      }
-
-      if (setUser) {
-        setUser(data);
-      }
-
-      onClose();
-      window.location.reload();
-    } catch (error) {
-      console.error("Login Error:", error.message);
-      setError(error.message);
+    // Ensure response is valid JSON before parsing
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("Unexpected response from server. Please try again.");
     }
-  };
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Login failed. Please try again.");
+    }
+
+    if (formData.rememberMe) {
+      localStorage.setItem("user", JSON.stringify(data));
+    } else {
+      sessionStorage.setItem("user", JSON.stringify(data));
+    }
+
+    if (setUser) {
+      setUser(data);  // ✅ Update user state
+    }
+
+    onClose();
+    window.location.reload();  // ✅ Ensure UI updates
+  } catch (error) {
+    console.error("Login Error:", error.message);
+    setError(error.message);
+  }
+};
 
   return (
     <div style={styles.modalOverlay}>
