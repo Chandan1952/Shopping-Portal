@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { FaTimes } from "react-icons/fa";
 
 const styles = {
@@ -74,7 +74,6 @@ export default function LoginForm({ isOpen, onClose, onSwitch, setUser }) {
   });
 
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (isOpen) {
