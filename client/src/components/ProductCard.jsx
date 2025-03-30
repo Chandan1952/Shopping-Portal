@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { FaHeart, FaShoppingCart } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "./Header";
@@ -7,7 +7,7 @@ import AddToCartModal from "./AddToCartModal";
 
 const styles = {
     container: {
-        width: "90%",
+        width: "80%",
         margin: "auto",
         padding: "16px",
         display: "grid",
@@ -77,7 +77,7 @@ const styles = {
     disabledButton: {
         backgroundColor: "gray",
         cursor: "not-allowed",
-    },
+    }
 };
 
 const ProductCard = ({ product, wishlist, onToggleWishlist, onAddToCart }) => {
@@ -99,6 +99,7 @@ const ProductCard = ({ product, wishlist, onToggleWishlist, onAddToCart }) => {
             }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            onClick={() => navigate(`/product/${product._id}`)}
         >
             <div
                 style={styles.wishlistButton}
@@ -110,7 +111,7 @@ const ProductCard = ({ product, wishlist, onToggleWishlist, onAddToCart }) => {
                 <FaHeart color={isWishlisted ? "#ff3f6c" : "gray"} size={18} />
             </div>
 
-            <img src={imageUrl} alt={product.name} style={styles.productImage} onClick={() => navigate(`/product/${product._id}`)} />
+            <img src={imageUrl} alt={product.name} style={styles.productImage} />
 
             <h3
                 style={{
@@ -165,17 +166,79 @@ const ProductList = () => {
     const category = queryParams.get("category");
 
     useEffect(() => {
-        setLoading(true);
-        fetch(`https://shopping-portal-backend.onrender.com/api/products${category ? `?category=${category}` : ""}`)
-            .then((res) => res.json())
-            .then((data) => setProducts(Array.isArray(data) ? data : data.products || []))
-            .catch((err) => setError(err.message))
-            .finally(() => setLoading(false));
+        const fetchProducts = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                const url = category
+                    ? `https://shopping-portal-backend.onrender.com/api/products?category=${category}`
+                    : "https://shopping-portal-backend.onrender.com/api/products";
+
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Server Error: ${response.statusText}`);
+
+                const data = await response.json();
+                console.log("API Response:", data);
+
+                if (Array.isArray(data)) {
+                    setProducts(data);
+                } else if (data.products && Array.isArray(data.products)) {
+                    setProducts(data.products);
+                } else {
+                    throw new Error("Unexpected API response format");
+                }
+            } catch (error) {
+                console.error("Error fetching products:", error);
+                setError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProducts();
     }, [category]);
 
-    const toggleWishlist = useCallback((product) => {
-        setWishlist((prev) => (prev.includes(product._id) ? prev.filter((id) => id !== product._id) : [...prev, product._id]));
-    }, []);
+
+    
+
+    const toggleWishlist = async (product) => {
+        try {
+            const isAlreadyWishlisted = wishlist.includes(product._id);
+            const method = isAlreadyWishlisted ? "DELETE" : "POST";
+
+            const response = await fetch("https://shopping-portal-backend.onrender.com/api/wishlist", {
+                method,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    productId: product._id,
+                    name: product.name,
+
+                    price: product.price,
+                    originalPrice: product.originalPrice || null,
+                    discount: product.discount || 0,
+                    image: product.image,
+                 }),
+            });
+
+            if (!response.ok) throw new Error("Failed to update wishlist");
+            alert("❤️ Added to Wishlist!");
+
+
+            setWishlist((prevWishlist) =>
+                isAlreadyWishlisted
+                    ? prevWishlist.filter((id) => id !== product._id)
+                    : [...prevWishlist, product._id]
+            );
+        } catch (error) {
+            alert(error.message);
+        }
+    };
+
+
+    const indexOfLastProduct = currentPage * productsPerPage;
+    const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+    const currentProducts = Array.isArray(products) ? products.slice(indexOfFirstProduct, indexOfLastProduct) : [];
+    const totalPages = Math.ceil(products.length / productsPerPage);
 
     return (
         <>
@@ -183,15 +246,45 @@ const ProductList = () => {
             <div style={styles.container}>
                 {loading && <p>Loading products...</p>}
                 {error && <p style={{ color: "red" }}>{error}</p>}
-                {!loading && !error && products.length === 0 && <p>No products found.</p>}
-                {products.slice((currentPage - 1) * productsPerPage, currentPage * productsPerPage).map((product) => (
-                    <ProductCard key={product._id} product={product} wishlist={wishlist} onToggleWishlist={toggleWishlist} onAddToCart={setSelectedProduct} />
-                ))}
+                {!loading && !error && products.length === 0 && <p>No products found in this category.</p>}
+                {!loading &&
+                    !error &&
+                    currentProducts.map((product) => (
+                        <ProductCard
+                            key={product._id}
+                            product={product}
+                            wishlist={wishlist}
+                            onToggleWishlist={toggleWishlist}
+                            onAddToCart={setSelectedProduct}
+                        />
+                    ))}
             </div>
-
+      {/* Pagination Controls */}
+      <div style={styles.pagination}>
+                <button
+                    style={{ ...styles.paginationButton, ...(currentPage === 1 && styles.disabledButton) }}
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                >
+                    Previous
+                </button>
+                <span>Page {currentPage} of {totalPages}</span>
+                <button
+                    style={{ ...styles.paginationButton, ...(currentPage === totalPages && styles.disabledButton) }}
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                >
+                    Next
+                </button>
+            </div>
             <Footer />
 
-            {selectedProduct && <AddToCartModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
+            {selectedProduct && (
+                <AddToCartModal
+                    product={selectedProduct}
+                    onClose={() => setSelectedProduct(null)}
+                />
+            )}
         </>
     );
 };
