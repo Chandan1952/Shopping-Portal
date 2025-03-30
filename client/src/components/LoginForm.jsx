@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {  Link } from "react-router-dom"; // ✅ Import useNavigate
+import { useNavigate, Link } from "react-router-dom";
 import { FaTimes } from "react-icons/fa";
 
 const styles = {
@@ -63,7 +63,6 @@ const styles = {
     textAlign: "center",
     display: "block",
     marginTop: "10px",
-    fontSize:"17px"
   },
 };
 
@@ -75,6 +74,7 @@ export default function LoginForm({ isOpen, onClose, onSwitch, setUser }) {
   });
 
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isOpen) {
@@ -93,41 +93,60 @@ export default function LoginForm({ isOpen, onClose, onSwitch, setUser }) {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
 
-    try {
-      const response = await fetch("https://shopping-portal-backend.onrender.com/user-login", {
+  try {
+    const response = await fetch(
+      "https://car-rental-portal-backend.onrender.com/login", // Ensure correct API endpoint
+      {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
         }),
-        credentials: "include",
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed. Please try again.");
+        credentials: "include", // Ensure cookies are sent for session-based auth
       }
+    );
 
-      // Store user data in localStorage
-      // localStorage.setItem("user", JSON.stringify(data));
+    const text = await response.text();
+    console.log("Server response:", text); // Debugging output
 
-
-      // Close the login modal
-      setUser(data.user); // ✅ Update user state in Header
-      onClose();
-
-      // ✅ Redirect user to dashboard
-      window.location.reload();
-    } catch (error) {
-      setError(error.message);
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error("Unexpected response from server. Please try again.");
     }
-  };
+
+    if (!response.ok) {
+      throw new Error(data.message || "Login failed. Please try again.");
+    }
+
+    // Store user token based on "Remember Me"
+    if (formData.rememberMe) {
+      localStorage.setItem("user", JSON.stringify(data));
+    } else {
+      sessionStorage.setItem("user", JSON.stringify(data));
+    }
+
+    // Call setUser to update the global state if needed
+    if (setUser) {
+      setUser(data);
+    }
+
+    // Close the login modal
+    onClose();
+
+    // Redirect user to dashboard
+window.location.reload();
+  } catch (error) {
+    console.error("Login Error:", error.message);
+    setError(error.message);
+  }
+};
 
   return (
     <div style={styles.modalOverlay}>
@@ -170,10 +189,12 @@ export default function LoginForm({ isOpen, onClose, onSwitch, setUser }) {
             <label>Remember Me</label>
           </div>
 
-          <button type="submit" style={styles.loginButton}>Login</button>
+          <button type="submit" style={styles.loginButton}>
+            Login
+          </button>
 
           <Link to="/forget-password" style={styles.link}>
-          Forgot Password?
+            Forgot Password?
           </Link>
           <span style={styles.link} onClick={onSwitch}>
             Don't have an account? Sign Up
