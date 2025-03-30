@@ -73,10 +73,9 @@ const styles = {
     textDecoration: "none",
     fontSize: "14px",
   },
-  label:{
+  label: {
     fontSize: "14px",
   },
-
   errorMessage: {
     color: "red",
     fontSize: "14px",
@@ -89,7 +88,7 @@ const styles = {
   },
 };
 
-export default function SignupForm({ isOpen, onClose, onSwitch, setUser }) {
+export default function SignupForm({ isOpen, onClose, onSwitch }) {
   const [formData, setFormData] = useState({
     fullName: "",
     mobileNumber: "",
@@ -127,137 +126,62 @@ export default function SignupForm({ isOpen, onClose, onSwitch, setUser }) {
     }));
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
-  setSuccess("");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
 
-  if (formData.password !== formData.confirmPassword) {
-    setError("Passwords do not match.");
-    return;
-  }
-
-  try {
-    const response = await fetch("https://shopping-portal-backend.onrender.com/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
-
-    const contentType = response.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-      throw new Error("Unexpected response from the server. Please try again later.");
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
     }
 
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || "Signup failed. Please try again.");
+    try {
+      const response = await fetch("https://shopping-portal-backend.onrender.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Signup failed. Please try again.");
+      }
+
+      setSuccess("User Registration Successful!");
+      onSwitch(); // Open Login Form
+      onClose(); // Close Signup Modal
+    } catch (error) {
+      setError(error.message);
     }
-
-    setSuccess("User Registration Successful!");
-    alert("User Registration Successful!");
-
-    onSwitch(); // Open Login Form
-    onClose(); // Close Signup Modal
-  } catch (error) {
-    setError(error.message);
-  }
-};
+  };
 
   return (
     <div style={styles.modalOverlay}>
       <div style={styles.modalContent}>
-        {/* Close Button */}
         <button style={styles.closeButton} onClick={onClose}>
           <FaTimes />
         </button>
 
         <h2>Sign Up</h2>
-
-        {/* Display Error or Success Message */}
         {error && <p style={styles.errorMessage}>{error}</p>}
         {success && <p style={styles.successMessage}>{success}</p>}
 
-        {/* Signup Form */}
         <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            name="fullName"
-            placeholder="Full Name"
-            value={formData.fullName}
-            onChange={handleChange}
-            style={styles.input}
-            required
-          />
-          <input
-            type="tel"
-            name="mobileNumber"
-            placeholder="Mobile Number"
-            value={formData.mobileNumber}
-            onChange={handleChange}
-            style={styles.input}
-            required
-          />
-          <input
-            type="email"
-            name="email"
-            placeholder="Email Address"
-            value={formData.email}
-            onChange={handleChange}
-            style={styles.input}
-            required
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            style={styles.input}
-            required
-          />
-          <input
-            type="password"
-            name="confirmPassword"
-            placeholder="Confirm Password"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            style={styles.input}
-            required
-          />
-
-          {/* Checkbox */}
+          <input type="text" name="fullName" placeholder="Full Name" value={formData.fullName} onChange={handleChange} style={styles.input} required />
+          <input type="tel" name="mobileNumber" placeholder="Mobile Number" value={formData.mobileNumber} onChange={handleChange} style={styles.input} required />
+          <input type="email" name="email" placeholder="Email Address" value={formData.email} onChange={handleChange} style={styles.input} required />
+          <input type="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange} style={styles.input} required />
+          <input type="password" name="confirmPassword" placeholder="Confirm Password" value={formData.confirmPassword} onChange={handleChange} style={styles.input} required />
           <div style={styles.checkboxContainer}>
-            <input
-              type="checkbox"
-              name="agreeToTerms"
-              checked={formData.agreeToTerms}
-              onChange={handleChange}
-            />
-            <label style={styles.label} >
-              I agree with{" "}
-              <span style={styles.link}>Terms and Conditions</span>
+            <input type="checkbox" id="terms" name="agreeToTerms" checked={formData.agreeToTerms} onChange={handleChange} />
+            <label htmlFor="terms" style={styles.label}>
+              I agree with <span style={styles.link}>Terms and Conditions</span>
             </label>
           </div>
-
-          {/* Signup Button */}
-          <button
-            type="submit"
-            style={{
-              ...styles.signupButton,
-              ...(formData.agreeToTerms
-                ? styles.signupButtonEnabled
-                : styles.signupButtonDisabled),
-            }}
-            disabled={!formData.agreeToTerms} // Button is disabled if checkbox is not checked
-          >
+          <button type="submit" style={{ ...styles.signupButton, ...(formData.agreeToTerms ? styles.signupButtonEnabled : styles.signupButtonDisabled) }} disabled={!formData.agreeToTerms}>
             Sign Up
           </button>
-
-          {/* Switch to Login */}
-          <span style={styles.link} onClick={onSwitch}>
-            Already have an account? Login
-          </span>
+          <span style={styles.link} onClick={onSwitch}>Already have an account? Login</span>
         </form>
       </div>
     </div>
