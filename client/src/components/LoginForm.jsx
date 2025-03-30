@@ -5,64 +5,82 @@ import { FaTimes } from "react-icons/fa";
 const styles = {
   modalOverlay: {
     position: "fixed",
-    top: "0",
-    left: "0",
+    top: 0,
+    left: 0,
     width: "100%",
     height: "100%",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    zIndex: "1000",
+    zIndex: 1000,
+    padding: "20px",
   },
   modalContent: {
-    backgroundColor: "white",
-    padding: "20px",
-    borderRadius: "8px",
-    width: "350px",
+    backgroundColor: "#fff",
+    padding: "25px",
+    borderRadius: "10px",
+    width: "100%",
+    maxWidth: "380px",
     boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.3)",
     position: "relative",
+    textAlign: "center",
   },
   closeButton: {
     position: "absolute",
-    top: "10px",
-    right: "10px",
+    top: "12px",
+    right: "12px",
     cursor: "pointer",
-    fontSize: "18px",
-    color: "gray",
+    fontSize: "20px",
+    color: "#555",
     background: "none",
     border: "none",
   },
   input: {
-    width: "98%",
-    padding: "10px",
-    margin: "8px 0",
+    width: "100%",
+    padding: "12px",
+    margin: "10px 0",
     border: "1px solid #ccc",
-    borderRadius: "5px",
+    borderRadius: "6px",
+    fontSize: "14px",
   },
   checkboxContainer: {
     display: "flex",
     alignItems: "center",
-    gap: "5px",
-    marginTop: "10px",
+    justifyContent: "start",
+    gap: "8px",
+    fontSize: "14px",
+    margin: "10px 0",
   },
   loginButton: {
     width: "100%",
-    backgroundColor: "red",
+    backgroundColor: "#d32f2f",
     color: "white",
-    padding: "10px",
-    borderRadius: "5px",
+    padding: "12px",
+    borderRadius: "6px",
     fontSize: "16px",
+    fontWeight: "bold",
     cursor: "pointer",
     border: "none",
     marginTop: "10px",
+    transition: "0.3s",
+  },
+  loginButtonHover: {
+    backgroundColor: "#b71c1c",
   },
   link: {
-    color: "red",
+    color: "#d32f2f",
     cursor: "pointer",
     textAlign: "center",
     display: "block",
-    marginTop: "10px",
+    marginTop: "12px",
+    fontSize: "14px",
+    textDecoration: "none",
+  },
+  errorText: {
+    color: "red",
+    fontSize: "14px",
+    marginBottom: "10px",
   },
 };
 
@@ -92,60 +110,55 @@ export default function LoginForm({ isOpen, onClose, onSwitch, setUser }) {
     }));
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
 
-  try {
-    const response = await fetch(
-      "https://shopping-portal-backend.onrender.com/login", // Ensure correct API endpoint
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-        credentials: "include", // Ensure cookies are sent for session-based auth
-      }
-    );
-
-    const text = await response.text();
-    console.log("Server response:", text); // Debugging output
-
-    let data;
     try {
-      data = JSON.parse(text);
-    } catch {
-      throw new Error("Unexpected response from server. Please try again.");
+      const response = await fetch(
+        "https://shopping-portal-backend.onrender.com/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+          }),
+          credentials: "include",
+        }
+      );
+
+      const text = await response.text();
+      console.log("Server response:", text);
+
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error("Unexpected response from server. Please try again.");
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed. Please try again.");
+      }
+
+      if (formData.rememberMe) {
+        localStorage.setItem("user", JSON.stringify(data));
+      } else {
+        sessionStorage.setItem("user", JSON.stringify(data));
+      }
+
+      if (setUser) {
+        setUser(data);
+      }
+
+      onClose();
+      window.location.reload();
+    } catch (error) {
+      console.error("Login Error:", error.message);
+      setError(error.message);
     }
-
-    if (!response.ok) {
-      throw new Error(data.message || "Login failed. Please try again.");
-    }
-
-    // Store user token based on "Remember Me"
-    if (formData.rememberMe) {
-      localStorage.setItem("user", JSON.stringify(data));
-    } else {
-      sessionStorage.setItem("user", JSON.stringify(data));
-    }
-
-    // Call setUser to update the global state if needed
-    if (setUser) {
-      setUser(data);
-    }
-
-    // Close the login modal
-    onClose();
-
-    // Redirect user to dashboard
-window.location.reload();
-  } catch (error) {
-    console.error("Login Error:", error.message);
-    setError(error.message);
-  }
-};
+  };
 
   return (
     <div style={styles.modalOverlay}>
@@ -154,9 +167,9 @@ window.location.reload();
           <FaTimes />
         </button>
 
-        <h2 style={{ textAlign: "center", marginBottom: "10px" }}>Login</h2>
+        <h2 style={{ marginBottom: "15px", fontSize: "22px" }}>Login</h2>
 
-        {error && <p style={{ color: "red", textAlign: "center" }}>{error}</p>}
+        {error && <p style={styles.errorText}>{error}</p>}
 
         <form onSubmit={handleSubmit}>
           <input
@@ -188,7 +201,16 @@ window.location.reload();
             <label>Remember Me</label>
           </div>
 
-          <button type="submit" style={styles.loginButton}>
+          <button
+            type="submit"
+            style={styles.loginButton}
+            onMouseEnter={(e) =>
+              (e.target.style.backgroundColor = styles.loginButtonHover.backgroundColor)
+            }
+            onMouseLeave={(e) =>
+              (e.target.style.backgroundColor = styles.loginButton.backgroundColor)
+            }
+          >
             Login
           </button>
 
