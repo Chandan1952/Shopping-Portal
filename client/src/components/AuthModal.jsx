@@ -37,42 +37,37 @@ const styles = {
   },
 };
 
-const AuthModal = ({ isOpen, onClose }) => {
-  const [mode, setMode] = useState("login"); // "login", "signup", "forgotPassword"
+const AuthModal = ({ isOpen, onClose, setUser }) => { // ✅ Accept setUser prop
+  const [mode, setMode] = useState("login");
 
   if (!isOpen) return null;
 
   return (
     <div style={styles.modalOverlay}>
       <div style={styles.modalContent}>
-        {/* Close Button */}
         <button style={styles.closeButton} onClick={onClose}>×</button>
 
-        {/* Render Forms Based on Mode */}
         {mode === "login" && (
           <LoginForm
-            isOpen={isOpen}
             onClose={onClose}
-            onSwitch={() => setMode("signup")} // Switch to Signup
-            onForgotPassword={() => setMode("forgotPassword")} // Open Forgot Password
+            onSwitch={() => setMode("signup")}
+            onForgotPassword={() => setMode("forgotPassword")}
+            setUser={setUser} // ✅ Pass setUser
           />
         )}
         {mode === "signup" && (
           <SignupForm
-            isOpen={isOpen}
             onClose={onClose}
-            onSwitch={() => setMode("login")} // Switch to Login
+            onSwitch={() => setMode("login")}
+            setUser={setUser} // ✅ Pass setUser
           />
         )}
         {mode === "forgotPassword" && (
           <ForgotPassword
-            isOpen={isOpen}
-            onClose={() => setMode("login")} // Return to Login after closing
+            onClose={() => setMode("login")}
           />
         )}
       </div>
     </div>
   );
 };
-
-export default AuthModal;
