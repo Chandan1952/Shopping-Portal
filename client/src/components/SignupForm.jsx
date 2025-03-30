@@ -136,7 +136,7 @@ export default function SignupForm({ isOpen, onClose, onSwitch }) {
 
     try {
      const response = await axios.post(
-        "https://car-rental-portal-backend.onrender.com/submit",
+        "https://shopping-portal-backend.onrender.com/submit",
         {
           fullName: formData.fullName,
           phone: formData.mobileNumber,
