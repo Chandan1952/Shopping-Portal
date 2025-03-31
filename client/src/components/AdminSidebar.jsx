@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
@@ -13,11 +13,9 @@ import {
   FaTags,
   FaUsers,
   FaCog,
-
 } from "react-icons/fa";
 
 const AdminSidebar = () => {
-  
   const [dropdowns, setDropdowns] = useState({
     banner: false,
     brand: false,
@@ -34,24 +32,6 @@ const AdminSidebar = () => {
     }));
   };
 
- // ✅ Verify Admin Session
-    useEffect(() => {
-      const verifyAdminSession = async () => {
-        try {
-          const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { withCredentials: true });
-          if (!response.data.isAdmin) {
-            navigate("/admin-login", { replace: true });
-          }
-        } catch {
-          navigate("/admin-login", { replace: true });
-        }
-      };
-  
-      verifyAdminSession(); // ✅ Call the function inside useEffect
-    }, [navigate]); // ✅ Add navigate as a dependency
-  
-
-
   const handleLogout = async () => {
     try {
       const response = await fetch("https://shopping-portal-backend.onrender.com/admin-logout", {
@@ -62,7 +42,7 @@ const AdminSidebar = () => {
       if (response.ok) {
         alert("Logged out successfully!");
         localStorage.removeItem("authToken");
-        navigate("/admin-login"); // Change if needed
+        navigate("/admin-login");
       } else {
         alert("Logout failed. Please try again.");
       }
@@ -73,13 +53,10 @@ const AdminSidebar = () => {
 
   return (
     <div style={styles.sidebar}>
-
-      {/* Dashboard */}
       <NavLink to="/admin-dashboard" style={styles.link} activeStyle={styles.activeLink}>
         <FaTachometerAlt /> Dashboard
       </NavLink>
 
-      {/* Banner Dropdown */}
       <div style={styles.dropdown} onClick={() => toggleDropdown("banner")}>
         <span style={styles.dropdownLabel}>
           <FaBook /> Banner
@@ -97,7 +74,6 @@ const AdminSidebar = () => {
         </div>
       )}
 
-      {/* Brand Dropdown */}
       <div style={styles.dropdown} onClick={() => toggleDropdown("brand")}>
         <span style={styles.dropdownLabel}>
           <FaQuestionCircle /> Brand
@@ -112,11 +88,9 @@ const AdminSidebar = () => {
           <NavLink to="/admin-managebrand" style={styles.dropdownLink}>
             Manage Brand
           </NavLink>
-         
         </div>
       )}
 
-      {/* Product Dropdown */}
       <div style={styles.dropdown} onClick={() => toggleDropdown("product")}>
         <span style={styles.dropdownLabel}>
           <FaBox /> Product
@@ -134,7 +108,6 @@ const AdminSidebar = () => {
         </div>
       )}
 
-      {/* Category Dropdown */}
       <div style={styles.dropdown} onClick={() => toggleDropdown("category")}>
         <span style={styles.dropdownLabel}>
           <FaTags /> Category
@@ -152,7 +125,7 @@ const AdminSidebar = () => {
         </div>
       )}
 
-<NavLink to="/adminmanageusers" style={styles.link}>
+      <NavLink to="/adminmanageusers" style={styles.link}>
         <FaUsers /> Registered Users
       </NavLink>
 
@@ -172,8 +145,6 @@ const AdminSidebar = () => {
         <FaUsers /> Manage Gift Cards
       </NavLink>
 
-
-      {/* Change Password & Logout */}
       <div style={styles.bottomLinks}>
         <NavLink to="/admin-changepassword" style={styles.link} activeStyle={styles.activeLink}>
           <FaKey /> Change Password
@@ -181,13 +152,11 @@ const AdminSidebar = () => {
         <div style={styles.link} onClick={handleLogout}>
           <FaSignOutAlt /> Logout
         </div>
-
-
-
       </div>
     </div>
   );
 };
+
 
 const styles = {
   sidebar: {
