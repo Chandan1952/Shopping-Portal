@@ -11,10 +11,19 @@ export default function Header() {
   const navigate = useNavigate();
 
 
-  useEffect(() => {
+ useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch("https://shopping-portal-backend.onrender.com/api/user", { credentials: "include" });
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          setUser(JSON.parse(storedUser)); // ✅ Load from storage
+          return;
+        }
+
+        const response = await fetch("https://shopping-portal-backend.onrender.com/api/user", {
+          credentials: "include",
+        });
+
         const data = await response.json();
         if (response.ok) {
           setUser(data);
@@ -25,6 +34,7 @@ export default function Header() {
         console.error("Failed to fetch user:", error);
       }
     };
+
     fetchUser();
   }, []);
 
