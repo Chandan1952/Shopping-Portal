@@ -342,11 +342,12 @@ app.get("/admin-verify", (req, res) => {
 
 // ✅ Middleware to Check Admin Session
 const isAuthenticated = (req, res, next) => {
-  if (!req.session.adminEmail) {
-    return res.status(401).json({ error: "Unauthorized access" });
+  if (!req.session || !req.session.adminEmail) {
+    return res.status(401).json({ error: "Session expired. Please log in again." });
   }
   next();
 };
+
 
 // **Admin Dashboard Statistics Route**
 app.get("/admin-dashboard", isAuthenticated, async (req, res) => {
@@ -359,16 +360,11 @@ app.get("/admin-dashboard", isAuthenticated, async (req, res) => {
     ]);
 
     res.json({
-      stats: {
-        Image: ImageCount,
-        Brand: BrandCount,
-        Product: ProductCount,
-        Category: CategoryCount,
-      },
+      stats: { Image: ImageCount, Brand: BrandCount, Product: ProductCount, Category: CategoryCount },
     });
   } catch (error) {
     console.error("❌ Error fetching dashboard stats:", error.message);
-    res.status(500).json({ message: "Error fetching data" });
+    res.status(500).json({ message: process.env.NODE_ENV === "development" ? error.message : "Error fetching data" });
   }
 });
 
