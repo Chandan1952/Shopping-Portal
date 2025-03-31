@@ -83,6 +83,7 @@ const fetchUser = async () => {
 
   const handleCategoryClick = (category) => {
     navigate(`/products?category=${category.toLowerCase()}`); // ✅ Ensure lowercase query
+   setMenuOpen(false); // Close menu after clicking a link
   };
 
 
@@ -101,13 +102,17 @@ const fetchUser = async () => {
           <span onClick={() => handleCategoryClick("Home & Living")}>Home & Living</span>
         </nav> */}
 
+           {/* Mobile Menu Toggle Button */}
+      <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
+        ☰
+      </button>
+
           <nav className={`nav-links ${menuOpen ? "active" : ""}`}>
   <span onClick={() => handleCategoryClick("Mens")}>Men</span>
   <span onClick={() => handleCategoryClick("Women")}>Women</span>
   <span onClick={() => handleCategoryClick("Kids")}>Kids</span>
   <span onClick={() => handleCategoryClick("Home & Living")}>Home & Living</span>
 </nav>
-<button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
 
 
         {/* Search Bar */}
@@ -191,19 +196,20 @@ const fetchUser = async () => {
 
           }
 
-          .nav-links {
-            display: flex;
-            gap: 20px;
-            color: #333;
-            font-weight: bold;
-            transition: color 0.3s ease;
-            cursor: pointer;
-          }
-           .nav-links span:hover {
-            color: #ff3f6c;
-          }
+/* Desktop Navigation */
+.nav-links {
+  display: flex;
+  gap: 20px;
+  color: #333;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-       /* Mobile Navigation Styles */
+.nav-links span:hover {
+  color: #ff3f6c;
+}
+
+/* Mobile Navigation */
 @media (max-width: 768px) {
   .nav-links {
     display: none; /* Hide by default */
@@ -219,7 +225,7 @@ const fetchUser = async () => {
     text-align: center;
   }
 
- .nav-links.active {
+  .nav-links.active {
     display: flex; /* Show when menu is open */
   }
 
@@ -229,6 +235,7 @@ const fetchUser = async () => {
     border-bottom: 1px solid #ddd;
   }
 
+  /* Mobile Menu Button */
   .menu-toggle {
     display: block;
     font-size: 24px;
