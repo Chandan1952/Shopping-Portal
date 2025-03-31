@@ -110,29 +110,17 @@ export default function LoginForm({ isOpen, onClose, onSwitch, setUser }) {
     }));
   };
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
   e.preventDefault();
   setError("");
 
   try {
-    const response = await fetch(
-      "https://shopping-portal-backend.onrender.com/login",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-        credentials: "include",
-      }
-    );
-
-    // Ensure response is valid JSON before parsing
-    const contentType = response.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-      throw new Error("Unexpected response from server. Please try again.");
-    }
+    const response = await fetch("https://shopping-portal-backend.onrender.com/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: formData.email, password: formData.password }),
+      credentials: "include",
+    });
 
     const data = await response.json();
 
@@ -140,18 +128,11 @@ export default function LoginForm({ isOpen, onClose, onSwitch, setUser }) {
       throw new Error(data.message || "Login failed. Please try again.");
     }
 
-    if (formData.rememberMe) {
-      localStorage.setItem("user", JSON.stringify(data));
-    } else {
-      sessionStorage.setItem("user", JSON.stringify(data));
-    }
-
-    if (setUser) {
-      setUser(data);  // ✅ Update user state
-    }
+    localStorage.setItem("user", JSON.stringify(data));
+    setUser(data); 
 
     onClose();
-    window.location.reload();  // ✅ Ensure UI updates
+    setTimeout(() => window.location.reload(), 500); // ✅ Ensure UI updates
   } catch (error) {
     console.error("Login Error:", error.message);
     setError(error.message);
