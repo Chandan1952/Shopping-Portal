@@ -12,32 +12,35 @@ export default function Header() {
 
 
 useEffect(() => {
-  const fetchUser = async () => {
-    try {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        console.log("Loaded from storage:", JSON.parse(storedUser));
-        setUser(JSON.parse(storedUser));
-        return;
-      }
-
-      const response = await fetch("https://shopping-portal-backend.onrender.com/api/user", {
-        credentials: "include",
-      });
-
-      const data = await response.json();
-      console.log("Fetched user from API:", data);
-
-      if (response.ok) {
-        setUser(data);
-        localStorage.setItem("user", JSON.stringify(data)); // Ensure storage
-      } else {
-        console.error("Error fetching user:", data.error);
-      }
-    } catch (error) {
-      console.error("Failed to fetch user:", error);
+const fetchUser = async () => {
+  try {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      console.log("Loaded from storage:", JSON.parse(storedUser));
+      setUser(JSON.parse(storedUser));
+      return;
     }
-  };
+
+    const response = await fetch("https://shopping-portal-backend.onrender.com/api/user", {
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Fetched user from API:", data);
+
+    if (data) {
+      setUser(data);
+      localStorage.setItem("user", JSON.stringify(data));
+    }
+  } catch (error) {
+    console.error("Failed to fetch user:", error.message);
+  }
+};
+
 
   fetchUser();
 }, []);
