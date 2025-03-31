@@ -7,6 +7,8 @@ export default function Header() {
   const [isAuthOpen, setAuthOpen] = useState(false);
   const [profileDropdown, setProfileDropdown] = useState(false);
   const [user, setUser] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
@@ -92,12 +94,21 @@ const fetchUser = async () => {
 
 
         {/* Navigation Links */}
-        <nav className="nav-links">
+{/*         <nav className="nav-links">
           <span onClick={() => handleCategoryClick("Mens")}>Men</span>
           <span onClick={() => handleCategoryClick("Women")}>Women</span>
           <span onClick={() => handleCategoryClick("Kids")}>Kids</span>
           <span onClick={() => handleCategoryClick("Home & Living")}>Home & Living</span>
-        </nav>
+        </nav> */}
+
+          <nav className={`nav-links ${menuOpen ? "active" : ""}`}>
+  <span onClick={() => handleCategoryClick("Mens")}>Men</span>
+  <span onClick={() => handleCategoryClick("Women")}>Women</span>
+  <span onClick={() => handleCategoryClick("Kids")}>Kids</span>
+  <span onClick={() => handleCategoryClick("Home & Living")}>Home & Living</span>
+</nav>
+<button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
+
 
         {/* Search Bar */}
         <div className="search-container">
@@ -188,12 +199,52 @@ const fetchUser = async () => {
             transition: color 0.3s ease;
             cursor: pointer;
           }
-
-       
-
-          .nav-links span:hover {
+           .nav-links span:hover {
             color: #ff3f6c;
           }
+
+       /* Mobile Navigation Styles */
+@media (max-width: 768px) {
+  .nav-links {
+    display: none; /* Hide by default */
+    flex-direction: column;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    padding: 10px 0;
+    z-index: 1000;
+    text-align: center;
+  }
+
+ .nav-links.active {
+    display: flex; /* Show when menu is open */
+  }
+
+  .nav-links span {
+    padding: 12px;
+    font-size: 18px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .menu-toggle {
+    display: block;
+    font-size: 24px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 10px;
+    color: #333;
+  }
+
+  .menu-toggle:hover {
+    color: #ff3f6c;
+  }
+}
+
+         
 
           .search-container {
             position: relative;
