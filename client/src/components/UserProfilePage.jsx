@@ -162,8 +162,5 @@ const mainStyle = {
   borderRadius: "8px",
 };
 
-@media (max-width: 768px) {
-  mainStyle.minWidth = "100%"; // Ensures full-width on mobile
-}
 
 export default UserProfilePage;
