@@ -38,56 +38,37 @@ const Dashboard = ({ stats, loading, error }) => {
 };
 
 function AdminDashboard() {
-  const [admin, setAdmin] = useState(null);
   const [stats, setStats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
- useEffect(() => {
-  const verifyAdminSession = async () => {
-    try {
-      const response = await axios.get(`${BASE_URL}/admin-verify`, { withCredentials: true });
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/admin-dashboard`, { withCredentials: true });
+        const fetchedStats = response.data.stats || {};
 
-      if (response.data.isAdmin) {
-        setAdmin({ email: response.data.email });
+        const formattedStats = [
+          { title: "Banner", count: fetchedStats.Image || 0, color: "#1E3A8A" },
+          { title: "Brands", count: fetchedStats.Brand || 0, color: "#10B981" },
+          { title: "Products", count: fetchedStats.Product || 0, color: "#EAB308" },
+          { title: "Categories", count: fetchedStats.Category || 0, color: "#EF4444" },
+        ];
 
-        // ✅ Fetch stats only after authentication
-        fetchStats();  
-      } else {
-        navigate("/admin-login", { replace: true });
+        setStats(formattedStats);
+      } catch {
+        setError("Failed to fetch stats.");
+      } finally {
+        setLoading(false);
       }
-    } catch {
-      navigate("/admin-login", { replace: true });
-    }
-  };
+    };
 
-  const fetchStats = async () => {
-    try {
-      const response = await axios.get(`${BASE_URL}/admin-dashboard`, { withCredentials: true });
-      const fetchedStats = response.data.stats || {};
-
-      const formattedStats = [
-        { title: "Banner", count: fetchedStats.Image || 0, color: "#1E3A8A" },
-        { title: "Brands", count: fetchedStats.Brand || 0, color: "#10B981" },
-        { title: "Products", count: fetchedStats.Product || 0, color: "#EAB308" },
-        { title: "Categories", count: fetchedStats.Category || 0, color: "#EF4444" },
-      ];
-
-      setStats(formattedStats);
-    } catch {
-      setError("Failed to fetch stats.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  verifyAdminSession();
-}, [navigate]); // ✅ Keep only `navigate` as a dependency
+    fetchStats();
+  }, []);
 
   return (
     <div style={styles.app}>
-      <AdminHeader admin={admin} />
+      <AdminHeader />
       <div style={styles.mainContainer}>
         <AdminSidebar />
         <div style={styles.content}>
