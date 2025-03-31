@@ -38,10 +38,11 @@ app.use(
       ttl: 14 * 24 * 60 * 60, // 14 days
     }),
     cookie: {
-      secure: process.env.NODE_ENV === "production", // Set to false for local development
+      secure: process.env.NODE_ENV === "production", // ✅ HTTPS only in production
       httpOnly: true,
-      sameSite: "none", // ✅ Allows cross-site cookies
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // ✅ "lax" for local dev
     }
+
   })
 );
 
