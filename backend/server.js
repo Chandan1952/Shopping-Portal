@@ -332,17 +332,28 @@ app.post("/admin-login", async (req, res) => {
 
 
 
-app.get("/admin-verify", (req, res) => {
-  console.log("🔹 Incoming /admin-verify request");
-  console.log("🔹 Session Data:", req.session); // ✅ Debug session data
+// app.get("/admin-verify", (req, res) => {
+//   console.log("🔹 Incoming /admin-verify request");
+//   console.log("🔹 Session Data:", req.session); // ✅ Debug session data
 
-  if (!req.session.adminEmail) {
-    console.log("❌ No admin session found");
-    return res.status(401).json({ error: "Unauthorized access" });
+//   if (!req.session.adminEmail) {
+//     console.log("❌ No admin session found");
+//     return res.status(401).json({ error: "Unauthorized access" });
+//   }
+
+//   res.json({ isAdmin: true, email: req.session.adminEmail });
+// });
+
+
+
+app.get("/check-session", (req, res) => {
+  if (req.session.adminEmail) {
+    res.json({ isAuthenticated: true, adminEmail: req.session.adminEmail });
+  } else {
+    res.status(401).json({ isAuthenticated: false });
   }
-
-  res.json({ isAdmin: true, email: req.session.adminEmail });
 });
+
 
 
 // ✅ Middleware to Check Admin Session
