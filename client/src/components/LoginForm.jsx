@@ -65,9 +65,6 @@ const styles = {
     marginTop: "10px",
     transition: "0.3s",
   },
-  loginButtonHover: {
-    backgroundColor: "#b71c1c",
-  },
   link: {
     color: "#d32f2f",
     cursor: "pointer",
@@ -110,34 +107,37 @@ export default function LoginForm({ isOpen, onClose, onSwitch, setUser }) {
     }));
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
 
-  try {
-    const response = await fetch("https://shopping-portal-backend.onrender.com/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: formData.email, password: formData.password }),
-      credentials: "include",
-    });
+    try {
+      const response = await fetch("https://shopping-portal-backend.onrender.com/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+        credentials: "include",
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.message || "Login failed. Please try again.");
+      if (!response.ok || !data) {
+        throw new Error(data?.message || "Login failed. Please try again.");
+      }
+
+      localStorage.setItem("user", JSON.stringify(data));
+      setUser(data);
+
+      onClose();
+      setTimeout(() => window.location.reload(), 500); // Refresh UI after login
+    } catch (error) {
+      console.error("Login Error:", error.message);
+      setError(error.message);
     }
-
-    localStorage.setItem("user", JSON.stringify(data));
-    setUser(data); 
-
-    onClose();
-    setTimeout(() => window.location.reload(), 500); // ✅ Ensure UI updates
-  } catch (error) {
-    console.error("Login Error:", error.message);
-    setError(error.message);
-  }
-};
+  };
 
   return (
     <div style={styles.modalOverlay}>
@@ -183,12 +183,8 @@ export default function LoginForm({ isOpen, onClose, onSwitch, setUser }) {
           <button
             type="submit"
             style={styles.loginButton}
-            onMouseEnter={(e) =>
-              (e.target.style.backgroundColor = styles.loginButtonHover.backgroundColor)
-            }
-            onMouseLeave={(e) =>
-              (e.target.style.backgroundColor = styles.loginButton.backgroundColor)
-            }
+            onMouseEnter={(e) => (e.target.style.backgroundColor = "#b71c1c")}
+            onMouseLeave={(e) => (e.target.style.backgroundColor = "#d32f2f")}
           >
             Login
           </button>
