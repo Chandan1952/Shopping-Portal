@@ -109,12 +109,19 @@ export default function Header() {
                   <>
                     <div className="dropdown-item bold">Welcome, {user.fullName || "Guest"}</div>
                     <div className="dropdown-item">📞 {user.phone || "N/A"}</div>
-                    <hr />
+                     <hr />
                     <Link to="/edit-profile" className="dropdown-item">Profile</Link>
                     <Link to="/order-return" className="dropdown-item">Orders</Link>
                     <Link to="/wishlist" className="dropdown-item">Wishlist</Link>
                     <Link to="/gift-cards" className="dropdown-item">Gift Cards</Link>
                     <Link to="/contact" className="dropdown-item">Contact Us</Link>
+                    <Link to="/myntra-insider" className="dropdown-item highlight">Myntra Insider</Link>
+                    <hr />
+                    <Link to="/myntra-credit" className="dropdown-item">Myntra Credit</Link>
+                    <Link to="/coupons" className="dropdown-item">Coupons</Link>
+                    <Link to="/saved-cards" className="dropdown-item">Saved Cards</Link>
+                    <Link to="/saved-vpa" className="dropdown-item">Saved VPA</Link>
+                    <Link to="/saved-addresses" className="dropdown-item">Saved Addresses</Link>
                     <hr />
                     <button onClick={handleLogout} className="logout-button">Logout</button>
                   </>
