@@ -49,8 +49,7 @@ export default function Header() {
       localStorage.removeItem("user");
       sessionStorage.removeItem("user");
       setUser(null);
-      navigate("/");
-      window.location.reload(); // Force UI update
+      navigate("/", { replace: true });
     } else {
       console.error("Logout failed");
     }
