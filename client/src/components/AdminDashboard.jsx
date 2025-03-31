@@ -43,25 +43,24 @@ function AdminDashboard() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}/admin-dashboard`, { withCredentials: true });
-        const fetchedStats = response.data.stats || {};
+  const fetchStats = async () => {
+  try {
+    const response = await axios.get(`${BASE_URL}/admin-dashboard`, { withCredentials: true });
+    const fetchedStats = response.data.stats || {};
 
-        const formattedStats = [
-          { title: "Banner", count: fetchedStats.Image || 0, color: "#1E3A8A" },
-          { title: "Brands", count: fetchedStats.Brand || 0, color: "#10B981" },
-          { title: "Products", count: fetchedStats.Product || 0, color: "#EAB308" },
-          { title: "Categories", count: fetchedStats.Category || 0, color: "#EF4444" },
-        ];
-
-        setStats(formattedStats);
-      } catch {
-        setError("Failed to fetch stats.");
-      } finally {
-        setLoading(false);
-      }
-    };
+    setStats([
+      { title: "Banner", count: fetchedStats.Image || 0, color: "#1E3A8A" },
+      { title: "Brands", count: fetchedStats.Brand || 0, color: "#10B981" },
+      { title: "Products", count: fetchedStats.Product || 0, color: "#EAB308" },
+      { title: "Categories", count: fetchedStats.Category || 0, color: "#EF4444" },
+    ]);
+  } catch (err) {
+    console.error("Dashboard fetch error:", err);
+    setError("Failed to fetch stats. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
     fetchStats();
   }, []);
