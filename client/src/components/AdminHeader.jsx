@@ -1,38 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const BASE_URL = "https://shopping-portal-backend.onrender.com";
 
 const AdminHeader = () => {
-  const [admin, setAdmin] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
-
-  // ✅ Fetch admin session and details in a single request
-  useEffect(() => {
-    const fetchAdminData = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}/admin-verify`, { withCredentials: true });
-
-        if (response.data.isAdmin) {
-          setAdmin({ name: "Admin", email: response.data.email }); // Default name since API lacks it
-        } else {
-          navigate("/admin-login", { replace: true });
-        }
-      } catch {
-        navigate("/admin-login", { replace: true });
-      }
-    };
-
-    fetchAdminData();
-  }, [navigate]); // ✅ Add `navigate` as a dependency
 
   // ✅ Logout function
   const handleLogout = async () => {
     try {
       await axios.post(`${BASE_URL}/admin-logout`, {}, { withCredentials: true });
-      setAdmin(null);
       navigate("/admin-login");
     } catch {
       alert("Logout failed. Please try again.");
@@ -50,31 +29,17 @@ const AdminHeader = () => {
             onMouseEnter={() => setDropdownOpen(true)}
             onMouseLeave={() => setDropdownOpen(false)}
           >
-            <button style={styles.profileButton}>
-              {admin?.name ? admin.name.charAt(0).toUpperCase() : "A"}
-            </button>
+            <button style={styles.profileButton}>A</button>
             <div
               style={{
                 ...styles.dropdownContent,
                 ...(dropdownOpen ? styles.dropdownVisible : {}),
               }}
             >
-              {admin ? (
-                <>
-                  <h3 style={styles.dropdownContentText}>Hi, {admin.name}!</h3>
-                  <p style={styles.dropdownContentParagraph}>{admin.email}</p>
-                  <button onClick={handleLogout} style={styles.logoutButton}>
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <h3 style={styles.dropdownContentText}>Welcome!</h3>
-                  <p style={styles.dropdownContentParagraph}>
-                    Please <a href="/admin-login">login</a> to continue.
-                  </p>
-                </>
-              )}
+              <h3 style={styles.dropdownContentText}>Welcome!</h3>
+              <button onClick={handleLogout} style={styles.logoutButton}>
+                Logout
+              </button>
             </div>
           </div>
         </div>
@@ -142,11 +107,6 @@ const styles = {
     margin: "10px 0",
     fontSize: "18px",
     color: "#333",
-  },
-  dropdownContentParagraph: {
-    fontSize: "14px",
-    color: "#666",
-    margin: "5px 0 15px",
   },
   logoutButton: {
     display: "block",
