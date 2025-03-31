@@ -323,8 +323,13 @@ app.post("/admin-login", async (req, res) => {
   }
 
   req.session.adminEmail = ADMIN_EMAIL;  // ✅ Store admin session
-  res.status(200).json({ message: "Login successful" });
+  await req.session.save();  // ✅ Ensure session is saved
+
+  console.log("Session after login:", req.session);  // 🔍 Debugging
+
+  res.status(200).json({ message: "Login successful", session: req.session });
 });
+
 
 
 app.get("/admin-verify", (req, res) => {
