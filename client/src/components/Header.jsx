@@ -14,35 +14,34 @@ export default function Header() {
 
 
 useEffect(() => {
-const fetchUser = async () => {
-  try {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      console.log("Loaded from storage:", JSON.parse(storedUser));
-      setUser(JSON.parse(storedUser));
-      return;
+  const fetchUser = async () => {
+    try {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        console.log("Loaded from storage:", JSON.parse(storedUser));  // ✅ Debugging Log
+        setUser(JSON.parse(storedUser));
+        return;
+      }
+
+      const response = await fetch("https://shopping-portal-backend.onrender.com/api/user", {
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Fetched user from API:", data);  // ✅ Debugging Log
+
+      if (data) {
+        setUser(data);
+        localStorage.setItem("user", JSON.stringify(data));
+      }
+    } catch (error) {
+      console.error("Failed to fetch user:", error.message);
     }
-
-    const response = await fetch("https://shopping-portal-backend.onrender.com/api/user", {
-      credentials: "include",
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log("Fetched user from API:", data);
-
-    if (data) {
-      setUser(data);
-      localStorage.setItem("user", JSON.stringify(data));
-    }
-  } catch (error) {
-    console.error("Failed to fetch user:", error.message);
-  }
-};
-
+  };
 
   fetchUser();
 }, []);
@@ -102,10 +101,10 @@ const fetchUser = async () => {
           <span onClick={() => handleCategoryClick("Home & Living")}>Home & Living</span>
         </nav> */}
 
-           {/* Mobile Menu Toggle Button */}
-      <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
-        ☰
-      </button>
+      //      {/* Mobile Menu Toggle Button */}
+      // <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
+      //   ☰
+      // </button>
 
           <nav className={`nav-links ${menuOpen ? "active" : ""}`}>
   <span onClick={() => handleCategoryClick("Mens")}>Men</span>
