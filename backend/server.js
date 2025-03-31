@@ -29,7 +29,7 @@ app.use(express.json());
 // ✅ Session Middleware (MongoDB Store)
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "yourSecretKey",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
@@ -37,11 +37,11 @@ app.use(
       collectionName: "sessions",
       ttl: 14 * 24 * 60 * 60, // 14 days
     }),
-    cookie: {
-      secure: process.env.NODE_ENV === "production", // ✅ Secure only in production
-      httpOnly: true,
-      sameSite: "none", // 🔹 Important for cross-origin cookies
-    },
+   cookie: {
+  secure: process.env.NODE_ENV === "production", // ✅ Now correctly a boolean
+  httpOnly: true,
+  sameSite: "none",
+}
 
   })
 );
