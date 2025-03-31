@@ -42,28 +42,36 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-  const fetchStats = async () => {
-  try {
-    const response = await axios.get(`${BASE_URL}/admin-dashboard`, { withCredentials: true });
-    const fetchedStats = response.data.stats || {};
+useEffect(() => {
+  const checkSessionAndFetchStats = async () => {
+    try {
+      // ✅ Step 1: Check if session is active
+      const sessionResponse = await axios.get(`${BASE_URL}/check-session`, { withCredentials: true });
+      if (!sessionResponse.data.isAuthenticated) {
+        navigate("/admin-login"); // 🔄 Redirect if not logged in
+        return;
+      }
 
-    setStats([
-      { title: "Banner", count: fetchedStats.Image || 0, color: "#1E3A8A" },
-      { title: "Brands", count: fetchedStats.Brand || 0, color: "#10B981" },
-      { title: "Products", count: fetchedStats.Product || 0, color: "#EAB308" },
-      { title: "Categories", count: fetchedStats.Category || 0, color: "#EF4444" },
-    ]);
-  } catch (err) {
-    console.error("Dashboard fetch error:", err);
-    setError("Failed to fetch stats. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
+      // ✅ Step 2: Fetch dashboard stats
+      const statsResponse = await axios.get(`${BASE_URL}/admin-dashboard`, { withCredentials: true });
+      const fetchedStats = statsResponse.data.stats || {};
 
-    fetchStats();
-  }, []);
+      setStats([
+        { title: "Banner", count: fetchedStats.Image || 0, color: "#1E3A8A" },
+        { title: "Brands", count: fetchedStats.Brand || 0, color: "#10B981" },
+        { title: "Products", count: fetchedStats.Product || 0, color: "#EAB308" },
+        { title: "Categories", count: fetchedStats.Category || 0, color: "#EF4444" },
+      ]);
+    } catch (err) {
+      console.error("Dashboard fetch error:", err);
+      setError("Failed to fetch stats. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  checkSessionAndFetchStats();
+}, [navigate]);
 
   return (
     <div style={styles.app}>
