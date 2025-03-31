@@ -81,7 +81,6 @@ useEffect(() => {
 
   const handleCategoryClick = (category) => {
     navigate(`/products?category=${category.toLowerCase()}`); // ✅ Ensure lowercase query
-   setMenuOpen(false); // Close menu after clicking a link
   };
 
 
