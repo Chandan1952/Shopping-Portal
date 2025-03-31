@@ -11,32 +11,36 @@ export default function Header() {
   const navigate = useNavigate();
 
 
- useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-          setUser(JSON.parse(storedUser)); // ✅ Load from storage
-          return;
-        }
-
-        const response = await fetch("https://shopping-portal-backend.onrender.com/api/user", {
-          credentials: "include",
-        });
-
-        const data = await response.json();
-        if (response.ok) {
-          setUser(data);
-        } else {
-          console.error("Error fetching user:", data.error);
-        }
-      } catch (error) {
-        console.error("Failed to fetch user:", error);
+useEffect(() => {
+  const fetchUser = async () => {
+    try {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        console.log("Loaded from storage:", JSON.parse(storedUser));
+        setUser(JSON.parse(storedUser));
+        return;
       }
-    };
 
-    fetchUser();
-  }, []);
+      const response = await fetch("https://shopping-portal-backend.onrender.com/api/user", {
+        credentials: "include",
+      });
+
+      const data = await response.json();
+      console.log("Fetched user from API:", data);
+
+      if (response.ok) {
+        setUser(data);
+        localStorage.setItem("user", JSON.stringify(data)); // Ensure storage
+      } else {
+        console.error("Error fetching user:", data.error);
+      }
+    } catch (error) {
+      console.error("Failed to fetch user:", error);
+    }
+  };
+
+  fetchUser();
+}, []);
 
  const handleLogout = async () => {
   try {
@@ -113,8 +117,8 @@ export default function Header() {
               <div className="profile-dropdown">
                 {user ? (
                   <>
-                    <div className="dropdown-item bold">Welcome, {user.fullName}</div>
-                    <div className="dropdown-item">📞 {user.phone}</div>
+                   <div className="dropdown-item bold">Welcome, {user.fullName || "Guest"}</div>
+                   <div className="dropdown-item">📞 {user.phone || "N/A"}</div>
                     <hr />
                     <Link to="/edit-profile" className="dropdown-item">Profile</Link>
                     <Link to="/order-return" className="dropdown-item">Orders</Link>
