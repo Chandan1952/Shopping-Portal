@@ -12,26 +12,30 @@ const AdminLogin = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError("");
 
-    try {
-      const response = await axios.post("https://shopping-portal-backend.onrender.com/admin-login", formData, {
-        withCredentials: true,
-      });
-
-      if (response.status === 200) {
-        localStorage.setItem("adminEmail", formData.email);
-        navigate("/admin-dashboard");
+  try {
+    const response = await axios.post(
+      "https://shopping-portal-backend.onrender.com/admin-login",
+      formData,
+      {
+        withCredentials: true, // ✅ Sends session cookies
+        headers: { "Content-Type": "application/json" },
       }
-    } catch (err) {
-      setError(err.response?.data?.error || "Invalid credentials. Please try again.");
-    } finally {
-      setLoading(false);
+    );
+
+    if (response.status === 200) {
+      navigate("/admin-dashboard"); // ✅ Navigate after successful login
     }
-  };
+  } catch (err) {
+    setError(err.response?.data?.error || "Invalid credentials. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div style={styles.body}>
