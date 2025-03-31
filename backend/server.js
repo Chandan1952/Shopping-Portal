@@ -221,7 +221,11 @@ app.get("/api/auth/check", (req, res) => {
 
 // 🔹 GET USER DETAILS (Authenticated)
 app.get("/api/user", async (req, res) => {
-  if (!req.session.userId) return res.status(401).json({ error: "Unauthorized. Please log in." });
+  console.log("🔹 Session data:", req.session);
+
+  if (!req.session.userId) {
+    return res.status(401).json({ error: "Unauthorized. Please log in." });
+  }
 
   try {
     const user = await User.findById(req.session.userId).select("-password");
