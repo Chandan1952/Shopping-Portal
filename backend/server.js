@@ -38,10 +38,10 @@ app.use(
       ttl: 14 * 24 * 60 * 60, // 14 days
     }),
     cookie: {
-    secure: true,  // Set to false if using HTTP (local dev)
-    httpOnly: true,
-    sameSite: "none", // 🔹 Important for cross-origin cookies
-  }
+      secure: process.env.NODE_ENV === "production", // ✅ Secure only in production
+      httpOnly: true,
+      sameSite: "none", // 🔹 Important for cross-origin cookies
+    },
 
   })
 );
@@ -180,47 +180,51 @@ app.post('/reset-password', async function (req, res) {
 //**************************USER-DASHBOARD-PAGE************************
 
 
-// Route for handling "User-login" form submissions
-app.post('/login', async function (req, res) {
+// ✅ Login Route
+app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
     if (!email || !password) {
-      return res.status(400).json({ status: 'error', message: 'Email and password are required.' });
+      return res.status(400).json({ status: "error", message: "Email and password are required." });
     }
 
     const foundUser = await User.findOne({ email });
     if (!foundUser) {
-      return res.status(400).json({ status: 'error', message: 'Email not found.' });
+      return res.status(400).json({ status: "error", message: "Email not found." });
     }
 
     const isPasswordMatch = await bcrypt.compare(password, foundUser.password);
     if (!isPasswordMatch) {
-      return res.status(400).json({ status: 'error', message: 'Incorrect password.' });
+      return res.status(400).json({ status: "error", message: "Incorrect password." });
     }
 
     // ✅ Store User Session
-    req.session.userId = foundUser._id;  
+    req.session.userId = foundUser._id;
     req.session.username = foundUser.fullName;
     req.session.userEmail = foundUser.email;
 
     console.log("🔹 Session after login:", req.session); // ✅ Debugging
+    await req.session.save(); // 🔹 Ensure session is stored
 
-    res.status(200).json({ status: 'success', message: 'Login successful', userId: foundUser._id, userEmail: foundUser.email });
+    res.status(200).json({
+      status: "success",
+      message: "Login successful",
+      userId: foundUser._id,
+      userEmail: foundUser.email,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ status: 'error', message: 'An error occurred. Please try again.' });
+    res.status(500).json({ status: "error", message: "An error occurred. Please try again." });
   }
 });
 
-
-// 🟢 Check if User is Logged In
+// ✅ Check if User is Logged In
 app.get("/api/auth/check", (req, res) => {
   res.json({ isAuthenticated: !!req.session.userId });
 });
 
-
-// 🔹 GET USER DETAILS (Authenticated)
+// ✅ Get User Details (Authenticated)
 app.get("/api/user", async (req, res) => {
   console.log("🔹 Session data:", req.session);
 
