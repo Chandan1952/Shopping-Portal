@@ -107,38 +107,44 @@ export default function LoginForm({ isOpen, onClose, onSwitch, setUser }) {
     }));
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
 
-  try {
-    const response = await fetch("https://shopping-portal-backend.onrender.com/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: formData.email,
-        password: formData.password,
-      }),
-      credentials: "include",
-    });
+    try {
+      const response = await fetch("https://shopping-portal-backend.onrender.com/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+        credentials: "include",
+      });
 
-    const data = await response.json();
-    console.log("Response Data:", data); // Debugging step
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        throw new Error("Invalid server response. Please try again.");
+      }
 
-    if (!response.ok || !data) {
-      throw new Error(data?.message || "Login failed. Please try again.");
+      console.log("Response Data:", data); // Debugging
+
+      if (!response.ok) {
+        throw new Error(data?.message || "Login failed. Please try again.");
+      }
+
+      localStorage.setItem("user", JSON.stringify(data));
+      setUser(data);
+
+      onClose();
+      setTimeout(() => window.location.reload(), 500); // Refresh UI
+    } catch (error) {
+      console.error("Login Error:", error.message);
+      setError(error.message);
     }
-
-    localStorage.setItem("user", JSON.stringify(data));
-    setUser(data);
-
-    onClose();
-    setTimeout(() => window.location.reload(), 500); // Refresh UI after login
-  } catch (error) {
-    console.error("Login Error:", error);
-    setError(error.message); // Ensure setError is called correctly
-  }
-};
+  };
 
   return (
     <div style={styles.modalOverlay}>
