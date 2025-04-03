@@ -122,22 +122,12 @@ export default function SignupForm({ isOpen, onClose, onSwitch }) {
 
   if (!isOpen) return null;
 
-  const handleOverlayClick = (event) => {
-    if (event.target.id === "modalOverlay") {
-      onClose();
-    }
-  };
-
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prevData) => ({
       ...prevData,
       [name]: type === "checkbox" ? checked : value,
     }));
-  };
-
-  const validatePassword = (password) => {
-    return password.length >= 6;
   };
 
   const handleSubmit = async (e) => {
@@ -147,11 +137,6 @@ export default function SignupForm({ isOpen, onClose, onSwitch }) {
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match.");
-      return;
-    }
-
-    if (!validatePassword(formData.password)) {
-      setError("Password must be at least 6 characters long.");
       return;
     }
 
@@ -170,7 +155,7 @@ export default function SignupForm({ isOpen, onClose, onSwitch }) {
 
       setSuccess("User Registration Successful!");
       alert("User Registration Successful!");
-      // localStorage.setItem("user", JSON.stringify(response.data.user));
+      localStorage.setItem("user", JSON.stringify(response.data.user));
 
       onClose();
       onSwitch();
@@ -181,9 +166,9 @@ export default function SignupForm({ isOpen, onClose, onSwitch }) {
   };
 
   return (
-    <div id="modalOverlay" style={styles.modalOverlay} onClick={handleOverlayClick}>
-      <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <button style={styles.closeButton} onClick={onClose} aria-label="Close signup modal">
+    <div style={styles.modalOverlay}>
+      <div style={styles.modalContent}>
+        <button style={styles.closeButton} onClick={onClose}>
           <FaTimes />
         </button>
 
