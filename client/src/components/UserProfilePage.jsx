@@ -16,63 +16,40 @@ const UserProfilePage = () => {
 }, []);
 
 
- useEffect(() => {
-  const fetchUser = async () => {
-    try {
-      const response = await fetch("https://shopping-portal-backend.onrender.com/api/user", {
-        credentials: "include",
-      });
+  useEffect(() => {
+    fetch("https://shopping-portal-backend.onrender.com/api/user", {
+      credentials: "include", // ✅ Ensures session-based authentication works
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Not authenticated");
+        return res.json();
+      })
+      .then((data) => setUser(data))
+      .catch(() => navigate("/")) // Redirect if not logged in
+      .finally(() => setLoading(false));
+  }, [navigate]);
 
-      if (!response.ok) throw new Error("Not authenticated");
-      
-      const data = await response.json();
-      setUser(data);
-    } catch (error) {
-      navigate("/"); // Redirects unauthorized users
-    } finally {
-      setLoading(false);
-    }
+  const handleChange = (e) => {
+    setUser({ ...user, [e.target.name]: e.target.value });
   };
 
-  fetchUser();
-}, [navigate]);
+  const handleSave = async () => {
+    try {
+        const response = await fetch(`https://shopping-portal-backend.onrender.com/update-users/${user._id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify(user),
+        });
 
-
-const handleChange = (e) => {
-  const { name, value } = e.target;
-  setUser((prevUser) => ({
-    ...prevUser,
-    [name]: value.trim() ? value : prevUser[name], // Prevents empty updates
-  }));
+        if (!response.ok) throw new Error("Failed to update profile");
+        const data = await response.json();
+        alert("Profile updated successfully!");
+        setUser(data);
+    } catch (err) {
+        setError(err.message);
+    }
 };
-
-const [saving, setSaving] = useState(false);
-const [successMessage, setSuccessMessage] = useState("");
-
-const handleSave = async () => {
-  setSaving(true);
-  setSuccessMessage("");
-
-  try {
-    const response = await fetch(`https://shopping-portal-backend.onrender.com/update-users/${user._id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(user),
-    });
-
-    if (!response.ok) throw new Error("Failed to update profile");
-
-    const data = await response.json();
-    setUser(data);
-    setSuccessMessage("Profile updated successfully!");
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setSaving(false);
-  }
-};
-
 
 
   if (loading) return <p>Loading profile...</p>;
@@ -112,11 +89,7 @@ const handleSave = async () => {
             <label>City</label>
             <input type="text" name="city" style={inputStyle} value={user.city} onChange={handleChange} />
 
-          {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
-<button style={buttonStyle} onClick={handleSave} disabled={saving}>
-  {saving ? "Saving..." : "Save Changes"}
-</button>
-
+            <button style={buttonStyle} onClick={handleSave}>Save Changes</button>
           </div>
         </main>
       </div>
@@ -127,40 +100,20 @@ const handleSave = async () => {
 
 const inputStyle = {
   width: "100%",
-  padding: "10px",
+  padding: "8px",
   border: "1px solid #ccc",
-  borderRadius: "5px",
-  marginTop: "8px",
-  fontSize: "16px",
+  borderRadius: "4px",
+  marginTop: "4px",
 };
 
 const buttonStyle = {
   background: "#007BFF",
   color: "#fff",
-  padding: "12px",
-  borderRadius: "6px",
+  padding: "10px 16px",
+  borderRadius: "4px",
   border: "none",
   cursor: "pointer",
   marginTop: "16px",
-  width: "100%", // Make button full-width on mobile
 };
-const containerStyle = {
-  display: "flex",
-  flexDirection: "column",
-  maxWidth: "1200px",
-  margin: "auto",
-  padding: "16px",
-  gap: "20px",
-};
-
-const mainStyle = {
-  flex: "3",
-  minWidth: "600px",
-  background: "#fff",
-  padding: "24px",
-  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-  borderRadius: "8px",
-};
-
 
 export default UserProfilePage;
