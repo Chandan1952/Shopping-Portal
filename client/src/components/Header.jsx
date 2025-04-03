@@ -21,7 +21,6 @@ useEffect(() => {
         credentials: "include", // ✅ Required for cookies
       });
 
-      console.log("Response Headers:", [...response.headers]); // Debugging
 
       if (!response.ok) {
         throw new Error("User not authenticated");
