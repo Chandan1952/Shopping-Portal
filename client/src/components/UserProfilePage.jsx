@@ -10,47 +10,50 @@ const UserProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // ✅ Authentication Check
   useEffect(() => {
     fetch("https://shopping-portal-backend.onrender.com/api/auth/check", { credentials: "include" })
-        .catch(() => console.error("Authentication check failed"));
-}, []);
+      .then(res => {
+        if (!res.ok) throw new Error("Not authenticated");
+      })
+      .catch(() => navigate("/")); // Redirect user if not authenticated
+  }, [navigate]);
 
-
+  // ✅ Fetch User Data
   useEffect(() => {
     fetch("https://shopping-portal-backend.onrender.com/api/user", {
-      credentials: "include", // ✅ Ensures session-based authentication works
+      credentials: "include",
     })
       .then((res) => {
         if (!res.ok) throw new Error("Not authenticated");
         return res.json();
       })
-      .then((data) => setUser(data))
-      .catch(() => navigate("/")) // Redirect if not logged in
+      .then((data) => setUser(data.user)) // Extract 'user' object
+      .catch(() => navigate("/")) 
       .finally(() => setLoading(false));
   }, [navigate]);
 
   const handleChange = (e) => {
-    setUser({ ...user, [e.target.name]: e.target.value });
+    setUser((prevUser) => ({ ...prevUser, [e.target.name]: e.target.value }));
   };
 
   const handleSave = async () => {
     try {
-        const response = await fetch(`https://shopping-portal-backend.onrender.com/update-users/${user._id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify(user),
-        });
+      const response = await fetch(`https://shopping-portal-backend.onrender.com/api/user/update/${user._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(user),
+      });
 
-        if (!response.ok) throw new Error("Failed to update profile");
-        const data = await response.json();
-        alert("Profile updated successfully!");
-        setUser(data);
+      if (!response.ok) throw new Error("Failed to update profile");
+      const data = await response.json();
+      alert("Profile updated successfully!");
+      setUser(data.user); // ✅ Correct data handling
     } catch (err) {
-        setError(err.message);
+      setError(err.message);
     }
-};
-
+  };
 
   if (loading) return <p>Loading profile...</p>;
   if (!user) return <p>Error loading profile.</p>;
@@ -69,27 +72,29 @@ const UserProfilePage = () => {
 
           <div style={{ marginTop: "16px" }}>
             <label>Full Name</label>
-            <input type="text" name="fullName" style={inputStyle} value={user.fullName} onChange={handleChange} />
+            <input type="text" name="fullName" style={inputStyle} value={user?.fullName || ""} onChange={handleChange} />
 
             <label>Email Address</label>
-            <input type="email" name="email" style={inputStyle} value={user.email} disabled />
+            <input type="email" name="email" style={inputStyle} value={user?.email || ""} disabled />
 
             <label>Phone Number</label>
-            <input type="text" name="phone" style={inputStyle} value={user.phone} onChange={handleChange} />
+            <input type="text" name="phone" style={inputStyle} value={user?.phone || ""} onChange={handleChange} />
 
             <label>Date of Birth</label>
-            <input type="date" name="dob" style={inputStyle} value={user.dob} onChange={handleChange} />
+            <input type="date" name="dob" style={inputStyle} value={user?.dob || ""} onChange={handleChange} />
 
             <label>Your Address</label>
-            <textarea name="address" style={{ ...inputStyle, height: "80px" }} value={user.address} onChange={handleChange}></textarea>
+            <textarea name="address" style={{ ...inputStyle, height: "80px" }} value={user?.address || ""} onChange={handleChange}></textarea>
 
             <label>Country</label>
-            <input type="text" name="country" style={inputStyle} value={user.country} onChange={handleChange} />
+            <input type="text" name="country" style={inputStyle} value={user?.country || ""} onChange={handleChange} />
 
             <label>City</label>
-            <input type="text" name="city" style={inputStyle} value={user.city} onChange={handleChange} />
+            <input type="text" name="city" style={inputStyle} value={user?.city || ""} onChange={handleChange} />
 
-            <button style={buttonStyle} onClick={handleSave}>Save Changes</button>
+            <button style={buttonStyle} onClick={handleSave} disabled={!user?.fullName || !user?.phone}>
+              Save Changes
+            </button>
           </div>
         </main>
       </div>
