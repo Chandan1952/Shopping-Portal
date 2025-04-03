@@ -125,4 +125,4 @@ const styles = {
     borderRadius: "5px",
     objectFit: "contain",
   },
-}; proper adjust css
+};
