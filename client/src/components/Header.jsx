@@ -12,38 +12,22 @@ export default function Header() {
   const navigate = useNavigate();
 
 
-useEffect(() => {
-  const fetchUser = async () => {
-    try {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        console.log("Loaded from storage:", JSON.parse(storedUser));  // ✅ Debugging Log
-        setUser(JSON.parse(storedUser));
-        return;
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await fetch("https://shopping-portal-backend.onrender.com/api/user", { credentials: "include" });
+        const data = await response.json();
+        if (response.ok) {
+          setUser(data);
+        } else {
+          console.error("Error fetching user:", data.error);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
       }
-
-      const response = await fetch("https://shopping-portal-backend.onrender.com/api/user", {
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("Fetched user from API:", data);  // ✅ Debugging Log
-
-      if (data) {
-        setUser(data);
-        localStorage.setItem("user", JSON.stringify(data));
-      }
-    } catch (error) {
-      console.error("Failed to fetch user:", error.message);
-    }
-  };
-
-  fetchUser();
-}, []);
+    };
+    fetchUser();
+  }, []);
 
  const handleLogout = async () => {
   try {
