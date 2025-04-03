@@ -41,25 +41,37 @@ const AuthModal = ({ isOpen, onClose, setUser }) => {
 
   if (!isOpen) return null;
 
+  // ✅ Close modal if user clicks outside content
+  const handleOverlayClick = (event) => {
+    if (event.target.id === "modalOverlay") {
+      onClose();
+    }
+  };
+
   return (
-    <div style={styles.modalOverlay}>
-      <div style={styles.modalContent}>
+    <div id="modalOverlay" style={styles.modalOverlay} onClick={handleOverlayClick}>
+      <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         {/* Close Button */}
-        <button style={styles.closeButton} onClick={onClose}>×</button>
+        <button
+          style={styles.closeButton}
+          onClick={onClose}
+          aria-label="Close authentication modal"
+        >
+          ×
+        </button>
 
         {/* Render Forms Based on Mode */}
         {mode === "login" ? (
           <LoginForm
-            isOpen={isOpen}
             onClose={onClose}
             onSwitch={() => setMode("signup")} // Switch to Signup
-            setUser={setUser} // Pass setUser to LoginForm
+            setUser={setUser} // ✅ Pass setUser to update user state
           />
         ) : (
           <SignupForm
-            isOpen={isOpen}
             onClose={onClose}
             onSwitch={() => setMode("login")} // Switch to Login
+            setUser={setUser} // ✅ Ensure user is set after signup
           />
         )}
       </div>
@@ -67,5 +79,5 @@ const AuthModal = ({ isOpen, onClose, setUser }) => {
   );
 };
 
-// ✅ Default export added
+// ✅ Default export
 export default AuthModal;
