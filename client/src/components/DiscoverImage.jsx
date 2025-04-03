@@ -36,7 +36,7 @@ export default function BrandsSection() {
   const kidsBrands = brands.filter((brand) => brand.category === "kids");
 
   return (
-    <div style={styles.container}>
+    <div>
       <BrandSection title="Men Fashion" brands={menBrands} onTitleClick={() => handleCategoryClick("Men")} />
       <BrandSection title="Women Fashion" brands={womenBrands} onTitleClick={() => handleCategoryClick("Women")} />
       <BrandSection title="Kids Fashion" brands={kidsBrands} onTitleClick={() => handleCategoryClick("Kids")} />
@@ -73,12 +73,12 @@ function BrandCard({ brand }) {
     <div
       style={{
         ...styles.brandCard,
-        transform: hover ? "scale(1.07)" : "scale(1)",
-        boxShadow: hover ? "0px 8px 16px rgba(0, 0, 0, 0.2)" : "0px 4px 8px rgba(0, 0, 0, 0.1)",
+        transform: hover ? "scale(1.05)" : "scale(1)",
+        transition: "transform 0.3s ease-in-out",
       }}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      onClick={handleClick}
+      onClick={handleClick} // ✅ Click anywhere on the div to navigate
     >
       {brand?.img ? (
         <img
@@ -87,64 +87,42 @@ function BrandCard({ brand }) {
           style={styles.brandImg}
         />
       ) : (
-        <p style={styles.noImageText}>No Image</p>
+        <p style={{ textAlign: "center", padding: "10px" }}>No Image</p>
       )}
     </div>
   );
 }
 
 const styles = {
-  container: {
-    maxWidth: "1200px",
-    margin: "0 auto",
-    padding: "20px",
-  },
   section: {
     margin: "30px 0",
     padding: "20px",
     backgroundColor: "#fff",
-    borderRadius: "12px",
-    boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.05)",
   },
   title: {
     fontSize: "24px",
     fontWeight: "bold",
-    marginBottom: "15px",
+    marginBottom: "10px",
     cursor: "pointer",
-    textTransform: "uppercase",
-    color: "#333",
-    transition: "color 0.3s",
   },
   brandList: {
     display: "flex",
     gap: "15px",
     overflowX: "auto",
     paddingBottom: "10px",
-    scrollSnapType: "x mandatory",
-    scrollbarWidth: "none",
   },
   brandCard: {
-    minWidth: "180px",
-    maxWidth: "220px",
+    minWidth: "200px",
     textAlign: "center",
     padding: "10px",
-    borderRadius: "10px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+    borderRadius: "8px",
     cursor: "pointer",
     backgroundColor: "#f9f9f9",
-    transition: "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
-    scrollSnapAlign: "start",
   },
   brandImg: {
     width: "100%",
-    height: "140px",
-    borderRadius: "8px",
-    objectFit: "cover",
+    borderRadius: "5px",
+    objectFit: "contain",
   },
-  noImageText: {
-    textAlign: "center",
-    padding: "10px",
-    fontSize: "14px",
-    color: "#777",
-  },
-};
-
+}; proper adjust css
