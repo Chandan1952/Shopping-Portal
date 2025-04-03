@@ -222,10 +222,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// ✅ Check if User is Logged In
-app.get("/api/auth/check", (req, res) => {
-  res.json({ isAuthenticated: !!req.session.userId });
-});
+
 
 // ✅ Get User Details (Authenticated)
 app.get("/api/user", (req, res) => {
@@ -246,6 +243,14 @@ app.get("/api/user", (req, res) => {
       phone: req.session.userMobile,
     },
   });
+});
+
+
+
+
+// ✅ Check if User is Logged In
+app.get("/api/auth/check", (req, res) => {
+  res.json({ isAuthenticated: !!req.session.userId });
 });
 
 
