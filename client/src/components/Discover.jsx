@@ -7,7 +7,6 @@ export default function Discover() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
-  // Fetch images from API
   useEffect(() => {
     axios
       .get("https://shopping-portal-backend.onrender.com/carousel-images")
@@ -15,17 +14,14 @@ export default function Discover() {
       .catch((err) => console.error("Error fetching images:", err));
   }, []);
 
-  // Memoized function to move to the next slide
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % images.length);
   }, [images.length]);
 
-  // Move to the previous slide
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + images.length) % images.length);
   };
 
-  // Auto-slide functionality (every 3 seconds, unless hovered)
   useEffect(() => {
     if (!isHovered) {
       const interval = setInterval(nextSlide, 3000);
@@ -37,9 +33,11 @@ export default function Discover() {
     <div
       style={{
         maxWidth: "1400px",
-        margin: "0px auto",
+        margin: "0 auto",
         position: "relative",
         overflow: "hidden",
+        borderRadius: "12px",
+        boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -50,8 +48,9 @@ export default function Discover() {
           alt="Carousel"
           style={{
             width: "100%",
-            height: "100vh",
-            objectFit: "contain",
+            maxHeight: "550px",
+            objectFit: "cover",
+            borderRadius: "12px",
             transition: "opacity 0.5s ease-in-out",
           }}
         />
@@ -60,16 +59,20 @@ export default function Discover() {
         onClick={prevSlide}
         style={{
           position: "absolute",
-          left: "10px",
+          left: "20px",
           top: "50%",
           transform: "translateY(-50%)",
-          background: "rgba(0,0,0,0.5)",
+          background: "rgba(0, 0, 0, 0.6)",
           color: "#fff",
           border: "none",
-          padding: "10px",
+          padding: "12px",
           cursor: "pointer",
           borderRadius: "50%",
+          fontSize: "20px",
+          transition: "background 0.3s",
         }}
+        onMouseEnter={(e) => (e.target.style.background = "rgba(0, 0, 0, 0.8)")}
+        onMouseLeave={(e) => (e.target.style.background = "rgba(0, 0, 0, 0.6)")}
       >
         <FaChevronLeft />
       </button>
@@ -77,16 +80,20 @@ export default function Discover() {
         onClick={nextSlide}
         style={{
           position: "absolute",
-          right: "10px",
+          right: "20px",
           top: "50%",
           transform: "translateY(-50%)",
-          background: "rgba(0,0,0,0.5)",
+          background: "rgba(0, 0, 0, 0.6)",
           color: "#fff",
           border: "none",
-          padding: "10px",
+          padding: "12px",
           cursor: "pointer",
           borderRadius: "50%",
+          fontSize: "20px",
+          transition: "background 0.3s",
         }}
+        onMouseEnter={(e) => (e.target.style.background = "rgba(0, 0, 0, 0.8)")}
+        onMouseLeave={(e) => (e.target.style.background = "rgba(0, 0, 0, 0.6)")}
       >
         <FaChevronRight />
       </button>
