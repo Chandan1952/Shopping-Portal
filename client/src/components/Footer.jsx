@@ -64,7 +64,7 @@ const styles = {
 export default function Footer() {
   const navigate = useNavigate();
 
-  const categories = ["Men", "Women", "Kids", "Home & Living"];
+  const categories = ["Mens", "Women", "Kids", "Home & Living"];
 
   const handleCategoryClick = (category) => {
     navigate(`/products?category=${category.toLowerCase()}`); // ✅ Ensure lowercase query
