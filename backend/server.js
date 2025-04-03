@@ -228,32 +228,25 @@ app.get("/api/auth/check", (req, res) => {
 });
 
 // ✅ Get User Details (Authenticated)
-app.get("/api/user", async (req, res) => {
-  console.log("🔹 Session data:", req.session);
+app.get("/api/user", (req, res) => {
+  console.log("🔹 Checking Session:", req.session); // ✅ Debugging
 
   if (!req.session || !req.session.userId) {
-    return res.status(401).json({ status: "error", message: "Unauthorized. Please log in." });
+    console.log("❌ Session not found or missing userId"); // Debugging
+    return res.status(401).json({ message: "Not authenticated" });
   }
 
-  try {
-    const user = await User.findById(req.session.userId).select("-password");
-    if (!user) {
-      return res.status(404).json({ status: "error", message: "User not found." });
-    }
+  console.log("✅ User is authenticated:", req.session.userId); // Debugging
 
-    res.status(200).json({
-      status: "success",
-      userId: user._id,
-      username: user.fullName,  // ✅ Added fullName
-      userEmail: user.email,
-      mobile: user.mobile,      // ✅ Added mobile
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ status: "error", message: "Error fetching user details." });
-  }
+  res.json({
+    user: {
+      id: req.session.userId,
+      fullName: req.session.username,
+      email: req.session.userEmail,
+      phone: req.session.userMobile,
+    },
+  });
 });
-
 
 
 // 🔹 PUT USER UPDATED DETAILS (Authenticated)
