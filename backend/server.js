@@ -181,7 +181,6 @@ app.post('/reset-password', async function (req, res) {
 
 
 // ✅ Login Route
-// ✅ Login Route
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -204,7 +203,7 @@ app.post("/login", async (req, res) => {
     req.session.userId = foundUser._id;
     req.session.username = foundUser.fullName;
     req.session.userEmail = foundUser.email;
-    req.session.userMobile = foundUser.mobile;
+    req.session.userMobile = foundUser.phone;
 
     console.log("🔹 Session after login:", req.session); // ✅ Debugging
     await req.session.save(); // 🔹 Ensure session is stored
@@ -215,7 +214,7 @@ app.post("/login", async (req, res) => {
       userId: foundUser._id,
       username: foundUser.fullName,  // ✅ Added username
       userEmail: foundUser.email,
-      mobile: foundUser.mobile,      // ✅ Added mobile
+      mobile: foundUser.phone,      // ✅ Added mobile
     });
   } catch (error) {
     console.error(error);
