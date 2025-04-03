@@ -89,6 +89,7 @@ export default function LoginForm({ isOpen, onClose, onSwitch, setUser }) {
   });
 
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -110,6 +111,7 @@ export default function LoginForm({ isOpen, onClose, onSwitch, setUser }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
       const response = await fetch("https://shopping-portal-backend.onrender.com/login", {
@@ -135,14 +137,16 @@ export default function LoginForm({ isOpen, onClose, onSwitch, setUser }) {
         throw new Error(data?.message || "Login failed. Please try again.");
       }
 
-      localStorage.setItem("user", JSON.stringify(data));
-      setUser(data);
+      // ✅ Store only token, not user details, for security
+      localStorage.setItem("token", data.token);
+      setUser(data.user); // Set user state
 
       onClose();
-      setTimeout(() => window.location.reload(), 500); // Refresh UI
     } catch (error) {
       console.error("Login Error:", error.message);
       setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -192,8 +196,9 @@ export default function LoginForm({ isOpen, onClose, onSwitch, setUser }) {
             style={styles.loginButton}
             onMouseEnter={(e) => (e.target.style.backgroundColor = "#b71c1c")}
             onMouseLeave={(e) => (e.target.style.backgroundColor = "#d32f2f")}
+            disabled={loading}
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
 
           <Link to="/forget-password" style={styles.link}>
