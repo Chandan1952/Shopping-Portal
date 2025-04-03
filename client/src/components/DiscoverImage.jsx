@@ -148,4 +148,3 @@ const styles = {
   },
 };
 
-export default BrandsSection;
