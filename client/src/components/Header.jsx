@@ -13,23 +13,25 @@ export default function Header() {
 
 
 // ✅ Fetch User Data from Backend
- useEffect(() => {
+useEffect(() => {
   const fetchUser = async () => {
     try {
       const response = await fetch("https://shopping-portal-backend.onrender.com/api/user", {
         method: "GET",
-        credentials: "include", // Ensure cookies are sent
+        credentials: "include", // ✅ Required for cookies
       });
+
+      console.log("Response Headers:", [...response.headers]); // Debugging
 
       if (!response.ok) {
         throw new Error("User not authenticated");
       }
 
       const data = await response.json();
-      console.log("User fetched:", data);
+      console.log("✅ User fetched:", data);
       setUser(data.user);
     } catch (error) {
-      console.error("Failed to fetch user:", error.message);
+      console.error("❌ Failed to fetch user:", error.message);
       setUser(null);
     }
   };
