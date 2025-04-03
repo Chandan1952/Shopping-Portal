@@ -181,6 +181,7 @@ app.post('/reset-password', async function (req, res) {
 
 
 // ✅ Login Route
+// ✅ Login Route
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -203,6 +204,7 @@ app.post("/login", async (req, res) => {
     req.session.userId = foundUser._id;
     req.session.username = foundUser.fullName;
     req.session.userEmail = foundUser.email;
+    req.session.userMobile = foundUser.mobile;
 
     console.log("🔹 Session after login:", req.session); // ✅ Debugging
     await req.session.save(); // 🔹 Ensure session is stored
@@ -211,7 +213,9 @@ app.post("/login", async (req, res) => {
       status: "success",
       message: "Login successful",
       userId: foundUser._id,
+      username: foundUser.fullName,  // ✅ Added username
       userEmail: foundUser.email,
+      mobile: foundUser.mobile,      // ✅ Added mobile
     });
   } catch (error) {
     console.error(error);
@@ -228,19 +232,29 @@ app.get("/api/auth/check", (req, res) => {
 app.get("/api/user", async (req, res) => {
   console.log("🔹 Session data:", req.session);
 
-  if (!req.session.userId) {
-    return res.status(401).json({ error: "Unauthorized. Please log in." });
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({ status: "error", message: "Unauthorized. Please log in." });
   }
 
   try {
     const user = await User.findById(req.session.userId).select("-password");
-    if (!user) return res.status(404).json({ error: "User not found." });
+    if (!user) {
+      return res.status(404).json({ status: "error", message: "User not found." });
+    }
 
-    res.json(user);
+    res.status(200).json({
+      status: "success",
+      userId: user._id,
+      username: user.fullName,  // ✅ Added fullName
+      userEmail: user.email,
+      mobile: user.mobile,      // ✅ Added mobile
+    });
   } catch (err) {
-    res.status(500).json({ error: "Error fetching user details." });
+    console.error(err);
+    res.status(500).json({ status: "error", message: "Error fetching user details." });
   }
 });
+
 
 
 // 🔹 PUT USER UPDATED DETAILS (Authenticated)
@@ -310,64 +324,92 @@ app.post("/logout", (req, res) => {
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH; // Store hashed password
 
+
 app.post("/admin-login", async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  if (email !== ADMIN_EMAIL) {
-    return res.status(401).json({ error: "Invalid credentials" });
+    // Check if environment variables are set properly
+    if (!ADMIN_EMAIL || !ADMIN_PASSWORD_HASH) {
+      console.error("⚠️ Missing ADMIN_EMAIL or ADMIN_PASSWORD_HASH in .env");
+      return res.status(500).json({ status: "error", message: "Server configuration error." });
+    }
+
+    // ✅ Validate Admin Credentials
+    if (email !== ADMIN_EMAIL) {
+      return res.status(401).json({ status: "error", message: "Invalid credentials." });
+    }
+
+    const passwordMatch = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
+    if (!passwordMatch) {
+      return res.status(401).json({ status: "error", message: "Invalid credentials." });
+    }
+
+    // ✅ Securely Store Admin Session
+    req.session.isAdmin = true;
+    req.session.adminEmail = ADMIN_EMAIL;
+    await req.session.save(); // Ensure session is stored
+
+    console.log("🔹 Session after login:", req.session); // ✅ Debugging
+
+    res.status(200).json({
+      status: "success",
+      message: "Login successful",
+      session: { isAdmin: true, adminEmail: ADMIN_EMAIL },
+    });
+  } catch (error) {
+    console.error("❌ Error in /admin-login:", error);
+    res.status(500).json({ status: "error", message: "An error occurred. Please try again." });
+  }
+});
+
+
+app.get("/admin-verify", (req, res) => {
+  console.log("🔹 Incoming /admin-verify request");
+  console.log("🔹 Session Data:", req.session); // ✅ Debugging session data
+
+  // ✅ Ensure admin session exists
+  if (!req.session || !req.session.isAdmin) {
+    console.log("❌ Unauthorized access attempt - No admin session");
+    return res.status(401).json({ status: "error", message: "Unauthorized access." });
   }
 
-  const passwordMatch = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
-  if (!passwordMatch) {
-    return res.status(401).json({ error: "Invalid credentials" });
-  }
+  console.log("✅ Admin session verified:", req.session.adminEmail);
 
-  req.session.adminEmail = ADMIN_EMAIL;  // ✅ Store admin session
-  await req.session.save();  // ✅ Ensure session is saved
-
-  console.log("Session after login:", req.session);  // 🔍 Debugging
-
-  res.status(200).json({ message: "Login successful", session: req.session });
+  res.status(200).json({
+    status: "success",
+    isAdmin: true,
+    adminEmail: req.session.adminEmail,
+  });
 });
 
 
 
-// app.get("/admin-verify", (req, res) => {
-//   console.log("🔹 Incoming /admin-verify request");
-//   console.log("🔹 Session Data:", req.session); // ✅ Debug session data
 
-//   if (!req.session.adminEmail) {
-//     console.log("❌ No admin session found");
-//     return res.status(401).json({ error: "Unauthorized access" });
+// app.get("/check-session", (req, res) => {
+//   if (req.session.adminEmail) {
+//     res.json({ isAuthenticated: true, adminEmail: req.session.adminEmail });
+//   } else {
+//     res.status(401).json({ isAuthenticated: false });
 //   }
-
-//   res.json({ isAdmin: true, email: req.session.adminEmail });
 // });
 
 
 
-app.get("/check-session", (req, res) => {
-  if (req.session.adminEmail) {
-    res.json({ isAuthenticated: true, adminEmail: req.session.adminEmail });
-  } else {
-    res.status(401).json({ isAuthenticated: false });
-  }
-});
-
-
-
-// ✅ Middleware to Check Admin Session
+// ✅ Middleware to check admin authentication
 const isAuthenticated = (req, res, next) => {
-  if (!req.session || !req.session.adminEmail) {
-    return res.status(401).json({ error: "Session expired. Please log in again." });
+  if (!req.session?.isAdmin) {
+    return res.status(401).json({ status: "error", message: "Session expired. Please log in again." });
   }
   next();
 };
 
-
-// **Admin Dashboard Statistics Route**
+// ✅ Admin Dashboard Statistics Route
 app.get("/admin-dashboard", isAuthenticated, async (req, res) => {
   try {
+    console.log("🔹 Fetching admin dashboard statistics...");
+
+    // ✅ Fetch document counts in parallel
     const [ImageCount, BrandCount, ProductCount, CategoryCount] = await Promise.all([
       Image.countDocuments(),
       Brand.countDocuments(),
@@ -375,15 +417,26 @@ app.get("/admin-dashboard", isAuthenticated, async (req, res) => {
       Category.countDocuments(),
     ]);
 
-    res.json({
-      stats: { Image: ImageCount, Brand: BrandCount, Product: ProductCount, Category: CategoryCount },
+    console.log("✅ Dashboard stats fetched successfully");
+
+    res.status(200).json({
+      status: "success",
+      stats: {
+        Image: ImageCount,
+        Brand: BrandCount,
+        Product: ProductCount,
+        Category: CategoryCount,
+      },
     });
   } catch (error) {
-    console.error("❌ Error fetching dashboard stats:", error.message);
-    res.status(500).json({ message: process.env.NODE_ENV === "development" ? error.message : "Error fetching data" });
+    console.error("❌ Error fetching dashboard stats:", error);
+
+    res.status(500).json({
+      status: "error",
+      message: process.env.NODE_ENV === "development" ? error.message : "Error fetching data",
+    });
   }
 });
-
 
 
 // **Change Admin Password (Protected Route)**
