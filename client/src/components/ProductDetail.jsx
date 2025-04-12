@@ -21,8 +21,7 @@ const ProductDetail = () => {
 
         const data = await response.json();
         setProduct(data);
-
-        if (data.sizes && data.sizes.length > 0) {
+        if (data.sizes?.length > 0) {
           setSelectedSize(data.sizes[0]);
         }
       } catch (error) {
@@ -31,14 +30,13 @@ const ProductDetail = () => {
         setLoading(false);
       }
     };
-
     fetchProduct();
   }, [id]);
 
   const handleAddToCart = async () => {
-    if (!product) return alert("❌ Product details not loaded yet.");
-    if (!quantity || quantity < 1) return alert("❌ Please enter a valid quantity.");
-    if (product.sizes && product.sizes.length > 0 && !selectedSize) return alert("❌ Please select a size.");
+    if (!product || quantity < 1 || (product.sizes?.length > 0 && !selectedSize)) {
+      return alert("❌ Please complete all required selections.");
+    }
 
     try {
       const cartItem = {
@@ -91,12 +89,12 @@ const ProductDetail = () => {
     }
   };
 
-  if (loading) return <p>Loading product details...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  if (loading) return <p style={{ padding: "20px" }}>Loading product details...</p>;
+  if (error) return <p style={{ color: "red", padding: "20px" }}>{error}</p>;
 
-  const imageUrl = product.image
-    ? (product.image.startsWith("/uploads/") ? `https://shopping-portal-backend.onrender.com${product.image}` : product.image)
-    : "https://via.placeholder.com/240";
+  const imageUrl = product.image?.startsWith("/uploads/")
+    ? `https://shopping-portal-backend.onrender.com${product.image}`
+    : product.image || "https://via.placeholder.com/240";
 
   const allSizes = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
   const availableSizes = product?.sizes?.length ? product.sizes : allSizes;
@@ -104,122 +102,124 @@ const ProductDetail = () => {
   return (
     <>
       <Header />
-      <div style={{ maxWidth: "1100px", margin: "auto", padding: "20px", display: "flex", gap: "20px" }}>
-        {/* Left: Product Image */}
-        <div style={{ flex: "1", display: "flex", justifyContent: "center" }}>
+      <div style={{ maxWidth: "1200px", margin: "auto", padding: "40px 20px", display: "flex", gap: "40px", flexWrap: "wrap" }}>
+        {/* Product Image */}
+        <div style={{ flex: "1", minWidth: "300px", display: "flex", justifyContent: "center" }}>
           <img
             src={imageUrl}
             alt={product.name}
-            style={{ width: "100%", maxWidth: "400px", height: "400px", objectFit: "contain", borderRadius: "8px" }}
+            style={{
+              width: "100%",
+              maxWidth: "450px",
+              height: "auto",
+              borderRadius: "10px",
+              objectFit: "contain",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+            }}
           />
         </div>
 
-        {/* Right: Product Details */}
-        <div style={{ flex: "1", textAlign: "left" }}>
-          <h2>{product.name}</h2>
-          <p>{product.description}</p>
+        {/* Product Info */}
+        <div style={{ flex: "1", minWidth: "300px" }}>
+          <h2 style={{ fontSize: "28px", fontWeight: "700", marginBottom: "10px" }}>{product.name}</h2>
+          <p style={{ marginBottom: "20px", color: "#444" }}>{product.description}</p>
 
-          {/* Price Display */}
-          <div style={{ display: "flex", gap: "8px", marginTop: "5px", alignItems: "center" }}>
-            <span style={{ fontSize: "20px", fontWeight: "bold", color: "green" }}>Rs. {product.price}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
+            <span style={{ fontSize: "22px", fontWeight: "bold", color: "#28a745" }}>Rs. {product.price}</span>
             {product.originalPrice && (
-              <span style={{ fontSize: "16px", color: "gray", textDecoration: "line-through" }}>
-                Rs. {product.originalPrice}
-              </span>
+              <span style={{ textDecoration: "line-through", color: "#888" }}>Rs. {product.originalPrice}</span>
             )}
-            {product.discount && (
-              <span style={{ fontSize: "16px", color: "red", fontWeight: "bold" }}>({product.discount}% OFF)</span>
+            {product.discount > 0 && (
+              <span style={{ color: "red", fontWeight: "600" }}>({product.discount}% OFF)</span>
             )}
           </div>
 
-          {/* Quantity Selector */}
-          <div style={{ marginTop: "10px" }}>
+          {/* Quantity */}
+          <div style={{ marginBottom: "15px" }}>
             <label style={{ fontWeight: "bold", marginRight: "10px" }}>Quantity:</label>
             <input
               type="number"
               min="1"
               value={quantity}
               onChange={(e) => setQuantity(Number(e.target.value))}
-              style={{ width: "50px", padding: "5px", borderRadius: "5px", border: "1px solid gray" }}
+              style={{ width: "60px", padding: "5px", borderRadius: "5px", border: "1px solid #ccc" }}
             />
           </div>
 
-          {/* Size Selector */}
+          {/* Size */}
           {availableSizes.length > 0 && (
-            <div style={{ marginTop: "10px" }}>
-              <label style={{ fontWeight: "bold", marginRight: "10px" }}>Size:</label>
-              {availableSizes.map((size) => (
-                <button
-                  key={size}
-                  onClick={() => setSelectedSize(size)}
-                  style={{
-                    padding: "8px 16px",
-                    margin: "5px",
-                    borderRadius: "5px",
-                    border: selectedSize === size ? "2px solid #ff3f6c" : "1px solid gray",
-                    backgroundColor: selectedSize === size ? "#ff3f6c" : "white",
-                    color: selectedSize === size ? "white" : "black",
-                    cursor: "pointer",
-                  }}
-                >
-                  {size}
-                </button>
-              ))}
+            <div style={{ marginBottom: "20px" }}>
+              <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Select Size:</label>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+                {availableSizes.map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    style={{
+                      padding: "8px 16px",
+                      borderRadius: "6px",
+                      border: selectedSize === size ? "2px solid #ff3f6c" : "1px solid #ccc",
+                      backgroundColor: selectedSize === size ? "#ff3f6c" : "#fff",
+                      color: selectedSize === size ? "#fff" : "#333",
+                      fontWeight: "500",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease-in-out"
+                    }}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
-          {/* Buttons */}
-          <div style={{ marginTop: "20px", display: "flex", gap: "10px" }}>
+          {/* Action Buttons */}
+          <div style={{ display: "flex", gap: "15px", marginTop: "20px" }}>
             <button
+              onClick={handleAddToCart}
               style={{
-                flex: "1",
-                padding: "12px",
+                flex: 1,
+                padding: "14px",
                 backgroundColor: "#ff3f6c",
                 color: "white",
+                fontSize: "16px",
+                fontWeight: "bold",
+                border: "none",
                 borderRadius: "8px",
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: "5px",
+                gap: "8px",
+                transition: "background-color 0.3s"
               }}
-              onClick={handleAddToCart}
             >
               <FaShoppingCart /> Add to Cart
             </button>
 
             <button
+              onClick={handleAddToWishlist}
               style={{
-                flex: "1",
-                padding: "12px",
-                backgroundColor: "#ff3f6c",
-                color: "white",
+                flex: 1,
+                padding: "14px",
+                backgroundColor: "#fff",
+                color: "#ff3f6c",
+                fontSize: "16px",
+                fontWeight: "bold",
+                border: "2px solid #ff3f6c",
                 borderRadius: "8px",
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: "5px",
+                gap: "8px",
+                transition: "all 0.3s"
               }}
-              onClick={handleAddToWishlist}
             >
-              <FaHeart size={18} /> Wishlist
+              <FaHeart /> Wishlist
             </button>
           </div>
         </div>
-
-        {/* <h3 style={{ marginTop: "40px" }}>Recommended Products</h3>
-        <div style={{ display: "flex", overflowX: "auto", gap: "15px", padding: "10px 0" }}>
-          {recommended.map((item) => (
-            <Link key={item.id} to={`/product/${item.id}`} style={{ textDecoration: "none", color: "black" }}>
-              <div style={{ border: "1px solid #ddd", padding: "10px", borderRadius: "8px", textAlign: "center" }}>
-                <img src={item.image} alt={item.name} style={{ width: "150px", height: "150px", objectFit: "cover" }} />
-                <p>{item.name}</p>
-                <p style={{ fontWeight: "bold", color: "green" }}>Rs. {item.price}</p>
-              </div>
-            </Link>
-          ))}
-        </div> */}
       </div>
       <Footer />
     </>
