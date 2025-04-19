@@ -15,7 +15,6 @@ export default function OrderReturnPage() {
             .catch(() => console.error("Authentication check failed"));
     }, []);
     
-
     useEffect(() => {
         fetch("https://shopping-portal-backend.onrender.com/api/orders", { credentials: "include" })
             .then((res) => res.json())
@@ -89,7 +88,6 @@ export default function OrderReturnPage() {
         }
     };
 
-
     return (
         <div>
             <Header />
@@ -120,6 +118,19 @@ export default function OrderReturnPage() {
 
                                         <p style={{ fontWeight: "bold", color: "black" }}>Total Items: {order.items.length}</p>
                                         <p style={{ fontWeight: "bold", color: "black" }}>Total Amount: Rs. {totalAmount}</p>
+
+                                        {/* Displaying Payment Method */}
+                                        {order.paymentMethod === "COD" ? (
+                                            <p style={{ fontWeight: "bold", color: "orange" }}>
+                                                Payment Method: Cash on Delivery
+                                            </p>
+                                        ) : (
+                                            order.paymentStatus && (
+                                                <p style={{ fontWeight: "bold", color: order.paymentStatus === "Paid" ? "green" : order.paymentStatus === "Pending" ? "orange" : "red" }}>
+                                                    Payment Status: {order.paymentStatus}
+                                                </p>
+                                            )
+                                        )}
 
                                         {order.items.slice(0, expandedOrders[order._id] ? order.items.length : 1).map((item) => (
                                             <div key={item._id} style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "8px" }}>
@@ -197,71 +208,68 @@ export default function OrderReturnPage() {
                 </div>
             </div>
 
+            {/* Return Dialog */}
+            {returnDialog && (
+                <div style={{
+                    position: "fixed",
+                    top: 0, left: 0,
+                    width: "100%", height: "100%",
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center"
+                }}>
+                    <div style={{
+                        backgroundColor: "white",
+                        padding: "20px",
+                        borderRadius: "8px",
+                        width: "400px",
+                        textAlign: "center",
+                        position: "relative"
+                    }}>
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setReturnDialog(false)}
+                            style={{
+                                position: "absolute",
+                                top: "10px", right: "10px",
+                                border: "none",
+                                background: "red",
+                                color: "white",
+                                padding: "5px 10px",
+                                borderRadius: "5px",
+                                cursor: "pointer"
+                            }}
+                        >
+                            X
+                        </button>
 
-
-
-          {/* Return Dialog */}
-{returnDialog && (
-    <div style={{ 
-        position: "fixed", 
-        top: 0, left: 0, 
-        width: "100%", height: "100%", 
-        backgroundColor: "rgba(0, 0, 0, 0.5)", 
-        display: "flex", 
-        justifyContent: "center", 
-        alignItems: "center" 
-    }}>
-        <div style={{ 
-            backgroundColor: "white", 
-            padding: "20px", 
-            borderRadius: "8px", 
-            width: "400px", 
-            textAlign: "center", 
-            position: "relative" 
-        }}>
-            {/* Close Button */}
-            <button 
-                onClick={() => setReturnDialog(false)} 
-                style={{ 
-                    position: "absolute", 
-                    top: "10px", right: "10px", 
-                    border: "none", 
-                    background: "red", 
-                    color: "white", 
-                    padding: "5px 10px", 
-                    borderRadius: "5px", 
-                    cursor: "pointer"
-                }}
-            >
-                X
-            </button>
-
-            <h2>Return {selectedOrder?.items[0].name}</h2>
-            <textarea
-                value={returnReason}
-                onChange={(e) => setReturnReason(e.target.value)}
-                placeholder="Enter reason..."
-                style={{ width: "100%", height: "80px", margin: "10px 0", padding: "10px" }}
-            />
-            <button 
-                onClick={submitReturnRequest} 
-                style={{
-                    backgroundColor: "black",
-                    color: "white",
-                    padding: "10px",
-                    border: "none",
-                    borderRadius: "5px",
-                    cursor: "pointer"
-                }}
-            >
-                Submit Return
-            </button>
-        </div>
-    </div>
-)}
-
+                        <h2>Return {selectedOrder?.items[0].name}</h2>
+                        <textarea
+                            value={returnReason}
+                            onChange={(e) => setReturnReason(e.target.value)}
+                            placeholder="Enter reason..."
+                            style={{ width: "100%", height: "80px", margin: "10px 0", padding: "10px" }}
+                        />
+                        <button
+                            onClick={submitReturnRequest}
+                            style={{
+                                backgroundColor: "black",
+                                color: "white",
+                                padding: "10px",
+                                border: "none",
+                                borderRadius: "5px",
+                                cursor: "pointer"
+                            }}
+                        >
+                            Submit Return
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <Footer />
         </div>
     );
 }
+
