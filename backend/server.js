@@ -1,3 +1,4 @@
+
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
@@ -8,6 +9,8 @@ const cors = require("cors");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const Razorpay = require("razorpay");
+const crypto = require("crypto");
 
 const app = express();
 
@@ -42,7 +45,6 @@ app.use(
   httpOnly: true,
   sameSite: "none",
 }
-
   })
 );
 
@@ -180,77 +182,63 @@ app.post('/reset-password', async function (req, res) {
 //**************************USER-DASHBOARD-PAGE************************
 
 
-// ✅ Login Route
-app.post("/login", async (req, res) => {
+// Route for handling "User-login" form submissions
+app.post('/user-login', async function (req, res) {
   const { email, password } = req.body;
 
   try {
+    // Input Validation
     if (!email || !password) {
-      return res.status(400).json({ status: "error", message: "Email and password are required." });
+      return res.status(400).json({ status: 'error', message: 'Email and password are required.' });
     }
 
+    // Find user by email
     const foundUser = await User.findOne({ email });
+
+    // If user not found
     if (!foundUser) {
-      return res.status(400).json({ status: "error", message: "Email not found." });
+      return res.status(400).json({ status: 'error', message: 'Email not found.' });
     }
 
+    // Verify password
     const isPasswordMatch = await bcrypt.compare(password, foundUser.password);
+
     if (!isPasswordMatch) {
-      return res.status(400).json({ status: "error", message: "Incorrect password." });
+      return res.status(400).json({ status: 'error', message: 'Incorrect password.' });
     }
 
-    // ✅ Store User Session
-    req.session.userId = foundUser._id;
-    req.session.username = foundUser.fullName;
+    // Successful login
+    req.session.userId = foundUser._id; // Store user ID in session
+    req.session.username = foundUser.fullName; // Store user ID in session
     req.session.userEmail = foundUser.email;
-    req.session.userMobile = foundUser.phone;
 
-    console.log("🔹 Session after login:", req.session); // ✅ Debugging
-    await req.session.save(); // 🔹 Ensure session is stored
-
-    res.status(200).json({
-      status: "success",
-      message: "Login successful",
-      userId: foundUser._id,
-      username: foundUser.fullName,  // ✅ Added username
-      userEmail: foundUser.email,
-      mobile: foundUser.phone,      // ✅ Added mobile
-    });
+    // Send success response
+    res.status(200).json({ status: 'success', message: 'Login successful', userId: foundUser._id, userEmail: foundUser.email });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ status: "error", message: "An error occurred. Please try again." });
+    res.status(500).json({ status: 'error', message: 'An error occurred. Please try again.' });
   }
 });
 
 
-
-// ✅ Get User Details (Authenticated)
-app.get("/api/user", (req, res) => {
-  console.log("🔹 Checking Session:", req.session); // ✅ Debugging
-
-  if (!req.session || !req.session.userId) {
-    console.log("❌ Session not found or missing userId"); // Debugging
-    return res.status(401).json({ message: "Not authenticated" });
-  }
-
-  console.log("✅ User is authenticated:", req.session.userId); // Debugging
-
-  res.json({
-    user: {
-      id: req.session.userId,
-      fullName: req.session.username,
-      email: req.session.userEmail,
-      phone: req.session.userMobile,
-    },
-  });
-});
-
-
-
-
-// ✅ Check if User is Logged In
+// 🟢 Check if User is Logged In
 app.get("/api/auth/check", (req, res) => {
   res.json({ isAuthenticated: !!req.session.userId });
+});
+
+
+// 🔹 GET USER DETAILS (Authenticated)
+app.get("/api/user", async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: "Unauthorized. Please log in." });
+
+  try {
+    const user = await User.findById(req.session.userId).select("-password");
+    if (!user) return res.status(404).json({ error: "User not found." });
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: "Error fetching user details." });
+  }
 });
 
 
@@ -318,95 +306,57 @@ app.post("/logout", (req, res) => {
 
 //*********************ADMIN-DASHBOARD-PAGE************************
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
-const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH; // Store hashed password
+// Hardcoded admin credentials
+let admins = [
+  { email: "admin@gmail.com", password: bcrypt.hashSync("admin", 10) },
+];
 
 
+// **Admin Login (Stores in Session)**
 app.post("/admin-login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
+  const admin = admins.find(user => user.email === email);
 
-    // Check if environment variables are set properly
-    if (!ADMIN_EMAIL || !ADMIN_PASSWORD_HASH) {
-      console.error("⚠️ Missing ADMIN_EMAIL or ADMIN_PASSWORD_HASH in .env");
-      return res.status(500).json({ status: "error", message: "Server configuration error." });
-    }
-
-    // ✅ Validate Admin Credentials
-    if (email !== ADMIN_EMAIL) {
-      return res.status(401).json({ status: "error", message: "Invalid credentials." });
-    }
-
-    const passwordMatch = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
-    if (!passwordMatch) {
-      return res.status(401).json({ status: "error", message: "Invalid credentials." });
-    }
-
-    // ✅ Securely Store Admin Session
-    req.session.isAdmin = true;
-    req.session.adminEmail = ADMIN_EMAIL;
-    await req.session.save(); // Ensure session is stored
-
-    console.log("🔹 Session after login:", req.session); // ✅ Debugging
-
-    res.status(200).json({
-      status: "success",
-      message: "Login successful",
-      session: { isAdmin: true, adminEmail: ADMIN_EMAIL },
-    });
-  } catch (error) {
-    console.error("❌ Error in /admin-login:", error);
-    res.status(500).json({ status: "error", message: "An error occurred. Please try again." });
+  if (!admin || !(await bcrypt.compare(password, admin.password))) {
+    return res.status(401).json({ error: "Invalid email or password" });
   }
+
+  req.session.adminEmail = email;
+  return res.json({ message: "Login successful" });
 });
 
 
+// **Check Admin Session**
 app.get("/admin-verify", (req, res) => {
-  console.log("🔹 Incoming /admin-verify request");
-  console.log("🔹 Session Data:", req.session); // ✅ Debugging session data
-
-  // ✅ Ensure admin session exists
-  if (!req.session || !req.session.isAdmin) {
-    console.log("❌ Unauthorized access attempt - No admin session");
-    return res.status(401).json({ status: "error", message: "Unauthorized access." });
+  if (req.session.adminEmail) {
+    return res.json({ isAdmin: true, email: req.session.adminEmail });
   }
-
-  console.log("✅ Admin session verified:", req.session.adminEmail);
-
-  res.status(200).json({
-    status: "success",
-    isAdmin: true,
-    adminEmail: req.session.adminEmail,
-  });
+  return res.status(401).json({ error: "Unauthorized" });
 });
 
 
+// **Check Admin Session**
+app.get("/api/admin", (req, res) => {
+  if (!req.session.adminEmail) {
+    return res.status(401).json({ error: "Unauthorized access" });
+  }
+  res.json({ name: "Admin", email: req.session.adminEmail });
+});
 
 
-// app.get("/check-session", (req, res) => {
-//   if (req.session.adminEmail) {
-//     res.json({ isAuthenticated: true, adminEmail: req.session.adminEmail });
-//   } else {
-//     res.status(401).json({ isAuthenticated: false });
-//   }
-// });
-
-
-
-// ✅ Middleware to check admin authentication
+// **Middleware to Check Admin Session**
 const isAuthenticated = (req, res, next) => {
-  if (!req.session?.isAdmin) {
-    return res.status(401).json({ status: "error", message: "Session expired. Please log in again." });
+  if (!req.session.adminEmail) {
+    return res.status(401).json({ error: "Unauthorized access" });
   }
   next();
 };
 
-// ✅ Admin Dashboard Statistics Route
+
+
+// **Admin Dashboard Statistics Route**
 app.get("/admin-dashboard", isAuthenticated, async (req, res) => {
   try {
-    console.log("🔹 Fetching admin dashboard statistics...");
-
-    // ✅ Fetch document counts in parallel
     const [ImageCount, BrandCount, ProductCount, CategoryCount] = await Promise.all([
       Image.countDocuments(),
       Brand.countDocuments(),
@@ -414,10 +364,7 @@ app.get("/admin-dashboard", isAuthenticated, async (req, res) => {
       Category.countDocuments(),
     ]);
 
-    console.log("✅ Dashboard stats fetched successfully");
-
-    res.status(200).json({
-      status: "success",
+    res.json({
       stats: {
         Image: ImageCount,
         Brand: BrandCount,
@@ -426,14 +373,11 @@ app.get("/admin-dashboard", isAuthenticated, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("❌ Error fetching dashboard stats:", error);
-
-    res.status(500).json({
-      status: "error",
-      message: process.env.NODE_ENV === "development" ? error.message : "Error fetching data",
-    });
+    console.error("❌ Error fetching dashboard stats:", error.message);
+    res.status(500).json({ message: "Error fetching data" });
   }
 });
+
 
 
 // **Change Admin Password (Protected Route)**
@@ -1039,19 +983,39 @@ app.delete("/api/cart/:id", isAuthenticate, async (req, res) => {
 
 //****************************ORDER-PAGE******************************************************
 
-//Schema
 const OrderSchema = new mongoose.Schema(
   {
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     userInfo: {
       name: { type: String, required: true },
       address: { type: String, required: true },
       phone: { type: String, required: true },
     },
-    paymentMethod: { type: String, enum: ["Cash on Delivery", "Online Payment"], required: true },
+    paymentMethod: {
+      type: String,
+      enum: ["Cash on Delivery", "Online Payment"],
+      required: true,
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["Pending", "Paid", "Failed"],
+      default: "Pending",
+    },
+    transactionId: {
+      type: String,
+      default: null,
+    },
     items: [
       {
-        productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+        productId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+          required: true,
+        },
         name: { type: String, required: true },
         brand: { type: String },
         size: { type: String },
@@ -1059,55 +1023,190 @@ const OrderSchema = new mongoose.Schema(
         price: { type: Number, required: true },
         discount: { type: Number, default: 0 },
         image: { type: String },
-      }
+      },
     ],
-    
     totalAmount: { type: Number, required: true },
+
     status: {
       type: String,
-      enum: ["Pending", "Approved", "Shipped", "Cancelled", "Return Requested", "Return Approved", "Return Denied"],
+      enum: [
+        "Pending",
+        "Approved",
+        "Shipped",
+        "Delivered",
+        "Cancelled",
+        "Return Requested",
+        "Return Approved",
+        "Return Denied",
+      ],
       default: "Pending",
+    },
+    trackingId: {
+      type: String,
+      default: null,
+    },
+    estimatedDelivery: {
+      type: Date,
     },
     returnStatus: {
       type: String,
-      enum: ["Not Requested", "Requested", "Return Approved", "Return Denied"],
+      enum: [
+        "Not Requested",
+        "Requested",
+        "Return Approved",
+        "Return Denied",
+        "Returned",
+      ],
       default: "Not Requested",
     },
-    returnReason: { type: String, default: "" },
+    returnReason: {
+      type: String,
+      default: "",
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
 
 const Order = mongoose.model("Order", OrderSchema);
 
+// Razorpay Instance (HARDCODED keys - use only in development)
+const razorpay = new Razorpay({
+  key_id: "rzp_test_rv1bH6Okprpr7t",        // Replace with your actual Razorpay key_id
+  key_secret: "UQLubEmmVQVepHrqrET6GTDZ",   // Replace with your actual Razorpay secret
+});
 
-
-// ✅ Place Order
-app.post("/api/orders/place", isAuthenticate, async (req, res) => {
+// ✅ Create Razorpay Order
+app.post("/api/payment/orders", isAuthenticate, async (req, res) => {
   try {
-    const { userInfo, paymentMethod } = req.body; 
+    const { amount } = req.body;
+    const options = {
+      amount: amount * 100,
+      currency: "INR",
+      receipt: `receipt_${Date.now()}`,
+    };
+
+    const order = await razorpay.orders.create(options);
+    res.status(200).json({ order });
+  } catch (error) {
+    console.error("❌ Razorpay order creation failed:", error);
+    res.status(500).json({ message: "❌ Could not create Razorpay order" });
+  }
+});
+
+
+// ✅ Verify Razorpay Signature & Place Order
+app.post("/api/payment/verify", isAuthenticate, async (req, res) => {
+  try {
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      userInfo,
+      cart,
+      paymentMethod,
+    } = req.body;
+
+    // 🔐 Signature verification
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+    const expectedSignature = crypto
+      .createHmac("sha256", "UQLubEmmVQVepHrqrET6GTDZ")
+      .update(body)
+      .digest("hex");
+
+    if (expectedSignature !== razorpay_signature) {
+      return res.status(400).json({ message: "❌ Invalid payment signature" });
+    }
+
+    // 🧮 Total & Items
     const userId = req.session.userId;
-
-    const cartItems = await Cart.find({ userId }).populate("productId", "name price discount image");
-
-    if (!cartItems.length) return res.status(400).json({ message: "❌ Cart is empty" });
-
-    if (!userInfo?.name || !userInfo?.address || !userInfo?.phone) {
-      return res.status(400).json({ message: "❌ Missing user details" });
-    }
-
-    if (!["Cash on Delivery", "Online Payment"].includes(paymentMethod)) {
-      return res.status(400).json({ message: "❌ Invalid payment method" });
-    }
-
-    // ✅ Calculate total amount correctly (considering discount)
-    const totalAmount = cartItems.reduce((acc, item) => {
-      const priceAfterDiscount = item.price - (item.discount || 0);
-      return acc + priceAfterDiscount * item.quantity;
+    const totalAmount = cart.reduce((acc, item) => {
+      const discounted = item.price - (item.discount || 0);
+      return acc + discounted * item.quantity;
     }, 0);
 
-    // ✅ Format order items correctly (without full product object)
-    const orderItems = cartItems.map(item => ({
+    const orderItems = cart.map((item) => ({
+      productId: item._id,
+      name: item.name,
+      brand: item.brand || "", // fallback if undefined
+      size: item.size || "N/A",
+      quantity: item.quantity,
+      price: item.price,
+      discount: item.discount || 0,
+      image: item.image || "",
+    }));
+
+    // ✅ Save order with payment info
+      const newOrder = new Order({
+        userId,
+        userInfo: {
+          name: userInfo.fullName,
+          address: userInfo.address,
+          phone: userInfo.phone,
+        },
+        paymentMethod,
+        paymentStatus: "Paid",
+        transactionId: razorpay_payment_id,
+        items: orderItems,
+        totalAmount,
+      });
+      
+
+    await newOrder.save();
+    await Cart.deleteMany({ userId });
+
+    res.json({
+      message: "✅ Payment verified & order placed successfully",
+      order: newOrder,
+    });
+  } catch (error) {
+    console.error("❌ Payment verification failed:", error);
+    res.status(500).json({ message: "❌ Could not verify payment" });
+  }
+});
+
+
+// ✅ Cash on Delivery Order
+app.post("/api/orders/place", isAuthenticate, async (req, res) => {
+  try {
+    const { userInfo, paymentMethod } = req.body;
+    const userId = req.session.userId;
+
+    // ✅ Validate userInfo fields
+    if (
+      !userInfo ||
+      !(userInfo.fullName || userInfo.name) ||
+      !userInfo.address ||
+      !userInfo.phone
+    ) {
+      return res.status(400).json({ message: "❌ Incomplete user info" });
+    }
+
+    // ✅ Normalize userInfo
+    const normalizedUserInfo = {
+      name: userInfo.fullName || userInfo.name,
+      address: userInfo.address,
+      phone: userInfo.phone,
+    };
+
+    // ✅ Get cart items with product details
+    const cartItems = await Cart.find({ userId }).populate("productId", "name price discount image");
+
+    if (!cartItems.length) {
+      return res.status(400).json({ message: "❌ Cart is empty" });
+    }
+
+    // ✅ Calculate total amount after discount
+    const totalAmount = cartItems.reduce((acc, item) => {
+      const discounted = item.productId.price - (item.productId.discount || 0);
+      return acc + discounted * item.quantity;
+    }, 0);
+
+    // ✅ Prepare order items
+    const orderItems = cartItems.map((item) => ({
       productId: item.productId._id,
       name: item.productId.name,
       quantity: item.quantity,
@@ -1116,25 +1215,29 @@ app.post("/api/orders/place", isAuthenticate, async (req, res) => {
       image: item.productId.image,
     }));
 
+    // ✅ Create new order
     const newOrder = new Order({
       userId,
-      userInfo,
+      userInfo: normalizedUserInfo,
       paymentMethod,
       items: orderItems,
       totalAmount,
-      orderStatus: "Pending",
-      status: "Pending",
+      status: "Cash on Delivery",
     });
 
     await newOrder.save();
+
+    // ✅ Clear user's cart after order placed
     await Cart.deleteMany({ userId });
 
-    res.json({ message: "✅ Order placed successfully", order: newOrder });
+    res.json({ message: "✅ Order placed (Cash on Delivery)", orderId: newOrder._id });
   } catch (error) {
-    console.error("❌ Error placing order:", error);
-    res.status(500).json({ message: "❌ Error placing order" });
+    console.error("❌ Error placing COD order:", error);
+    res.status(500).json({ message: "❌ Could not place order" });
   }
 });
+
+
 
 
 
@@ -1148,41 +1251,50 @@ app.get("/api/orders", isAuthenticate, async (req, res) => {
   }
 });
 
-
 // ✅ Get All Orders (Admin)
 app.get("/api/admin/orders", async (req, res) => {
   try {
     const orders = await Order.find()
-      .populate("userId", "fullName email phone") // Fetch user details
-      .select("userInfo paymentMethod items totalAmount status returnReason createdAt");
+      .populate("userId", "fullName email phone") // Fetch user info
+      .select("userInfo paymentMethod paymentStatus transactionId items totalAmount status returnReason createdAt");
 
     res.json(orders);
   } catch (error) {
+    console.error("❌ Error fetching admin orders:", error);
     res.status(500).json({ message: "❌ Error fetching orders" });
   }
 });
 
-
-// ✅ Approve Order
+// ✅ Approve Order with Payment Verification
 app.put("/api/orders/:id/approve", async (req, res) => {
   try {
-      const order = await Order.findByIdAndUpdate(
-          req.params.id,
-          { status: "Approved", orderStatus: "Approved" }, // ✅ Update both status and orderStatus
-          { new: true }
-      );
-      if (!order) return res.status(404).json({ error: "Order not found" });
+    const order = await Order.findById(req.params.id);
 
-      res.json({ message: "✅ Order approved successfully!", order });
+    if (!order) return res.status(404).json({ error: "Order not found" });
+
+    // Ensure the payment status is "Paid" for Online Payments
+    if (order.paymentMethod === "Online Payment" && order.paymentStatus !== "Paid") {
+      return res.status(400).json({ error: "❌ Payment not completed, cannot approve order" });
+    }
+
+    // ✅ Update order status to approved
+    order.status = "Approved";
+    order.orderStatus = "Approved";  // If it's a separate field to track the order approval
+    await order.save();
+
+    res.json({ message: "✅ Order approved successfully!", order });
   } catch (error) {
-      res.status(500).json({ error: "Failed to approve order" });
+    console.error("❌ Failed to approve order:", error);
+    res.status(500).json({ error: "Failed to approve order" });
   }
 });
 
 
-// ✅ Mark Order as Shipped
+// ✅ Mark Order as Shipped with Tracking Information
 app.put("/api/orders/:id/shipped", async (req, res) => {
   try {
+    const { trackingId, estimatedDelivery } = req.body; // Get tracking information from request body
+    
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ error: "❌ Order not found" });
 
@@ -1190,18 +1302,26 @@ app.put("/api/orders/:id/shipped", async (req, res) => {
       return res.status(400).json({ error: "❌ Only approved orders can be shipped" });
     }
 
+    // ✅ Update order status to "Shipped"
     order.status = "Shipped";
-    order.orderStatus = "Shipped";  // ✅ Ensure orderStatus is also updated
+    order.orderStatus = "Shipped"; // Ensure orderStatus is also updated
+
+    // Add tracking ID and estimated delivery date if provided
+    if (trackingId) order.trackingId = trackingId;
+    if (estimatedDelivery) order.estimatedDelivery = new Date(estimatedDelivery);
+
     await order.save();
 
     res.json({ message: "✅ Order marked as shipped!", order });
   } catch (error) {
+    console.error("❌ Failed to update order:", error);
     res.status(500).json({ error: "❌ Failed to update order" });
   }
 });
 
 
-// ✅ Delete Order
+
+// ✅ Soft Delete Order
 app.delete("/api/orders/:id", isAuthenticate, async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
@@ -1217,8 +1337,11 @@ app.delete("/api/orders/:id", isAuthenticate, async (req, res) => {
       return res.status(400).json({ error: "❌ Cannot delete a shipped order" });
     }
 
-    await order.deleteOne();
-    res.json({ message: "✅ Order deleted successfully!" });
+    // Set isDeleted flag to true for soft deletion
+    order.isDeleted = true;
+    await order.save();
+
+    res.json({ message: "✅ Order marked as deleted successfully!" });
 
   } catch (error) {
     console.error("❌ Error deleting order:", error);
@@ -1248,6 +1371,15 @@ app.post("/api/orders/return", isAuthenticate, async (req, res) => {
     // Allow return requests only for shipped orders
     if (order.status !== "Shipped") {
       return res.status(400).json({ error: "❌ Only shipped orders can be returned" });
+    }
+
+    // Check if the return request is within the allowed time frame (e.g., 7 days from shipped date)
+    const now = new Date();
+    const shippedDate = new Date(order.createdAt); // Assuming order creation date is the shipment date
+    const returnDeadline = new Date(shippedDate.setDate(shippedDate.getDate() + 7)); // 7 days after shipped date
+
+    if (now > returnDeadline) {
+      return res.status(400).json({ error: "❌ Return request period has expired" });
     }
 
     // Prevent multiple return requests
@@ -1320,8 +1452,19 @@ app.put("/api/orders/:orderId/cancel", isAuthenticate, async (req, res) => {
       return res.status(400).json({ error: "❌ This order cannot be canceled" });
     }
 
+    // Optional: Add a check for orders that can only be canceled within a specific time window
+    const cancelTimeWindow = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+    if (new Date() - new Date(order.createdAt) > cancelTimeWindow) {
+      return res.status(400).json({ error: "❌ Order cancellation period has expired" });
+    }
+
     // Cancel the order
     order.status = "Cancelled";
+    
+    // Optional: Record the cancellation action
+    order.cancelledBy = req.session.userId; // Save the user who canceled the order (for auditing)
+    order.cancelledAt = new Date(); // Save the cancellation timestamp
+    
     await order.save();
 
     res.json({ message: "✅ Order cancelled successfully!", order });
@@ -1330,8 +1473,6 @@ app.put("/api/orders/:orderId/cancel", isAuthenticate, async (req, res) => {
     res.status(500).json({ error: "❌ Internal Server Error" });
   }
 });
-
-
 
 // ✅ Approve Return Request
 app.put("/api/orders/:orderId/approve-return", isAuthenticate, async (req, res) => {
@@ -1357,7 +1498,16 @@ app.put("/api/orders/:orderId/approve-return", isAuthenticate, async (req, res) 
     // Approve the return
     order.returnStatus = "Return Approved";
     order.status = "Return Approved";
+
+    // Optional: Record who approved the return
+    order.returnApprovedBy = req.session.userId; // Log the admin who approved the return
+    order.returnApprovedAt = new Date(); // Log the approval date
+
+    // Save changes
     await order.save();
+
+    // Optional: Notify the customer (Implement notification logic here)
+    // sendReturnApprovalNotification(order.userId);  // Example for notification function (Email, SMS, etc.)
 
     res.json({ message: "✅ Return request approved", order });
   } catch (error) {
@@ -1367,8 +1517,7 @@ app.put("/api/orders/:orderId/approve-return", isAuthenticate, async (req, res) 
 });
 
 
-
-// ❌ Cancel Return Request
+// ❌ Cancel Return Request (Deny)
 app.put("/api/orders/:orderId/cancel-return", isAuthenticate, async (req, res) => {
   try {
     // Ensure only admins can deny return requests
@@ -1384,10 +1533,17 @@ app.put("/api/orders/:orderId/cancel-return", isAuthenticate, async (req, res) =
       return res.status(400).json({ error: "❌ No return request found for this order" });
     }
 
-    // Deny return request
+    // Deny the return request
     order.returnStatus = "Return Denied";
     order.returnReason = ""; // Clear reason
+    order.returnDeniedBy = req.session.userId; // Log who denied the return request
+    order.returnDeniedAt = new Date(); // Log the date of denial
+
+    // Save changes to the order
     await order.save();
+
+    // Optional: Notify the customer (implement notification logic here)
+    // sendReturnDenialNotification(order.userId); // Example of a notification function (Email/SMS)
 
     res.json({ message: "❌ Return request denied", order });
   } catch (error) {
@@ -1395,8 +1551,6 @@ app.put("/api/orders/:orderId/cancel-return", isAuthenticate, async (req, res) =
     res.status(500).json({ error: "❌ Internal Server Error" });
   }
 });
-
-
 
 
 
