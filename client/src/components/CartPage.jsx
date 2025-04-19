@@ -7,27 +7,24 @@ const CartPage = () => {
     const [cart, setCart] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [userInfo, setUserInfo] = useState({ name: "", address: "", phone: "" });
+    const [userInfo, setUserInfo] = useState({ fullName: "", address: "", phone: "" });
     const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
 
     const navigate = useNavigate();
 
+    useEffect(() => {
+        fetch("https://shopping-portal-backend.onrender.com/api/user", {
+            credentials: "include",
+        })
+            .then((res) => {
+                if (!res.ok) throw new Error("Not authenticated");
+                return res.json();
+            })
+            .then((data) => setUserInfo(data))
+            .catch(() => navigate("/"))
+            .finally(() => setLoading(false));
+    }, [navigate]);
 
-  useEffect(() => {
-    fetch("https://shopping-portal-backend.onrender.com/api/user", {
-      credentials: "include", // ✅ Ensures session-based authentication works
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Not authenticated");
-        return res.json();
-      })
-      .then((data) => setUserInfo(data))
-      .catch(() => navigate("/")) // Redirect if not logged in
-      .finally(() => setLoading(false));
-  }, [navigate]);
-    
-
-    // Check if user is authenticated
     useEffect(() => {
         fetch("https://shopping-portal-backend.onrender.com/api/auth/check", { credentials: "include" })
             .then((res) => res.json())
@@ -37,47 +34,37 @@ const CartPage = () => {
             .catch(() => setIsAuthenticated(false));
     }, []);
 
-    // Fetch Cart Items
     useEffect(() => {
         fetch("https://shopping-portal-backend.onrender.com/api/cart", { credentials: "include" })
             .then((res) => res.json())
             .then((data) => {
-                if (Array.isArray(data)) {
-                    setCart(data);
-                } else {
-                    setCart([]);
-                }
+                setCart(Array.isArray(data) ? data : []);
                 setLoading(false);
             })
-            .catch((error) => {
-                console.error("Error fetching cart:", error);
+            .catch(() => {
                 setCart([]);
                 setLoading(false);
             });
     }, []);
 
-    // Update Cart Quantity
     const updateCart = async (id, change) => {
         try {
-            const response = await fetch(`https://shopping-portal-backend.onrender.com/api/cart/${id}`, {
+            await fetch(`https://shopping-portal-backend.onrender.com/api/cart/${id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ change }),
                 credentials: "include",
             });
-            if (!response.ok) throw new Error("Failed to update cart");
         } catch (error) {
             console.error("Error updating quantity:", error);
         }
     };
 
-    // Increase Quantity
     const increaseQty = async (id) => {
         setCart(cart.map((item) => (item._id === id ? { ...item, quantity: item.quantity + 1 } : item)));
         await updateCart(id, 1);
     };
 
-    // Decrease Quantity
     const decreaseQty = async (id) => {
         const item = cart.find((item) => item._id === id);
         if (item && item.quantity > 1) {
@@ -86,7 +73,6 @@ const CartPage = () => {
         }
     };
 
-    // Remove Item
     const removeItem = async (id) => {
         setCart(cart.filter((item) => item._id !== id));
         try {
@@ -96,10 +82,19 @@ const CartPage = () => {
         }
     };
 
-
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setUserInfo((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const loadRazorpayScript = () => {
+        return new Promise((resolve) => {
+            const script = document.createElement("script");
+            script.src = "https://checkout.razorpay.com/v1/checkout.js";
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        });
     };
 
     const handlePlaceOrder = async () => {
@@ -113,33 +108,105 @@ const CartPage = () => {
             return;
         }
 
-        try {
-            const response = await fetch("https://shopping-portal-backend.onrender.com/api/orders/place", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({
-                    cart,
-                    userInfo,
-                    paymentMethod,
-                }),
-            });
+        if (paymentMethod === "Cash on Delivery") {
+            // COD flow
+            try {
+                const response = await fetch("https://shopping-portal-backend.onrender.com/api/orders/place", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({
+                        cart,
+                        paymentMethod,
+                        userInfo: {
+                            name: userInfo.fullName,
+                            address: userInfo.address,
+                            phone: userInfo.phone,
+                        },
+                    }),
+                });
 
-            const data = await response.json();
-            if (response.ok) {
-                alert("✅ Order placed successfully!");
-                setCart([]);
-            } else {
-                alert("❌ Error placing order: " + data.message);
+                const data = await response.json();
+                if (response.ok) {
+                    alert("✅ Order placed successfully!");
+                    setCart([]);
+                    navigate(`/order-status/${data.orderId}`); // Redirect to the order status page
+                } else {
+                    alert("❌ Error placing order: " + data.message);
+                }
+            } catch (error) {
+                console.error("Error placing order:", error);
+                alert("❌ Error placing order. Please try again.");
             }
-        } catch (error) {
-            console.error("Error placing order:", error);
-            alert("❌ Error placing order. Please try again.");
+        } else {
+            // Online payment with Razorpay
+            const res = await loadRazorpayScript();
+            if (!res) {
+                alert("❌ Razorpay SDK failed to load.");
+                return;
+            }
+
+            try {
+                const orderRes = await fetch("https://shopping-portal-backend.onrender.com/api/payment/orders", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ amount: finalAmount }),
+                });
+
+                const { order } = await orderRes.json();
+
+                const options = {
+                    key: "rzp_test_rv1bH6Okprpr7t", // replace with your Razorpay public key
+                    amount: order.amount,
+                    currency: "INR",
+                    name: "My Shop",
+                    description: "Order Payment",
+                    order_id: order.id,
+                    handler: async function (response) {
+                        const verifyRes = await fetch("https://shopping-portal-backend.onrender.com/api/payment/verify", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            credentials: "include",
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                cart,
+                                userInfo,
+                                paymentMethod,
+                            }),
+                        });
+
+                        if (verifyRes.ok) {
+                            alert("✅ Payment successful & order placed!");
+                            setCart([]);
+                            const { orderId } = await verifyRes.json();
+                            navigate(`/order-status/${orderId}`); // Redirect to the order status page
+                        } else {
+                            alert("❌ Payment verification failed.");
+                        }
+                    },
+                    prefill: {
+                        name: userInfo.fullName,
+                        email: "customer@example.com",
+                        contact: userInfo.phone,
+                    },
+                    theme: {
+                        color: "#ff3f6c",
+                    },
+                };
+
+                const rzp = new window.Razorpay(options);
+                rzp.open();
+            } catch (error) {
+                console.error("Payment Error:", error);
+                alert("❌ Error initiating payment.");
+            }
         }
     };
 
 
-    // Calculate Price Details
     const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
     const totalMRP = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
     const totalDiscount = cart.reduce((acc, item) => acc + (item.discount || 0) * item.quantity, 0);
@@ -185,7 +252,7 @@ const CartPage = () => {
 
                 <div style={styles.userForm}>
                     <h3>User Information</h3>
-                    <input name="name" placeholder="Full Name" onChange={handleInputChange} value={userInfo.fullName} />
+                    <input name="fullName" placeholder="Full Name" onChange={handleInputChange} value={userInfo.fullName} />
                     <input name="address" placeholder="Address" onChange={handleInputChange} value={userInfo.address} />
                     <input name="phone" placeholder="Phone Number" onChange={handleInputChange} value={userInfo.phone} />
                 </div>
@@ -213,7 +280,6 @@ const CartPage = () => {
         </div>
     );
 };
-
 
 
 // Updated CSS Styles
