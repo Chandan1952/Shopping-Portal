@@ -61,7 +61,7 @@ function App() {
 
         <Route path="/edit-profile" element={<UserProfilePage />} />
         <Route path="/update-password" element={<UserChangePassword />} />
-        <Route path="/order-return" element={<OrderReturnPage />} />
+        <Route path="/order-status/:orderId" element={<OrderReturnPage />} />
         <Route path="/product/:id" element={<ProductDetail />} /> {/* ✅ Product Detail Page */}
         <Route path="/wishlist" element={<Wishlist />} />
 
@@ -90,23 +90,6 @@ function App() {
         <Route path="/admin-updatedcontactinfo" element={<UpdateContactInfo />} />
         <Route path="/admin-managequery" element={<ManageQueries />} />
         <Route path="/admin-managegiftcard" element={<AdminManageGiftCard />} />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-
-
 
 
       </Routes>
