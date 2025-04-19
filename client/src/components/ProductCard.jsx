@@ -35,9 +35,6 @@ const ProductList = () => {
             fontWeight: "500",
             marginBottom: "10px",
         },
-        filterCheckbox: {
-            marginRight: "10px",
-        },
         productCard: {
             backgroundColor: "#ffffff",
             borderRadius: "16px",
@@ -125,6 +122,7 @@ const ProductList = () => {
     const [error, setError] = useState(null);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
+    const [sortOption, setSortOption] = useState("");
     const [filters, setFilters] = useState({
         category: "",
         priceRange: [0, 10000],
@@ -145,14 +143,7 @@ const ProductList = () => {
             const response = await fetch("https://shopping-portal-backend.onrender.com/api/wishlist", {
                 method,
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    productId: product._id,
-                    name: product.name,
-                    price: product.price,
-                    originalPrice: product.originalPrice || null,
-                    discount: product.discount || 0,
-                    image: product.image,
-                }),
+                body: JSON.stringify(product),
             });
 
             if (!response.ok) throw new Error("Failed to update wishlist");
@@ -182,13 +173,7 @@ const ProductList = () => {
                 if (!response.ok) throw new Error(`Server Error: ${response.statusText}`);
 
                 const data = await response.json();
-                if (Array.isArray(data)) {
-                    setProducts(data);
-                } else if (data.products && Array.isArray(data.products)) {
-                    setProducts(data.products);
-                } else {
-                    throw new Error("Unexpected API response format");
-                }
+                setProducts(Array.isArray(data) ? data : data.products || []);
             } catch (error) {
                 setError(error.message);
             } finally {
@@ -202,25 +187,39 @@ const ProductList = () => {
     const filterProducts = () => {
         return products.filter((product) => {
             const inCategory = filters.category ? product.category === filters.category : true;
-            const inPriceRange =
-                product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1];
+            const inPriceRange = product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1];
             const hasDiscount = product.discount >= filters.discount;
-
             return inCategory && inPriceRange && hasDiscount;
         });
     };
 
+    const sortProducts = (list) => {
+        switch (sortOption) {
+            case "priceLowToHigh":
+                return [...list].sort((a, b) => a.price - b.price);
+            case "priceHighToLow":
+                return [...list].sort((a, b) => b.price - a.price);
+            case "nameAZ":
+                return [...list].sort((a, b) => a.name.localeCompare(b.name));
+            case "nameZA":
+                return [...list].sort((a, b) => b.name.localeCompare(a.name));
+            case "discount":
+                return [...list].sort((a, b) => b.discount - a.discount);
+            default:
+                return list;
+        }
+    };
+
+    const filteredProducts = sortProducts(filterProducts());
     const indexOfLastProduct = currentPage * productsPerPage;
-    const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-    const filteredProducts = filterProducts();
-    const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+    const currentProducts = filteredProducts.slice(indexOfLastProduct - productsPerPage, indexOfLastProduct);
     const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
-    const ProductCard = ({ product, wishlist, onToggleWishlist, onAddToCart }) => {
+    const ProductCard = ({ product }) => {
         const [isHovered, setIsHovered] = useState(false);
-        const imageUrl = product.image
-            ? (product.image.startsWith("/uploads/") ? `https://shopping-portal-backend.onrender.com${product.image}` : product.image)
-            : "https://via.placeholder.com/240";
+        const imageUrl = product.image?.startsWith("/uploads/")
+            ? `https://shopping-portal-backend.onrender.com${product.image}`
+            : product.image || "https://via.placeholder.com/240";
         const isWishlisted = wishlist.includes(product._id);
 
         return (
@@ -234,37 +233,24 @@ const ProductList = () => {
                 onMouseLeave={() => setIsHovered(false)}
                 onClick={() => navigate(`/product/${product._id}`)}
             >
-                {product.discount > 0 && (
-                    <div style={styles.discountBadge}>{product.discount}% OFF</div>
-                )}
+                {product.discount > 0 && <div style={styles.discountBadge}>{product.discount}% OFF</div>}
                 <div
                     style={styles.wishlistButton}
                     onClick={(e) => {
                         e.stopPropagation();
-                        onToggleWishlist(product);
+                        toggleWishlist(product);
                     }}
                 >
                     <FaHeart color={isWishlisted ? "#ff3f6c" : "gray"} size={18} />
                 </div>
                 <img src={imageUrl} alt={product.name} style={styles.productImage} />
-
-                <h3
-                    style={{
-                        fontSize: "18px",
-                        fontWeight: "bold",
-                        marginTop: "12px",
-                        color: "#333",
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        maxHeight: "48px",
-                    }}
-                >
+                <h3 style={{
+                    fontSize: "18px", fontWeight: "bold", marginTop: "12px", color: "#333",
+                    display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+                    overflow: "hidden", textOverflow: "ellipsis", maxHeight: "48px",
+                }}>
                     {product.name}
                 </h3>
-
                 <div style={{ display: "flex", justifyContent: "center", gap: "8px", marginTop: "6px", flexWrap: "wrap" }}>
                     <span style={{ fontSize: "16px", fontWeight: "bold", color: "green" }}>Rs. {product.price}</span>
                     {product.originalPrice && (
@@ -273,12 +259,11 @@ const ProductList = () => {
                         </span>
                     )}
                 </div>
-
                 <button
                     style={styles.cartButton}
                     onClick={(e) => {
                         e.stopPropagation();
-                        onAddToCart(product);
+                        setSelectedProduct(product);
                     }}
                 >
                     <FaShoppingCart /> Add to Cart
@@ -302,9 +287,9 @@ const ProductList = () => {
                             style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ddd" }}
                         >
                             <option value="">All</option>
-                            <option value="electronics"></option>
+                            <option value="electronics">Electronics</option>
                             <option value="fashion">Fashion</option>
-                            <option value="home"></option>
+                            <option value="home">Home</option>
                         </select>
                     </div>
 
@@ -316,7 +301,9 @@ const ProductList = () => {
                             max="10000"
                             step="500"
                             value={filters.priceRange[0]}
-                            onChange={(e) => setFilters({ ...filters, priceRange: [parseInt(e.target.value), filters.priceRange[1]] })}
+                            onChange={(e) =>
+                                setFilters({ ...filters, priceRange: [parseInt(e.target.value), filters.priceRange[1]] })
+                            }
                             style={{ width: "100%" }}
                         />
                         <input
@@ -325,7 +312,9 @@ const ProductList = () => {
                             max="10000"
                             step="500"
                             value={filters.priceRange[1]}
-                            onChange={(e) => setFilters({ ...filters, priceRange: [filters.priceRange[0], parseInt(e.target.value)] })}
+                            onChange={(e) =>
+                                setFilters({ ...filters, priceRange: [filters.priceRange[0], parseInt(e.target.value)] })
+                            }
                             style={{ width: "100%" }}
                         />
                         <div>Rs. {filters.priceRange[0]} - Rs. {filters.priceRange[1]}</div>
@@ -339,13 +328,24 @@ const ProductList = () => {
                             max="100"
                             value={filters.discount}
                             onChange={(e) => setFilters({ ...filters, discount: parseInt(e.target.value) })}
-                            style={{
-                                width: "100%",
-                                padding: "10px",
-                                borderRadius: "8px",
-                                border: "1px solid #ddd",
-                            }}
+                            style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ddd" }}
                         />
+                    </div>
+
+                    <div style={styles.filterGroup}>
+                        <div style={styles.filterLabel}>Sort By</div>
+                        <select
+                            value={sortOption}
+                            onChange={(e) => setSortOption(e.target.value)}
+                            style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ddd" }}
+                        >
+                            <option value="">Default</option>
+                            <option value="priceLowToHigh">Price: Low to High</option>
+                            <option value="priceHighToLow">Price: High to Low</option>
+                            <option value="nameAZ">Name: A-Z</option>
+                            <option value="nameZA">Name: Z-A</option>
+                            <option value="discount">Discount: High to Low</option>
+                        </select>
                     </div>
                 </div>
 
@@ -358,13 +358,7 @@ const ProductList = () => {
                         </div>
                     )}
                     {!loading && !error && currentProducts.map((product) => (
-                        <ProductCard
-                            key={product._id}
-                            product={product}
-                            wishlist={wishlist}
-                            onToggleWishlist={toggleWishlist}
-                            onAddToCart={setSelectedProduct}
-                        />
+                        <ProductCard key={product._id} product={product} />
                     ))}
                 </div>
             </div>
@@ -388,12 +382,8 @@ const ProductList = () => {
             </div>
 
             <Footer />
-
             {selectedProduct && (
-                <AddToCartModal
-                    product={selectedProduct}
-                    onClose={() => setSelectedProduct(null)}
-                />
+                <AddToCartModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />
             )}
         </>
     );
