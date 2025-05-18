@@ -11,7 +11,7 @@ const UpdatePassword = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/auth/check", { credentials: "include" })
+    fetch("https://shopping-portal-backend.onrender.com/api/auth/check", { credentials: "include" })
       .catch(() => console.error("Authentication check failed"));
   }, []);
 
@@ -23,7 +23,7 @@ const UpdatePassword = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/api/change-password", {
+      const response = await fetch("https://shopping-portal-backend.onrender.com/api/change-password", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
