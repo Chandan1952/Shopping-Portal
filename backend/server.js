@@ -9,14 +9,14 @@ const fs = require("fs");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 
-// require("dotenv").config(); // Load environment variables
+require("dotenv").config(); // Load environment variables
 
 const app = express();
 
 // ✅ CORS (Fix Frontend URL)
 app.use(
   cors({
-    origin: "http://localhost:3000", // Ensure correct frontend URL
+    origin: "https://shopping-portal-client.onrender.com", // Ensure correct frontend URL
     credentials: true, // Allow cookies/session sharing
   })
 );
