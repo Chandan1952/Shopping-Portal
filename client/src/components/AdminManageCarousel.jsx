@@ -14,7 +14,7 @@ export default function AdminManageCarousel() {
   useEffect(() => {
     const verifyAdminSession = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/admin-verify", { 
+        const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { 
           withCredentials: true 
         });
         if (!response.data.isAdmin) {
@@ -34,7 +34,7 @@ export default function AdminManageCarousel() {
   const fetchImages = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:5000/carousel-images");
+      const res = await axios.get("https://shopping-portal-backend.onrender.com/carousel-images");
       setImages(Array.isArray(res.data) ? res.data : res.data.images || []);
       setMessage("");
     } catch (error) {
@@ -50,7 +50,7 @@ export default function AdminManageCarousel() {
     if (!window.confirm("Are you sure you want to delete this image?")) return;
     
     try {
-      await axios.delete(`http://localhost:5000/carousel-images/${id}`);
+      await axios.delete(`https://shopping-portal-backend.onrender.com/carousel-images/${id}`);
       setMessage("Image deleted successfully");
       fetchImages();
     } catch (error) {
