@@ -150,7 +150,7 @@ export default function ManageQueries() {
   useEffect(() => {
     const verifyAdminSession = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/admin-verify", { 
+        const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { 
           withCredentials: true 
         });
         if (!response.data.isAdmin) {
@@ -170,7 +170,7 @@ export default function ManageQueries() {
 
   const fetchQueries = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/allqueries");
+      const response = await fetch("https://shopping-portal-backend.onrender.com/api/allqueries");
       const data = await response.json();
       setQueries(data);
     } catch (error) {
@@ -180,7 +180,7 @@ export default function ManageQueries() {
 
   const updateQueryStatus = async (id, newStatus) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/query/${id}`, {
+      const response = await fetch(`https://shopping-portal-backend.onrender.com/api/query/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
