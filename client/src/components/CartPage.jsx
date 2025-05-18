@@ -14,7 +14,7 @@ const CartPage = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch("http://localhost:5000/api/user", {
+        fetch("https://shopping-portal-backend.onrender.com/api/user", {
             credentials: "include",
         })
             .then((res) => {
@@ -27,7 +27,7 @@ const CartPage = () => {
     }, [navigate]);
 
     useEffect(() => {
-        fetch("http://localhost:5000/api/auth/check", { credentials: "include" })
+        fetch("https://shopping-portal-backend.onrender.com/api/auth/check", { credentials: "include" })
             .then((res) => res.json())
             .then((data) => {
                 setIsAuthenticated(data.isAuthenticated);
@@ -36,7 +36,7 @@ const CartPage = () => {
     }, []);
 
     useEffect(() => {
-        fetch("http://localhost:5000/api/cart", { credentials: "include" })
+        fetch("https://shopping-portal-backend.onrender.com/api/cart", { credentials: "include" })
             .then((res) => res.json())
             .then((data) => {
                 setCart(Array.isArray(data) ? data : []);
@@ -50,7 +50,7 @@ const CartPage = () => {
 
     const updateCart = async (id, change) => {
         try {
-            await fetch(`http://localhost:5000/api/cart/${id}`, {
+            await fetch(`https://shopping-portal-backend.onrender.com/api/cart/${id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ change }),
@@ -77,7 +77,7 @@ const CartPage = () => {
     const removeItem = async (id) => {
         setCart(cart.filter((item) => item._id !== id));
         try {
-            await fetch(`http://localhost:5000/api/cart/${id}`, { method: "DELETE", credentials: "include" });
+            await fetch(`https://shopping-portal-backend.onrender.com/api/cart/${id}`, { method: "DELETE", credentials: "include" });
         } catch (error) {
             console.error("Error removing item:", error);
         }
@@ -113,7 +113,7 @@ const CartPage = () => {
 
         if (paymentMethod === "Cash on Delivery") {
             try {
-                const response = await fetch("http://localhost:5000/api/orders/place", {
+                const response = await fetch("https://shopping-portal-backend.onrender.com/api/orders/place", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     credentials: "include",
@@ -151,7 +151,7 @@ const CartPage = () => {
             }
 
             try {
-                const orderRes = await fetch("http://localhost:5000/api/payment/orders", {
+                const orderRes = await fetch("https://shopping-portal-backend.onrender.com/api/payment/orders", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     credentials: "include",
@@ -168,7 +168,7 @@ const CartPage = () => {
                     description: "Order Payment",
                     order_id: order.id,
                     handler: async function (response) {
-                        const verifyRes = await fetch("http://localhost:5000/api/payment/verify", {
+                        const verifyRes = await fetch("https://shopping-portal-backend.onrender.com/api/payment/verify", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             credentials: "include",
@@ -318,7 +318,7 @@ const CartPage = () => {
                                                     marginRight: "24px"
                                                 }}>
                                                     <img
-                                                        src={item.image.startsWith("/uploads/") ? `http://localhost:5000${item.image}` : item.image || "https://via.placeholder.com/150"}
+                                                        src={item.image.startsWith("/uploads/") ? `https://shopping-portal-backend.onrender.com${item.image}` : item.image || "https://via.placeholder.com/150"}
                                                         alt={item.name}
                                                         style={{
                                                             width: "96px",
