@@ -16,7 +16,7 @@ const AdminManageBrand = () => {
     useEffect(() => {
         const verifyAdminSession = async () => {
             try {
-                const response = await axios.get("http://localhost:5000/admin-verify", { withCredentials: true });
+                const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { withCredentials: true });
                 if (!response.data.isAdmin) {
                     navigate("/admin-login", { replace: true });
                 }
@@ -34,7 +34,7 @@ const AdminManageBrand = () => {
     const fetchBrands = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`http://localhost:5000/api/brands`);
+            const response = await fetch(`https://shopping-portal-backend.onrender.com/api/brands`);
             if (!response.ok) throw new Error("Failed to fetch brands");
             const data = await response.json();
             setBrands(data);
@@ -48,7 +48,7 @@ const AdminManageBrand = () => {
         if (!window.confirm("Are you sure you want to delete this brand?")) return;
 
         try {
-            const response = await fetch(`http://localhost:5000/api/brands/${id}`, {
+            const response = await fetch(`https://shopping-portal-backend.onrender.com/api/brands/${id}`, {
                 method: "DELETE",
             });
             if (response.ok) {
@@ -143,7 +143,7 @@ const AdminManageBrand = () => {
                                                 <td>
                                                     <div className="image-container">
                                                         <img
-                                                            src={brand.img ? `http://localhost:5000${brand.img}` : "/placeholder.jpg"}
+                                                            src={brand.img ? `https://shopping-portal-backend.onrender.com${brand.img}` : "/placeholder.jpg"}
                                                             alt={brand.brand || "Brand Image"}
                                                             className="brand-image"
                                                         />
