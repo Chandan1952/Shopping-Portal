@@ -289,7 +289,7 @@ export default function SignupForm({ isOpen, onClose, onSwitch }) {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/submit", {
+      const response = await fetch("https://shopping-portal-backend.onrender.com/submit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
