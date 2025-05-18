@@ -351,7 +351,7 @@ const ProductList = () => {
             const isAlreadyWishlisted = wishlist.includes(product._id);
             const method = isAlreadyWishlisted ? "DELETE" : "POST";
 
-            const response = await fetch("http://localhost:5000/api/wishlist", {
+            const response = await fetch("https://shopping-portal-backend.onrender.com/api/wishlist", {
                 method,
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(product),
@@ -377,8 +377,8 @@ const ProductList = () => {
                 setLoading(true);
                 setError(null);
                 const url = category
-                    ? `http://localhost:5000/api/products?category=${category}`
-                    : "http://localhost:5000/api/products";
+                    ? `https://shopping-portal-backend.onrender.com/api/products?category=${category}`
+                    : "https://shopping-portal-backend.onrender.com/api/products";
 
                 const response = await fetch(url);
                 if (!response.ok) throw new Error(`Server Error: ${response.statusText}`);
@@ -429,7 +429,7 @@ const ProductList = () => {
     const ProductCard = ({ product }) => {
         const [isHovered, setIsHovered] = useState(false);
         const imageUrl = product.image?.startsWith("/uploads/")
-            ? `http://localhost:5000${product.image}`
+            ? `https://shopping-portal-backend.onrender.com${product.image}`
             : product.image || "https://via.placeholder.com/240";
         const isWishlisted = wishlist.includes(product._id);
 
