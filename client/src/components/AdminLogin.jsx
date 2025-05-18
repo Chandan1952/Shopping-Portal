@@ -19,7 +19,7 @@ const AdminLogin = () => {
     setError("");
 
     try {
-      const response = await axios.post("http://localhost:5000/admin-login", formData, {
+      const response = await axios.post("https://shopping-portal-backend.onrender.com/admin-login", formData, {
         withCredentials: true,
       });
 
