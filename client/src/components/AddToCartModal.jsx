@@ -14,7 +14,7 @@ const AddToCartModal = ({ product, onClose }) => {
 
   const imageUrl = product.image
     ? product.image.startsWith("/uploads/")
-      ? `http://localhost:5000${product.image}`
+      ? `https://shopping-portal-backend.onrender.com${product.image}`
       : product.image
     : "https://via.placeholder.com/300";
 
@@ -24,7 +24,7 @@ const AddToCartModal = ({ product, onClose }) => {
   const handleAddToCart = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/api/cart", {
+      const response = await fetch("https://shopping-portal-backend.onrender.com/api/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
