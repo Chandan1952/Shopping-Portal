@@ -19,7 +19,7 @@ const UpdateContactInfo = () => {
   useEffect(() => {
     const verifyAdminSession = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/admin-verify", { 
+        const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { 
           withCredentials: true 
         });
         if (!response.data.isAdmin) {
@@ -39,7 +39,7 @@ const UpdateContactInfo = () => {
   const fetchContactDetails = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/contact-details");
+      const response = await fetch("https://shopping-portal-backend.onrender.com/contact-details");
       const data = await response.json();
       setContactInfo(data);
       setMessage({ text: "", type: "" });
@@ -58,7 +58,7 @@ const UpdateContactInfo = () => {
 
   const handleUpdate = async () => {
     try {
-      const response = await fetch("http://localhost:5000/update-contact", {
+      const response = await fetch("https://shopping-portal-backend.onrender.com/update-contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(contactInfo),
