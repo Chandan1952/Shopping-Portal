@@ -38,7 +38,7 @@ const AdminSidebar = () => {
   useEffect(() => {
     const verifyAdminSession = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/admin-verify", { withCredentials: true });
+        const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { withCredentials: true });
         if (!response.data.isAdmin) {
           navigate("/admin-login", { replace: true });
         }
@@ -51,7 +51,7 @@ const AdminSidebar = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("http://localhost:5000/admin-logout", {
+      const response = await fetch("https://shopping-portal-backend.onrender.com/admin-logout", {
         method: "POST",
         credentials: "include",
       });
