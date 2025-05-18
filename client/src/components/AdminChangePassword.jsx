@@ -20,7 +20,7 @@ export default function UpdatePassword() {
   useEffect(() => {
     const verifyAdminSession = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/admin-verify`, { withCredentials: true });
+        const response = await axios.get(`https://shopping-portal-backend.onrender.com/admin-verify`, { withCredentials: true });
         if (!response.data.isAdmin) {
           navigate("/");
         }
@@ -46,7 +46,7 @@ export default function UpdatePassword() {
     setMessage("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/change-password", {
+      const response = await fetch("https://shopping-portal-backend.onrender.com/api/change-password", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
