@@ -236,7 +236,7 @@ const Wishlist = () => {
     useEffect(() => {
         const fetchWishlist = async () => {
             try {
-                const response = await fetch("http://localhost:5000/api/wishlist");
+                const response = await fetch("https://shopping-portal-backend.onrender.com/api/wishlist");
                 if (!response.ok) throw new Error("Failed to fetch wishlist");
                 const data = await response.json();
                 setWishlist(data);
@@ -252,7 +252,7 @@ const Wishlist = () => {
 
     const handleRemove = async (productId) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/wishlist/${productId}`, { 
+            const response = await fetch(`https://shopping-portal-backend.onrender.com/api/wishlist/${productId}`, { 
                 method: "DELETE" 
             });
             if (!response.ok) throw new Error("Failed to remove item");
@@ -264,7 +264,7 @@ const Wishlist = () => {
 
     const handleMoveToCart = async (item) => {
         try {
-            const response = await fetch("http://localhost:5000/api/cart", {
+            const response = await fetch("https://shopping-portal-backend.onrender.com/api/cart", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -355,7 +355,7 @@ const Wishlist = () => {
                                     <ItemImage>
                                         <img
                                             src={item.image.startsWith("/uploads/") 
-                                                ? `http://localhost:5000${item.image}` 
+                                                ? `https://shopping-portal-backend.onrender.com${item.image}` 
                                                 : item.image || "https://via.placeholder.com/300"}
                                             alt={item.name}
                                             onError={(e) => (e.target.src = "https://via.placeholder.com/300")}
