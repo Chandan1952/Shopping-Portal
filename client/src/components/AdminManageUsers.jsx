@@ -28,7 +28,7 @@ const AdminManageUsers = () => {
     const fetchUsers = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/admin-manageprofile?page=${currentPage}&limit=${limit}&search=${searchTerm}`,
+          `https://shopping-portal-backend.onrender.com/admin-manageprofile?page=${currentPage}&limit=${limit}&search=${searchTerm}`,
           { withCredentials: true }
         );
         setUsers(response.data?.users || []);
@@ -52,7 +52,7 @@ const AdminManageUsers = () => {
     if (!window.confirm("Are you sure you want to delete this user permanently?")) return;
 
     try {
-      await axios.delete(`http://localhost:5000/delete/${userId}`, {
+      await axios.delete(`https://shopping-portal-backend.onrender.com/delete/${userId}`, {
         withCredentials: true,
       });
       setUsers(users.filter((user) => user._id !== userId));
