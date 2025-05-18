@@ -11,7 +11,7 @@ const ContactUs = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    fetch("http://localhost:5000/contact-details")
+    fetch("https://shopping-portal-backend.onrender.com/contact-details")
       .then((response) => response.json())
       .then((data) => {
         setContactDetails(data);
@@ -39,7 +39,7 @@ const ContactUs = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/queries", {
+      const response = await fetch("https://shopping-portal-backend.onrender.com/api/queries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
