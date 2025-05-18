@@ -18,7 +18,7 @@ export default function AdminManageCategory() {
   useEffect(() => {
     const verifyAdminSession = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/admin-verify", { 
+        const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { 
           withCredentials: true 
         });
         if (!response.data.isAdmin) {
@@ -38,7 +38,7 @@ export default function AdminManageCategory() {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:5000/categories");
+      const res = await axios.get("https://shopping-portal-backend.onrender.com/categories");
       setCategories(res.data);
       setMessage("");
     } catch (error) {
@@ -53,7 +53,7 @@ export default function AdminManageCategory() {
     if (!window.confirm("Are you sure you want to delete this category?")) return;
     
     try {
-      await axios.delete(`http://localhost:5000/categories/${id}`);
+      await axios.delete(`https://shopping-portal-backend.onrender.com/categories/${id}`);
       setCategories(categories.filter((category) => category._id !== id));
       setMessage("Category deleted successfully");
     } catch (error) {
@@ -70,7 +70,7 @@ export default function AdminManageCategory() {
 
   const handleUpdate = async (id) => {
     try {
-      await axios.put(`http://localhost:5000/categories/${id}`, {
+      await axios.put(`https://shopping-portal-backend.onrender.com/categories/${id}`, {
         title: editedTitle,
         discount: editedDiscount,
       });
@@ -154,7 +154,7 @@ export default function AdminManageCategory() {
                       <td style={styles.tableTd}>
                         <div style={styles.imageContainer}>
                           <img 
-                            src={category.img ? `http://localhost:5000${category.img}` : '/placeholder-category.jpg'} 
+                            src={category.img ? `https://shopping-portal-backend.onrender.com${category.img}` : '/placeholder-category.jpg'} 
                             alt={category.title} 
                             style={styles.categoryImage}
                             onError={(e) => {
