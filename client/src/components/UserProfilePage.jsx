@@ -12,12 +12,12 @@ const UserProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/auth/check", { credentials: "include" })
+    fetch("https://shopping-portal-backend.onrender.com/api/auth/check", { credentials: "include" })
       .catch(() => console.error("Authentication check failed"));
   }, []);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/user", {
+    fetch("https://shopping-portal-backend.onrender.com/api/user", {
       credentials: "include",
     })
       .then((res) => {
@@ -35,7 +35,7 @@ const UserProfilePage = () => {
 
   const handleSave = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/update-users/${user._id}`, {
+      const response = await fetch(`https://shopping-portal-backend.onrender.com/update-users/${user._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
