@@ -14,7 +14,7 @@ const AdminManageGiftCard = () => {
       useEffect(() => {
         const verifyAdminSession = async () => {
           try {
-            const response = await axios.get("http://localhost:5000/admin-verify", { withCredentials: true });
+            const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { withCredentials: true });
             if (!response.data.isAdmin) {
               navigate("/admin-login", { replace: true });
             }
@@ -33,7 +33,7 @@ const AdminManageGiftCard = () => {
 
   const fetchGiftCards = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/giftcards");
+      const response = await fetch("https://shopping-portal-backend.onrender.com/api/giftcards");
       const data = await response.json();
       setGiftCards(data);
     } catch (error) {
@@ -44,7 +44,7 @@ const AdminManageGiftCard = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this gift card?")) return;
     try {
-      await fetch(`http://localhost:5000/api/giftcards/${id}`, {
+      await fetch(`https://shopping-portal-backend.onrender.com/api/giftcards/${id}`, {
         method: "DELETE",
       });
       setMessage("Gift card deleted successfully");
