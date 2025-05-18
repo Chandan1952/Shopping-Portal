@@ -92,6 +92,23 @@ function App() {
         <Route path="/admin-managegiftcard" element={<AdminManageGiftCard />} />
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
       </Routes>
     </Router>
   );

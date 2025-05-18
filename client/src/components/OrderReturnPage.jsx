@@ -9,17 +9,24 @@ export default function OrderReturnPage() {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [returnReason, setReturnReason] = useState("");
     const [expandedOrders, setExpandedOrders] = useState({});
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        fetch("https://shopping-portal-backend.onrender.com/api/auth/check", { credentials: "include" })
+        fetch("http://localhost:5000/api/auth/check", { credentials: "include" })
             .catch(() => console.error("Authentication check failed"));
     }, []);
     
     useEffect(() => {
-        fetch("https://shopping-portal-backend.onrender.com/api/orders", { credentials: "include" })
+        fetch("http://localhost:5000/api/orders", { credentials: "include" })
             .then((res) => res.json())
-            .then((data) => setOrders(data))
-            .catch((error) => console.error("❌ Error fetching orders:", error));
+            .then((data) => {
+                setOrders(data);
+                setIsLoading(false);
+            })
+            .catch((error) => {
+                console.error("Error fetching orders:", error);
+                setIsLoading(false);
+            });
     }, []);
 
     const handleReturn = (order) => {
@@ -31,7 +38,7 @@ export default function OrderReturnPage() {
         if (!window.confirm("Are you sure you want to cancel this return request?")) return;
 
         try {
-            const response = await fetch(`https://shopping-portal-backend.onrender.com/api/orders/${orderId}/cancel-return`, {
+            const response = await fetch(`http://localhost:5000/api/orders/${orderId}/cancel-return`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -41,13 +48,13 @@ export default function OrderReturnPage() {
                 setOrders(orders.map(order =>
                     order._id === orderId ? { ...order, returnStatus: "Cancelled" } : order
                 ));
-                alert("❌ Return request cancelled.");
+                alert("Return request cancelled successfully!");
             } else {
-                alert("❌ Failed to cancel return request.");
+                alert("Failed to cancel return request.");
             }
         } catch (error) {
-            console.error("❌ Error:", error);
-            alert("❌ Error cancelling return request.");
+            console.error("Error:", error);
+            alert("Error cancelling return request.");
         }
     };
 
@@ -57,12 +64,12 @@ export default function OrderReturnPage() {
 
     const submitReturnRequest = async () => {
         if (!returnReason.trim()) {
-            alert("❌ Please enter a return reason!");
+            alert("Please enter a return reason!");
             return;
         }
 
         try {
-            const response = await fetch("https://shopping-portal-backend.onrender.com/api/orders/return", {
+            const response = await fetch("http://localhost:5000/api/orders/return", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -70,136 +77,387 @@ export default function OrderReturnPage() {
             });
 
             if (response.ok) {
-                alert("✅ Return request submitted successfully!");
+                alert("Return request submitted successfully!");
                 setReturnDialog(false);
                 setReturnReason("");
 
-                // ✅ Fetch updated orders after submitting return request
-                const updatedOrders = await fetch("https://shopping-portal-backend.onrender.com/api/orders", { credentials: "include" })
+                const updatedOrders = await fetch("http://localhost:5000/api/orders", { credentials: "include" })
                     .then((res) => res.json());
                 setOrders(updatedOrders);
             } else {
                 const errorData = await response.json();
-                alert(errorData.error || "❌ Error submitting return request");
+                alert(errorData.error || "Error submitting return request");
             }
         } catch (error) {
-            console.error("❌ Error:", error);
-            alert("❌ Error processing return request");
+            console.error("Error:", error);
+            alert("Error processing return request");
         }
     };
 
+    // Styles
+    const styles = {
+        container: {
+            display: "flex",
+            minHeight: "calc(100vh - 160px)",
+            maxWidth: "1400px",
+            margin: "40px auto",
+            gap: "30px",
+            padding: "0 5%",
+        },
+        sidebar: {
+            flex: "0 0 280px",
+        },
+        mainContent: {
+            flex: "1",
+        },
+        header: {
+            fontSize: "28px",
+            fontWeight: "600",
+            color: "#2c3e50",
+            marginBottom: "30px",
+            position: "relative",
+            ":after": {
+                content: '""',
+                display: "block",
+                width: "60px",
+                height: "4px",
+                background: "linear-gradient(to right, #3498db, #9b59b6)",
+                marginTop: "10px",
+                borderRadius: "2px",
+            },
+        },
+        orderCard: {
+            backgroundColor: "#fff",
+            borderRadius: "12px",
+            boxShadow: "0 5px 15px rgba(0, 0, 0, 0.05)",
+            padding: "25px",
+            marginBottom: "25px",
+            transition: "transform 0.3s ease, box-shadow 0.3s ease",
+            ":hover": {
+                transform: "translateY(-5px)",
+                boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
+            },
+        },
+        orderHeader: {
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "20px",
+            paddingBottom: "15px",
+            borderBottom: "1px solid #eee",
+        },
+        statusBadge: (status) => ({
+            padding: "6px 12px",
+            borderRadius: "20px",
+            fontSize: "14px",
+            fontWeight: "600",
+            backgroundColor: 
+                status === "Delivered" ? "#d4edda" : 
+                status === "Approved" ? "#d1ecf1" : "#fff3cd",
+            color: 
+                status === "Delivered" ? "#155724" : 
+                status === "Approved" ? "#0c5460" : "#856404",
+        }),
+        paymentBadge: (status) => ({
+            padding: "6px 12px",
+            borderRadius: "20px",
+            fontSize: "14px",
+            fontWeight: "600",
+            backgroundColor: 
+                status === "Paid" ? "#d4edda" : 
+                status === "Pending" ? "#fff3cd" : "#f8d7da",
+            color: 
+                status === "Paid" ? "#155724" : 
+                status === "Pending" ? "#856404" : "#721c24",
+        }),
+        itemContainer: {
+            display: "flex",
+            alignItems: "center",
+            gap: "20px",
+            marginBottom: "15px",
+            padding: "15px",
+            borderRadius: "8px",
+            backgroundColor: "#f8f9fa",
+        },
+        itemImage: {
+            width: "80px",
+            height: "80px",
+            borderRadius: "8px",
+            objectFit: "cover",
+            border: "1px solid #eee",
+        },
+        itemDetails: {
+            flex: "1",
+        },
+        itemName: {
+            fontWeight: "600",
+            marginBottom: "5px",
+            color: "#2c3e50",
+        },
+        itemPrice: {
+            color: "#e74c3c",
+            fontWeight: "600",
+            marginRight: "15px",
+        },
+        viewMoreBtn: {
+            background: "none",
+            border: "none",
+            color: "#3498db",
+            cursor: "pointer",
+            fontWeight: "600",
+            padding: "5px 0",
+            margin: "10px 0",
+            display: "flex",
+            alignItems: "center",
+            gap: "5px",
+        },
+        returnStatus: (status) => ({
+            padding: "6px 12px",
+            borderRadius: "20px",
+            fontSize: "14px",
+            fontWeight: "600",
+            backgroundColor: status === "Requested" ? "#d1ecf1" : "#f8d7da",
+            color: status === "Requested" ? "#0c5460" : "#721c24",
+            margin: "15px 0",
+            display: "inline-block",
+        }),
+        actionButton: {
+            padding: "10px 20px",
+            borderRadius: "8px",
+            fontWeight: "600",
+            cursor: "pointer",
+            border: "none",
+            transition: "all 0.3s ease",
+            fontSize: "14px",
+        },
+        returnButton: {
+            background: "linear-gradient(to right, #3498db, #9b59b6)",
+            color: "white",
+            ":hover": {
+                background: "linear-gradient(to right, #2980b9, #8e44ad)",
+                transform: "translateY(-2px)",
+                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+            },
+        },
+        cancelButton: {
+            background: "#e74c3c",
+            color: "white",
+            ":hover": {
+                background: "#c0392b",
+                transform: "translateY(-2px)",
+                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+            },
+        },
+        modalOverlay: {
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+        },
+        modalContent: {
+            backgroundColor: "white",
+            borderRadius: "12px",
+            width: "100%",
+            maxWidth: "500px",
+            padding: "30px",
+            position: "relative",
+            boxShadow: "0 10px 30px rgba(0, 0, 0, 0.2)",
+        },
+        closeButton: {
+            position: "absolute",
+            top: "15px",
+            right: "15px",
+            background: "none",
+            border: "none",
+            fontSize: "20px",
+            cursor: "pointer",
+            color: "#7f8c8d",
+            ":hover": {
+                color: "#e74c3c",
+            },
+        },
+        modalTitle: {
+            fontSize: "22px",
+            fontWeight: "600",
+            marginBottom: "20px",
+            color: "#2c3e50",
+        },
+        textarea: {
+            width: "100%",
+            minHeight: "120px",
+            padding: "15px",
+            borderRadius: "8px",
+            border: "1px solid #ddd",
+            marginBottom: "20px",
+            fontSize: "15px",
+            ":focus": {
+                borderColor: "#3498db",
+                outline: "none",
+                boxShadow: "0 0 0 3px rgba(52, 152, 219, 0.2)",
+            },
+        },
+        submitButton: {
+            background: "linear-gradient(to right, #2ecc71, #27ae60)",
+            color: "white",
+            padding: "12px 25px",
+            borderRadius: "8px",
+            border: "none",
+            cursor: "pointer",
+            fontWeight: "600",
+            fontSize: "16px",
+            width: "100%",
+            transition: "all 0.3s ease",
+            ":hover": {
+                background: "linear-gradient(to right, #27ae60, #219653)",
+                transform: "translateY(-2px)",
+                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+            },
+        },
+        loading: {
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "200px",
+            fontSize: "18px",
+            color: "#7f8c8d",
+        },
+        emptyState: {
+            textAlign: "center",
+            padding: "50px",
+            backgroundColor: "#f8f9fa",
+            borderRadius: "12px",
+            color: "#7f8c8d",
+        },
+    };
+
     return (
-        <div>
+        <div style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
             <Header />
-            <div style={{ display: "flex", marginTop: "35px", padding: "0 16px", maxWidth: "1200px", margin: "auto" }}>
-                <UserSidebar />
-                <div style={{ flex: 1, margin: "0 20px" }}>
-                    <h1>My Orders</h1>
-                    {orders.length === 0 ? (
-                        <p>No orders found.</p>
+            <div style={styles.container}>
+                <div style={styles.sidebar}>
+                    <UserSidebar />
+                </div>
+                
+                <div style={styles.mainContent}>
+                    <h1 style={styles.header}>My Orders</h1>
+                    
+                    {isLoading ? (
+                        <div style={styles.loading}>Loading your orders...</div>
+                    ) : orders.length === 0 ? (
+                        <div style={styles.emptyState}>
+                            <h3>No orders found</h3>
+                            <p>You haven't placed any orders yet.</p>
+                        </div>
                     ) : (
-                        <div className="space-y-4">
+                        <div>
                             {orders.map((order) => {
                                 const totalAmount = order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
                                 return (
-                                    <div key={order._id} style={{ padding: "15px", borderRadius: "8px", boxShadow: "0px 4px 8px rgba(0,0,0,0.2)", backgroundColor: "white", marginBottom: "10px" }}>
-
-                                        {/* Order Status, Quantity, and Total Amount */}
-                                        <p style={{ fontWeight: "bold", color: "black" }}>
-                                            Order Status:
-                                            <span style={{
-                                                color: order.status === "Delivered" ? "green" :
-                                                    order.status === "Approved" ? "blue" : "orange"
-                                            }}>
-                                                {order.status}
-                                            </span>
-                                        </p>
-
-                                        <p style={{ fontWeight: "bold", color: "black" }}>Total Items: {order.items.length}</p>
-                                        <p style={{ fontWeight: "bold", color: "black" }}>Total Amount: Rs. {totalAmount}</p>
-
-                                        {/* Displaying Payment Method */}
-                                        {order.paymentMethod === "COD" ? (
-                                            <p style={{ fontWeight: "bold", color: "orange" }}>
-                                                Payment Method: Cash on Delivery
-                                            </p>
-                                        ) : (
-                                            order.paymentStatus && (
-                                                <p style={{ fontWeight: "bold", color: order.paymentStatus === "Paid" ? "green" : order.paymentStatus === "Pending" ? "orange" : "red" }}>
-                                                    Payment Status: {order.paymentStatus}
+                                    <div key={order._id} style={styles.orderCard}>
+                                        <div style={styles.orderHeader}>
+                                            <div>
+                                                <p style={{ fontWeight: "600", marginBottom: "5px" }}>
+                                                    Order #{order._id.slice(-6).toUpperCase()}
                                                 </p>
-                                            )
-                                        )}
+                                                <p style={{ color: "#7f8c8d", fontSize: "14px" }}>
+                                                    {new Date(order.createdAt).toLocaleDateString()}
+                                                </p>
+                                            </div>
+                                            <div style={styles.statusBadge(order.status)}>
+                                                {order.status}
+                                            </div>
+                                        </div>
+
+                                        <div style={{ marginBottom: "15px" }}>
+                                            <p style={{ fontWeight: "600", marginBottom: "5px" }}>
+                                                Total: Rs. {totalAmount.toFixed(2)}
+                                            </p>
+                                            {order.paymentMethod === "COD" ? (
+                                                <p style={styles.paymentBadge("COD")}>
+                                                    Cash on Delivery
+                                                </p>
+                                            ) : (
+                                                order.paymentStatus && (
+                                                    <p style={styles.paymentBadge(order.paymentStatus)}>
+                                                        {order.paymentStatus}
+                                                    </p>
+                                                )
+                                            )}
+                                        </div>
 
                                         {order.items.slice(0, expandedOrders[order._id] ? order.items.length : 1).map((item) => (
-                                            <div key={item._id} style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "8px" }}>
+                                            <div key={item._id} style={styles.itemContainer}>
                                                 <img
                                                     src={
                                                         item.image?.startsWith("/uploads/")
-                                                            ? `https://shopping-portal-backend.onrender.com${item.image}`
+                                                            ? `http://localhost:5000${item.image}`
                                                             : item.image || "https://via.placeholder.com/100"
                                                     }
                                                     alt={item.name}
-                                                    style={{ width: "80px", height: "80px", borderRadius: "8px", objectFit: "cover" }}
+                                                    style={styles.itemImage}
                                                     onError={(e) => (e.target.src = "https://via.placeholder.com/100")}
                                                 />
-                                                <div>
-                                                    <span>{item.name}</span>
-                                                    <span style={{ display: "block", fontWeight: "bold" }}>Price: Rs.{item.price}</span>
-                                                    <span style={{ display: "block", fontWeight: "bold" }}>Size: {item.size}</span>
-                                                    <span style={{ display: "block", fontWeight: "bold", color: "black" }}>Quantity: {item.quantity}</span>
+                                                <div style={styles.itemDetails}>
+                                                    <p style={styles.itemName}>{item.name}</p>
+                                                    <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+                                                        <span style={styles.itemPrice}>Rs. {item.price}</span>
+                                                        <span style={{ color: "#7f8c8d" }}>Size: {item.size}</span>
+                                                        <span style={{ color: "#7f8c8d" }}>Qty: {item.quantity}</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))}
 
                                         {order.items.length > 1 && (
-                                            <button onClick={() => toggleExpand(order._id)} style={{ border: "none", background: "none", color: "blue", cursor: "pointer" }}>
-                                                {expandedOrders[order._id] ? "View Less" : "View More"}
+                                            <button 
+                                                onClick={() => toggleExpand(order._id)} 
+                                                style={styles.viewMoreBtn}
+                                            >
+                                                {expandedOrders[order._id] ? (
+                                                    <>
+                                                        <span>Show less</span>
+                                                        <span>↑</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <span>Show {order.items.length - 1} more items</span>
+                                                        <span>↓</span>
+                                                    </>
+                                                )}
                                             </button>
                                         )}
 
-                                        {/* Return Status */}
                                         {order.returnStatus && (
-                                            <p style={{ color: order.returnStatus === "Requested" ? "blue" : "red", fontWeight: "bold" }}>
-                                                Return Status: {order.returnStatus}
-                                            </p>
+                                            <div style={styles.returnStatus(order.returnStatus)}>
+                                                Return: {order.returnStatus}
+                                            </div>
                                         )}
 
-                                        {/* Return and Cancel Buttons */}
-                                        {order.returnStatus === "Requested" ? (
-                                            <button
-                                                onClick={() => handleCancelReturn(order._id)}
-                                                style={{
-                                                    marginTop: "10px",
-                                                    padding: "10px 15px",
-                                                    borderRadius: "5px",
-                                                    backgroundColor: "red",
-                                                    color: "white",
-                                                    cursor: "pointer",
-                                                    border: "none",
-                                                    fontSize: "16px",
-                                                }}
-                                            >
-                                                Cancel Return Request
-                                            </button>
-                                        ) : (
-                                            <button
-                                                style={{
-                                                    marginTop: "10px",
-                                                    padding: "10px 15px",
-                                                    borderRadius: "5px",
-                                                    backgroundColor: "black",
-                                                    color: "white",
-                                                    cursor: "pointer",
-                                                    border: "none",
-                                                    fontSize: "16px",
-                                                }}
-                                                onClick={() => handleReturn(order)}
-                                            >
-                                                Return
-                                            </button>
-                                        )}
+                                        <div style={{ display: "flex", gap: "15px" }}>
+                                            {order.returnStatus === "Requested" ? (
+                                                <button
+                                                    onClick={() => handleCancelReturn(order._id)}
+                                                    style={{ ...styles.actionButton, ...styles.cancelButton }}
+                                                >
+                                                    Cancel Return
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    onClick={() => handleReturn(order)}
+                                                    style={{ ...styles.actionButton, ...styles.returnButton }}
+                                                    disabled={order.status !== "Delivered"}
+                                                >
+                                                    Request Return
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                 );
                             })}
@@ -208,61 +466,36 @@ export default function OrderReturnPage() {
                 </div>
             </div>
 
-            {/* Return Dialog */}
+            {/* Return Dialog Modal */}
             {returnDialog && (
-                <div style={{
-                    position: "fixed",
-                    top: 0, left: 0,
-                    width: "100%", height: "100%",
-                    backgroundColor: "rgba(0, 0, 0, 0.5)",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center"
-                }}>
-                    <div style={{
-                        backgroundColor: "white",
-                        padding: "20px",
-                        borderRadius: "8px",
-                        width: "400px",
-                        textAlign: "center",
-                        position: "relative"
-                    }}>
-                        {/* Close Button */}
-                        <button
-                            onClick={() => setReturnDialog(false)}
-                            style={{
-                                position: "absolute",
-                                top: "10px", right: "10px",
-                                border: "none",
-                                background: "red",
-                                color: "white",
-                                padding: "5px 10px",
-                                borderRadius: "5px",
-                                cursor: "pointer"
+                <div style={styles.modalOverlay}>
+                    <div style={styles.modalContent}>
+                        <button 
+                            onClick={() => {
+                                setReturnDialog(false);
+                                setReturnReason("");
                             }}
+                            style={styles.closeButton}
                         >
-                            X
+                            ×
                         </button>
-
-                        <h2>Return {selectedOrder?.items[0].name}</h2>
+                        <h3 style={styles.modalTitle}>Request Return</h3>
+                        <p style={{ marginBottom: "20px", color: "#7f8c8d" }}>
+                            You're requesting a return for order #{selectedOrder?._id.slice(-6).toUpperCase()}
+                        </p>
+                        
                         <textarea
                             value={returnReason}
                             onChange={(e) => setReturnReason(e.target.value)}
-                            placeholder="Enter reason..."
-                            style={{ width: "100%", height: "80px", margin: "10px 0", padding: "10px" }}
+                            placeholder="Please explain the reason for your return..."
+                            style={styles.textarea}
                         />
+                        
                         <button
                             onClick={submitReturnRequest}
-                            style={{
-                                backgroundColor: "black",
-                                color: "white",
-                                padding: "10px",
-                                border: "none",
-                                borderRadius: "5px",
-                                cursor: "pointer"
-                            }}
+                            style={styles.submitButton}
                         >
-                            Submit Return
+                            Submit Return Request
                         </button>
                     </div>
                 </div>
@@ -272,4 +505,3 @@ export default function OrderReturnPage() {
         </div>
     );
 }
-

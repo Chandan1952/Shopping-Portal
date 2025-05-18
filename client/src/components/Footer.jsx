@@ -1,147 +1,284 @@
 import { useNavigate } from "react-router-dom";
-import { FaFacebookF, FaTwitter, FaInstagram, FaYoutube } from "react-icons/fa";
+import { FaFacebookF, FaTwitter, FaInstagram, FaYoutube, FaArrowRight } from "react-icons/fa";
 import { AiOutlineApple } from "react-icons/ai";
 import { BsGooglePlay } from "react-icons/bs";
+import styled from "styled-components";
 
-const styles = {
-  footer: {
-    backgroundColor: "#f4f4f4",
-    padding: "40px 20px",
-    fontSize: "14px",
-    color: "#333",
-    borderTop: "3px solid #ddd",
-  },
-  container: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "30px",
-    maxWidth: "1200px",
-    margin: "auto",
-  },
-  column: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "10px",
-  },
-  heading: {
-    fontWeight: "600",
-    fontSize: "16px",
-    marginBottom: "12px",
-    color: "#222",
-  },
-  link: {
-    cursor: "pointer",
-    color: "#007bff",
-    transition: "color 0.3s",
-    fontSize: "14px",
-    textDecoration: "none",
-  },
-  linkHover: {
-    textDecoration: "underline",
-  },
-  socialIcons: {
-    display: "flex",
-    gap: "12px",
-    fontSize: "22px",
-    marginTop: "10px",
-  },
-  appButtons: {
-    display: "flex",
-    gap: "12px",
-    marginTop: "12px",
-    alignItems: "center",
-  },
-  bottomSection: {
-    marginTop: "30px",
-    borderTop: "1px solid #ccc",
-    paddingTop: "12px",
-    textAlign: "center",
-    fontSize: "13px",
-    color: "#555",
-  },
-};
+const FooterContainer = styled.footer`
+  background-color: #2a2a2a;
+  color: #ffffff;
+  padding: 60px 20px 30px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+`;
+
+const GridContainer = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: 40px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+`;
+
+const Column = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+`;
+
+const ColumnHeading = styled.h3`
+  font-weight: 600;
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: #ffffff;
+  position: relative;
+  padding-bottom: 10px;
+  
+  &:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, #ff4d4d, #f9cb28);
+  }
+`;
+
+const FooterLink = styled.a`
+  color: #b0b0b0;
+  transition: all 0.3s ease;
+  font-size: 15px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  &:hover {
+    color: #ffffff;
+    transform: translateX(5px);
+    
+    svg {
+      opacity: 1;
+    }
+  }
+  
+  svg {
+    opacity: 0;
+    transition: all 0.3s ease;
+    font-size: 12px;
+    color: #f9cb28;
+  }
+`;
+
+const SocialIcons = styled.div`
+  display: flex;
+  gap: 15px;
+  margin-top: 15px;
+`;
+
+const SocialIcon = styled.a`
+  color: #b0b0b0;
+  font-size: 20px;
+  transition: all 0.3s ease;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  
+  &:hover {
+    color: #ffffff;
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.1);
+  }
+`;
+
+const AppDownload = styled.div`
+  margin-top: 25px;
+`;
+
+const AppButtons = styled.div`
+  display: flex;
+  gap: 15px;
+  margin-top: 15px;
+`;
+
+const AppButton = styled.a`
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  color: #ffffff;
+  text-decoration: none;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+  }
+  
+  svg {
+    font-size: 24px;
+  }
+`;
+
+const AppButtonText = styled.div`
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  
+  span:first-child {
+    font-size: 10px;
+  }
+  
+  span:last-child {
+    font-weight: 600;
+    font-size: 14px;
+  }
+`;
+
+const Badge = styled.div`
+  background: linear-gradient(135deg, #ff4d4d, #f9cb28);
+  color: #2a2a2a;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 12px;
+  display: inline-block;
+  margin-bottom: 10px;
+`;
+
+const BottomSection = styled.div`
+  max-width: 1200px;
+  margin: 30px auto 0;
+  text-align: center;
+  font-size: 14px;
+  color: #b0b0b0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+`;
+
+const Copyright = styled.p`
+  font-size: 13px;
+`;
+
+const ContactLink = styled.a`
+  color: #f9cb28;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+`;
 
 export default function Footer() {
   const navigate = useNavigate();
 
-  const categories = ["Mens", "Women", "Kids", "Home & Living"];
+  const categories = ["Men", "Women", "Kids", "Home & Living"];
 
   const handleCategoryClick = (category) => {
-    navigate(`/products?category=${category.toLowerCase()}`); // ✅ Ensure lowercase query
+    navigate(`/products?category=${category.toLowerCase()}`);
   };
 
   return (
-    <footer style={styles.footer}>
-      <div style={styles.container}>
+    <FooterContainer>
+      <GridContainer>
         {/* Online Shopping Links */}
-        <div style={styles.column}>
-          <div style={styles.heading}>Online Shopping</div>
+        <Column>
+          <ColumnHeading>Shop</ColumnHeading>
           {categories.map((category) => (
-            <span
+            <FooterLink 
               key={category}
               onClick={() => handleCategoryClick(category)}
-              style={styles.link}
               aria-label={`Browse ${category} products`}
             >
+              <FaArrowRight />
               {category}
-            </span>
+            </FooterLink>
           ))}
-        </div>
+        </Column>
 
         {/* Customer Policies */}
-        <div style={styles.column}>
-          <div style={styles.heading}>Customer Policies</div>
-          <span onClick={() => navigate("/contact")} style={styles.link}>Contact Us</span>
-          <span onClick={() => navigate("/faq")} style={styles.link}>FAQ</span>
-          <span onClick={() => navigate("/terms-of-use")} style={styles.link}>Terms of Use</span>
-          <span onClick={() => navigate("/track-orders")} style={styles.link}>Track Orders</span>
-          <span onClick={() => navigate("/shipping")} style={styles.link}>Shipping</span>
-          <span onClick={() => navigate("/cancellation")} style={styles.link}>Cancellation</span>
-          <span onClick={() => navigate("/returns")} style={styles.link}>Returns</span>
-          <span onClick={() => navigate("/privacy-policy")} style={styles.link}>Privacy Policy</span>
-        </div>
+        <Column>
+          <ColumnHeading>Customer Service</ColumnHeading>
+          <FooterLink onClick={() => navigate("/contact")}>Contact Us</FooterLink>
+          <FooterLink onClick={() => navigate("/faq")}>FAQ</FooterLink>
+          <FooterLink onClick={() => navigate("/terms-of-use")}>Terms of Use</FooterLink>
+          <FooterLink onClick={() => navigate("/track-orders")}>Track Orders</FooterLink>
+          <FooterLink onClick={() => navigate("/shipping")}>Shipping</FooterLink>
+          <FooterLink onClick={() => navigate("/cancellation")}>Cancellation</FooterLink>
+          <FooterLink onClick={() => navigate("/returns")}>Returns</FooterLink>
+          <FooterLink onClick={() => navigate("/privacy-policy")}>Privacy Policy</FooterLink>
+        </Column>
 
         {/* Social Media Links & App Download */}
-        <div style={styles.column}>
-          <div style={styles.heading}>Keep in Touch</div>
-          <div style={styles.socialIcons}>
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer"><FaFacebookF /></a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"><FaTwitter /></a>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><FaInstagram /></a>
-            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
-          </div>
-          <div style={{ marginTop: "15px" }}>
-            <div style={styles.heading}>Experience the Myntra App</div>
-            <div style={styles.appButtons}>
-              <a href="https://play.google.com" target="_blank" rel="noopener noreferrer">
-                <BsGooglePlay size={30} />
-              </a>
-              <a href="https://www.apple.com/app-store/" target="_blank" rel="noopener noreferrer">
-                <AiOutlineApple size={30} />
-              </a>
-            </div>
-          </div>
-        </div>
+        <Column>
+          <ColumnHeading>Connect With Us</ColumnHeading>
+          <SocialIcons>
+            <SocialIcon href="https://facebook.com" target="_blank" rel="noopener noreferrer">
+              <FaFacebookF />
+            </SocialIcon>
+            <SocialIcon href="https://twitter.com" target="_blank" rel="noopener noreferrer">
+              <FaTwitter />
+            </SocialIcon>
+            <SocialIcon href="https://instagram.com" target="_blank" rel="noopener noreferrer">
+              <FaInstagram />
+            </SocialIcon>
+            <SocialIcon href="https://youtube.com" target="_blank" rel="noopener noreferrer">
+              <FaYoutube />
+            </SocialIcon>
+          </SocialIcons>
+          
+          <AppDownload>
+            <ColumnHeading>Download App</ColumnHeading>
+            <AppButtons>
+              <AppButton href="https://play.google.com" target="_blank" rel="noopener noreferrer">
+                <BsGooglePlay />
+                <AppButtonText>
+                  <span>GET IT ON</span>
+                  <span>Google Play</span>
+                </AppButtonText>
+              </AppButton>
+              <AppButton href="https://www.apple.com/app-store/" target="_blank" rel="noopener noreferrer">
+                <AiOutlineApple />
+                <AppButtonText>
+                  <span>Download on the</span>
+                  <span>App Store</span>
+                </AppButtonText>
+              </AppButton>
+            </AppButtons>
+          </AppDownload>
+        </Column>
 
         {/* Additional Info */}
-        <div style={styles.column}>
-          <div style={styles.heading}>100% Original</div>
-          <p>Guaranteed for all products at Myntra.com</p>
-          <div style={styles.heading}>Return within 14 Days</div>
-          <p>of receiving your order</p>
-        </div>
-      </div>
+        <Column>
+          <Badge>100% ORIGINAL</Badge>
+          <p style={{ color: "#b0b0b0", fontSize: "14px" }}>Guaranteed for all products at Myntra.com</p>
+          
+          <Badge style={{ marginTop: "20px" }}>EASY RETURNS</Badge>
+          <p style={{ color: "#b0b0b0", fontSize: "14px" }}>Return within 14 days of receiving your order</p>
+        </Column>
+      </GridContainer>
 
       {/* Bottom Section */}
-      <div style={styles.bottomSection}>
-        <p>© 2025 www.myntra.com. All rights reserved.</p>
+      <BottomSection>
+        <Copyright>© 2025 www.myntra.com. All rights reserved.</Copyright>
         <p>
           In case of any concern,{" "}
-          <span onClick={() => navigate("/contact")} style={{ color: "#007bff", fontWeight: "600", cursor: "pointer" }}>
+          <ContactLink onClick={() => navigate("/contact")}>
             Contact Us
-          </span>
+          </ContactLink>
         </p>
-      </div>
-    </footer>
+      </BottomSection>
+    </FooterContainer>
   );
 }

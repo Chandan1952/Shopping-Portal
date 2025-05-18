@@ -1,65 +1,54 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaSearch, FaUser, FaHeart, FaShoppingBag } from "react-icons/fa";
+import { FaSearch, FaUser, FaHeart, FaShoppingBag, FaChevronDown } from "react-icons/fa";
+import { RiLogoutCircleRLine } from "react-icons/ri";
+import { MdOutlineAccountCircle, MdCardGiftcard, MdContactSupport, MdCreditCard, MdLocalOffer } from "react-icons/md";
+import { BsBoxSeam, BsBookmarkHeart, BsHouseDoor } from "react-icons/bs";
 import AuthModal from "./AuthModal";
 
 export default function Header() {
   const [isAuthOpen, setAuthOpen] = useState(false);
   const [profileDropdown, setProfileDropdown] = useState(false);
   const [user, setUser] = useState(null);
-
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [activeCategory, setActiveCategory] = useState(null);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/user", { credentials: "include" });
+        const data = await response.json();
+        if (response.ok) {
+          setUser(data);
+        } else {
+          console.error("Error fetching user:", data.error);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
+      }
+    };
+    fetchUser();
+  }, []);
 
-// ✅ Fetch User Data from Backend
-useEffect(() => {
-  const fetchUser = async () => {
+  const handleLogout = async () => {
     try {
-      const response = await fetch("https://shopping-portal-backend.onrender.com/api/user", {
-        method: "GET",
-        credentials: "include", // ✅ Required for cookies
+      const response = await fetch("http://localhost:5000/logout", {
+        method: "POST",
+        credentials: "include",
       });
 
-
-      if (!response.ok) {
-        throw new Error("User not authenticated");
+      if (response.ok) {
+        setUser(null);
+        navigate("/");
+      } else {
+        console.error("Logout failed");
       }
-
-      const data = await response.json();
-      console.log("✅ User fetched:", data);
-      setUser(data.user);
     } catch (error) {
-      console.error("❌ Failed to fetch user:", error.message);
-      setUser(null);
+      console.error("Error logging out:", error);
     }
   };
-
-  fetchUser();
-}, []);
-
-
-
- const handleLogout = async () => {
-  try {
-    const response = await fetch("https://shopping-portal-backend.onrender.com/logout", {
-      method: "POST",
-      credentials: "include",
-    });
-
-    if (response.ok) {
-      localStorage.removeItem("user");
-      sessionStorage.removeItem("user");
-      setUser(null);
-      navigate("/", { replace: true });
-    } else {
-      console.error("Logout failed");
-    }
-  } catch (error) {
-    console.error("Error logging out:", error);
-  }
-};
-
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -73,233 +62,538 @@ useEffect(() => {
     };
   }, []);
 
-
   const handleCategoryClick = (category) => {
-    navigate(`/products?category=${category.toLowerCase()}`); // ✅ Ensure lowercase query
+    setActiveCategory(category);
+    navigate(`/products?category=${category.toLowerCase()}`);
   };
-
 
   return (
     <>
+      {/* Top Notification Bar */}
+      <div className="top-notification">
+        <p>Summer Sale Live! Get 50% OFF on selected items. <Link to="/summer-sale">Shop Now</Link></p>
+      </div>
+      
       <header className="header">
         {/* Logo */}
-        <Link to="/" className="logo">Myntra</Link>
-
+        <Link to="/" className="logo">
+          <span className="logo-main">Myntra</span>
+          <span className="logo-sub">Fashion & Beyond</span>
+        </Link>
 
         {/* Navigation Links */}
         <nav className="nav-links">
-          <span onClick={() => handleCategoryClick("Mens")}>Men</span>
-          <span onClick={() => handleCategoryClick("Women")}>Women</span>
-          <span onClick={() => handleCategoryClick("Kids")}>Kids</span>
-          <span onClick={() => handleCategoryClick("Home & Living")}>Home & Living</span>
+          {["Mens", "Women", "Kids", "Home & Living"].map((category) => (
+            <div 
+              key={category}
+              className={`nav-item ${activeCategory === category ? 'active' : ''}`}
+              onClick={() => handleCategoryClick(category)}
+            >
+              {category}
+              {category === "Home & Living" && <FaChevronDown className="dropdown-arrow" />}
+            </div>
+          ))}
         </nav>
 
-
-
         {/* Search Bar */}
-        <div className="search-container">
+        <div className={`search-container ${searchFocused ? 'focused' : ''}`}>
           <FaSearch className="search-icon" />
-          <input type="text" placeholder="Search for products, brands, and more" className="search-input" />
+          <input 
+            type="text" 
+            placeholder="Search for products, brands and more" 
+            className="search-input"
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
+          />
         </div>
 
         {/* Icons - Profile, Wishlist, Cart */}
-        {/* Icons */}
         <div className="icons-container">
-          {/* Profile Dropdown with Hover Effect */}
+          {/* Profile Dropdown */}
           <div
-            className="icon profile-container"
+            className="icon-container profile-container"
             ref={dropdownRef}
             onMouseEnter={() => setProfileDropdown(true)}
             onMouseLeave={() => setProfileDropdown(false)}
           >
-            <FaUser />
+            <div className="icon-wrapper">
+              <FaUser className="icon" />
+              <span className="icon-label">Profile</span>
+            </div>
+            
             {profileDropdown && (
               <div className="profile-dropdown">
                 {user ? (
                   <>
-                   <div className="dropdown-item bold">Welcome, {user.fullName || "Guest"}</div>
-                   <div className="dropdown-item">📞 {user.phone || "N/A"}</div>
-                    <hr />
-                    <Link to="/edit-profile" className="dropdown-item">Profile</Link>
-                    <Link to="/order-return" className="dropdown-item">Orders</Link>
-                    <Link to="/wishlist" className="dropdown-item">Wishlist</Link>
-                    <Link to="/gift-cards" className="dropdown-item">Gift Cards</Link>
-                    <Link to="/contact" className="dropdown-item">Contact Us</Link>
-                    <Link to="/myntra-insider" className="dropdown-item highlight">Myntra Insider</Link>
-                    <hr />
-                    <Link to="/myntra-credit" className="dropdown-item">Myntra Credit</Link>
-                    <Link to="/coupons" className="dropdown-item">Coupons</Link>
-                    <Link to="/saved-cards" className="dropdown-item">Saved Cards</Link>
-                    <Link to="/saved-vpa" className="dropdown-item">Saved VPA</Link>
-                    <Link to="/saved-addresses" className="dropdown-item">Saved Addresses</Link>
-                    <hr />
-                    <button onClick={handleLogout} className="logout-button">Logout</button>
+                    <div className="dropdown-header">
+                      <div className="user-avatar">
+                        {user.fullName.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="user-info">
+                        <div className="user-name">Hello, {user.fullName}</div>
+                        <div className="user-phone">{user.phone}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="dropdown-section">
+                      <Link to="/edit-profile" className="dropdown-item">
+                        <MdOutlineAccountCircle className="item-icon" />
+                        <span>Profile</span>
+                      </Link>
+                      <Link to="/order-status/:orderId" className="dropdown-item">
+                        <BsBoxSeam className="item-icon" />
+                        <span>Orders</span>
+                      </Link>
+                      <Link to="/wishlist" className="dropdown-item">
+                        <BsBookmarkHeart className="item-icon" />
+                        <span>Wishlist</span>
+                      </Link>
+                    </div>
+                    
+                    <div className="dropdown-section">
+                      <Link to="/gift-cards" className="dropdown-item">
+                        <MdCardGiftcard className="item-icon" />
+                        <span>Gift Cards</span>
+                      </Link>
+                      <Link to="/contact" className="dropdown-item">
+                        <MdContactSupport className="item-icon" />
+                        <span>Contact Us</span>
+                      </Link>
+                      <Link to="/myntra-insider" className="dropdown-item highlight">
+                        <BsHouseDoor className="item-icon" />
+                        <span>Myntra Insider</span>
+                      </Link>
+                    </div>
+                    
+                    <div className="dropdown-section">
+                      <Link to="/myntra-credit" className="dropdown-item">
+                        <MdCreditCard className="item-icon" />
+                        <span>Myntra Credit</span>
+                      </Link>
+                      <Link to="/coupons" className="dropdown-item">
+                        <MdLocalOffer className="item-icon" />
+                        <span>Coupons</span>
+                      </Link>
+                    </div>
+                    
+                    <div className="dropdown-footer">
+                      <button onClick={handleLogout} className="logout-button">
+                        <RiLogoutCircleRLine className="logout-icon" />
+                        <span>Logout</span>
+                      </button>
+                    </div>
                   </>
                 ) : (
-                  <button className="auth-button" onClick={() => setAuthOpen(true)}>LOGIN / REGISTER</button>
+                  <div className="auth-section">
+                    <p className="welcome-text">Welcome to Myntra</p>
+                    <p className="auth-subtext">To access your account</p>
+                    <button className="auth-button" onClick={() => setAuthOpen(true)}>
+                      Login / Register
+                    </button>
+                    <div className="auth-benefits">
+                      <div className="benefit-item">✓ Get exclusive rewards</div>
+                      <div className="benefit-item">✓ Track your orders</div>
+                      <div className="benefit-item">✓ Faster checkout</div>
+                    </div>
+                  </div>
                 )}
               </div>
             )}
           </div>
-          <AuthModal isOpen={isAuthOpen} onClose={() => setAuthOpen(false)} setUser={setUser} />
+          <AuthModal isOpen={isAuthOpen} onClose={() => setAuthOpen(false)} />
 
-          {/* Wishlist and Cart Icons */}
-          <Link to="/wishlist" className="cart-link">
-            <FaHeart className="icon" />
+          {/* Wishlist */}
+          <Link to="/wishlist" className="icon-container">
+            <div className="icon-wrapper">
+              <FaHeart className="icon" />
+              <span className="icon-label">Wishlist</span>
+            </div>
           </Link>
 
-          <Link to="/card-list" className="cart-link">
-            <FaShoppingBag className="icon" />
+          {/* Bag */}
+          <Link to="/card-list" className="icon-container">
+            <div className="icon-wrapper">
+              <FaShoppingBag className="icon" />
+              <span className="icon-label">Bag</span>
+              <span className="cart-badge">0</span>
+            </div>
           </Link>
         </div>
       </header>
 
-
-
-
       {/* Styles */}
       <style>
         {`
+          /* Top Notification Bar */
+          .top-notification {
+            background-color: #ff3f6c;
+            color: white;
+            text-align: center;
+            padding: 8px 0;
+            font-size: 14px;
+          }
+          
+          .top-notification a {
+            color: white;
+            text-decoration: underline;
+            font-weight: bold;
+            margin-left: 5px;
+          }
+
+          /* Header */
           .header {
             background-color: #ffffff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 12px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            padding: 12px 5%;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
           }
 
+          /* Logo */
           .logo {
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+          }
+          
+          .logo-main {
             color: #ff3f6c;
             font-size: 24px;
-            font-weight: bold;
-            text-decoration: none;
-
+            font-weight: 800;
+            letter-spacing: -0.5px;
+          }
+          
+          .logo-sub {
+            color: #666;
+            font-size: 10px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: -2px;
           }
 
-/* Desktop Navigation */
-.nav-links {
-  display: flex;
-  gap: 20px;
-  color: #333;
-  font-weight: bold;
-  cursor: pointer;
-}
+          /* Navigation Links */
+          .nav-links {
+            display: flex;
+            gap: 25px;
+          }
+          
+          .nav-item {
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 0;
+            position: relative;
+            transition: all 0.2s ease;
+          }
+          
+          .nav-item:hover {
+            color: #ff3f6c;
+          }
+          
+          .nav-item.active {
+            color: #ff3f6c;
+          }
+          
+          .nav-item.active:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #ff3f6c;
+            border-radius: 3px 3px 0 0;
+          }
+          
+          .dropdown-arrow {
+            font-size: 10px;
+            margin-left: 2px;
+            transition: transform 0.2s ease;
+          }
+          
+          .nav-item:hover .dropdown-arrow {
+            transform: translateY(1px);
+          }
 
-.nav-links span:hover {
-  color: #ff3f6c;
-}
-
-
-         
-
+          /* Search Bar */
           .search-container {
             position: relative;
             width: 30%;
+            min-width: 300px;
+            transition: all 0.3s ease;
           }
-
+          
+          .search-container.focused {
+            box-shadow: 0 0 0 2px rgba(255, 63, 108, 0.2);
+            border-radius: 4px;
+          }
+          
           .search-input {
             width: 100%;
-            padding: 8px 10px 8px 35px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            padding: 12px 15px 12px 40px;
+            border: 1px solid #f5f5f6;
+            border-radius: 4px;
             outline: none;
+            font-size: 14px;
+            background-color: #f5f5f6;
+            transition: all 0.3s ease;
           }
-
+          
+          .search-input:focus {
+            background-color: white;
+            border-color: #ff3f6c;
+          }
+          
+          .search-input::placeholder {
+            color: #9c9c9c;
+          }
+          
           .search-icon {
             position: absolute;
-            left: 10px;
+            left: 15px;
             top: 50%;
             transform: translateY(-50%);
-            color: #777;
-            font-size: 16px;
+            color: #9c9c9c;
+            font-size: 14px;
           }
-
-          .icons-container {
-            display: flex;
-            gap: 20px;
-            font-size: 22px;
-            position: relative;
-          }
-
-          .icon {
-            cursor: pointer;
-            transition: color 0.2s ease-in-out;
-          }
-
-          .icon:hover {
+          
+          .search-container.focused .search-icon {
             color: #ff3f6c;
           }
 
+          /* Icons Container */
+          .icons-container {
+            display: flex;
+            gap: 25px;
+          }
+          
+          .icon-container {
+            position: relative;
+          }
+          
+          .icon-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+          }
+          
+          .icon {
+            font-size: 18px;
+            color: #282c3f;
+            transition: color 0.2s ease;
+          }
+          
+          .icon-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #282c3f;
+            margin-top: 2px;
+          }
+          
+          .icon-container:hover .icon,
+          .icon-container:hover .icon-label {
+            color: #ff3f6c;
+          }
+          
+          .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: 0;
+            background-color: #ff3f6c;
+            color: white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+          }
+
+          /* Profile Dropdown */
           .profile-dropdown {
             position: absolute;
             top: 100%;
             right: 0;
             background-color: #fff;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 5px;
-            min-width: 220px;
-            padding: 10px 0;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            border-radius: 6px;
+            width: 280px;
+            padding: 15px 0;
             display: flex;
             flex-direction: column;
-            z-index: 100;
-            animation: fadeIn 0.2s ease-in-out;
+            z-index: 1000;
+            animation: fadeIn 0.2s ease-out;
           }
-
-          .dropdown-item {
-            padding: 5px 15px;
-            color: #555;
-            text-decoration: none;
-            transition: background 0.2s;
-            font-size: 12px;
+          
+          .dropdown-header {
+            display: flex;
+            align-items: center;
+            padding: 0 20px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 10px;
           }
-
-          .dropdown-item:hover {
-            background-color: #f2f2f2;
-          }
-
-          .bold {
-            font-weight: bold;
-            text-align: center;
-          }
-
-          .highlight {
-            color: red;
-            font-weight: bold;
-          }
-
-          .logout-button {
+          
+          .user-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #ff3f6c;
             color: white;
-            text-align: center;
-            border: none;
-            background: red;
-            width: 100%;
-            padding: 10px;
-            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 12px;
           }
-          .logout-button:hover{
-            color: black;
-
-            } 
-          .auth-button {
+          
+          .user-info {
+            display: flex;
+            flex-direction: column;
+          }
+          
+          .user-name {
+            font-weight: 600;
+            font-size: 14px;
+          }
+          
+          .user-phone {
+            font-size: 12px;
+            color: #666;
+          }
+          
+          .dropdown-section {
+            padding: 5px 0;
+            border-bottom: 1px solid #f0f0f0;
+          }
+          
+          .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            color: #282c3f;
+            text-decoration: none;
+            font-size: 13px;
+            transition: background 0.2s;
+          }
+          
+          .dropdown-item:hover {
+            background-color: #f9f9f9;
+          }
+          
+          .item-icon {
+            margin-right: 12px;
+            font-size: 16px;
+            color: #666;
+          }
+          
+          .dropdown-item:hover .item-icon {
+            color: #ff3f6c;
+          }
+          
+          .highlight {
+            color: #ff3f6c;
+            font-weight: 600;
+          }
+          
+          .dropdown-footer {
+            padding: 15px 20px 0;
+          }
+          
+          .logout-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             width: 100%;
             padding: 10px;
             background-color: #ff3f6c;
             color: white;
             border: none;
+            border-radius: 4px;
             cursor: pointer;
-            text-align: center;
-            transition: background 0.2s ease-in-out;
+            font-weight: 600;
+            font-size: 13px;
+            transition: background 0.2s;
           }
-
+          
+          .logout-button:hover {
+            background-color: #e7365f;
+          }
+          
+          .logout-icon {
+            margin-right: 8px;
+            font-size: 14px;
+          }
+          
+          /* Auth Section */
+          .auth-section {
+            padding: 15px 20px;
+          }
+          
+          .welcome-text {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+          }
+          
+          .auth-subtext {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 15px;
+          }
+          
+          .auth-button {
+            width: 100%;
+            padding: 12px;
+            background-color: #ff3f6c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 15px;
+          }
+          
           .auth-button:hover {
             background-color: #e7365f;
           }
+          
+          .auth-benefits {
+            font-size: 12px;
+            color: #666;
+          }
+          
+          .benefit-item {
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+          }
+          
+          .benefit-item:before {
+            content: '✓';
+            color: #ff3f6c;
+            margin-right: 8px;
+            font-weight: bold;
+          }
 
+          /* Animations */
           @keyframes fadeIn {
             from {
               opacity: 0;
-              transform: translateY(-10px);
+              transform: translateY(10px);
             }
             to {
               opacity: 1;
@@ -307,71 +601,51 @@ useEffect(() => {
             }
           }
 
-          /* General Mobile Styles */
-@media (max-width: 768px) {
-  .header {
-    flex-direction: column;
-    align-items: center;
-    padding: 10px;
-  }
-
-  .logo {
-    font-size: 20px;
-    margin-bottom: 10px;
-  }
-
-  .nav-links {
-    display: none; /* Hide navigation links by default on mobile */
-    flex-direction: column;
-    width: 100%;
-    text-align: center;
-    position: absolute;
-    top: 60px;
-    left: 0;
-    background: white;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    padding: 10px 0;
-  }
-
-  .nav-links.active {
-    display: flex; /* Show navigation when active */
-  }
-
-  .nav-links span {
-    padding: 10px;
-    font-size: 18px;
-  }
-
-  .menu-toggle {
-    display: block;
-    font-size: 24px;
-    cursor: pointer;
-  }
-
-  .search-container {
-    width: 90%;
-    margin-bottom: 10px;
-  }
-
-  .icons-container {
-    gap: 10px;
-    font-size: 18px;
-  }
-
-  .profile-dropdown {
-    min-width: 180px;
-    right: 50%;
-    transform: translateX(50%);
-  }
-}
-
-/* Tablet View Adjustments */
-@media (max-width: 1024px) {
-  .search-container {
-    width: 60%;
-  }
-}
-
+          /* Responsive */
+          @media (max-width: 1200px) {
+            .search-container {
+              min-width: 250px;
+            }
+            
+            .nav-links {
+              gap: 15px;
+            }
+            
+            .icons-container {
+              gap: 15px;
+            }
+          }
+          
+          @media (max-width: 992px) {
+            .header {
+              flex-wrap: wrap;
+              padding-bottom: 15px;
+            }
+            
+            .logo {
+              order: 1;
+            }
+            
+            .icons-container {
+              order: 2;
+              margin-left: auto;
+            }
+            
+            .search-container {
+              order: 4;
+              width: 100%;
+              margin-top: 15px;
+              min-width: auto;
+            }
+            
+            .nav-links {
+              order: 3;
+              width: 100%;
+              justify-content: space-between;
+              margin-top: 15px;
+              padding-top: 10px;
+              border-top: 1px solid #f0f0f0;
+            }
           }
         `}
       </style>

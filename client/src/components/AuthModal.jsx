@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import SignupForm from "./SignupForm";
 import LoginForm from "./LoginForm";
+import ForgotPassword from "./ForgotPassword";
 
 const styles = {
   modalOverlay: {
@@ -36,8 +37,8 @@ const styles = {
   },
 };
 
-const AuthModal = ({ isOpen, onClose, setUser }) => {
-  const [mode, setMode] = useState("login"); // "login" or "signup"
+const AuthModal = ({ isOpen, onClose }) => {
+  const [mode, setMode] = useState("login"); // "login", "signup", "forgotPassword"
 
   if (!isOpen) return null;
 
@@ -48,18 +49,25 @@ const AuthModal = ({ isOpen, onClose, setUser }) => {
         <button style={styles.closeButton} onClick={onClose}>×</button>
 
         {/* Render Forms Based on Mode */}
-        {mode === "login" ? (
+        {mode === "login" && (
           <LoginForm
             isOpen={isOpen}
             onClose={onClose}
             onSwitch={() => setMode("signup")} // Switch to Signup
-            setUser={setUser} // Pass setUser to LoginForm
+            onForgotPassword={() => setMode("forgotPassword")} // Open Forgot Password
           />
-        ) : (
+        )}
+        {mode === "signup" && (
           <SignupForm
             isOpen={isOpen}
             onClose={onClose}
             onSwitch={() => setMode("login")} // Switch to Login
+          />
+        )}
+        {mode === "forgotPassword" && (
+          <ForgotPassword
+            isOpen={isOpen}
+            onClose={() => setMode("login")} // Return to Login after closing
           />
         )}
       </div>
@@ -67,5 +75,4 @@ const AuthModal = ({ isOpen, onClose, setUser }) => {
   );
 };
 
-// ✅ Default export added
 export default AuthModal;

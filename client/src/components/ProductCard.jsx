@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { FaHeart, FaShoppingCart } from "react-icons/fa";
+import { FaHeart, FaShoppingCart, FaFilter, FaStar, FaRegStar } from "react-icons/fa";
+import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
@@ -7,113 +8,322 @@ import AddToCartModal from "./AddToCartModal";
 
 const ProductList = () => {
     const styles = {
-        container: {
-            width: "90%",
-            margin: "40px auto",
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-            gap: "24px",
+        mainContainer: {
+            backgroundColor: "#f5f5f7",
+            minHeight: "100vh",
+            paddingBottom: "40px"
+        },
+        contentContainer: {
+            maxWidth: "1400px",
+            margin: "0 auto",
+            padding: "20px",
+            display: "flex",
+            gap: "30px",
+            position: "relative"
         },
         filterContainer: {
-            width: "250px",
-            padding: "20px",
-            border: "1px solid #ddd",
-            borderRadius: "10px",
-            backgroundColor: "#f9f9f9",
-            boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+            width: "280px",
+            padding: "25px",
+            border: "1px solid #e0e0e0",
+            borderRadius: "12px",
+            backgroundColor: "#ffffff",
+            boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)",
+            height: "fit-content",
+            position: "sticky",
+            top: "100px",
+            transition: "all 0.3s ease"
         },
         filterHeader: {
-            fontSize: "18px",
-            fontWeight: "bold",
-            marginBottom: "20px",
+            fontSize: "20px",
+            fontWeight: "700",
+            marginBottom: "25px",
+            color: "#2c3e50",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px"
         },
         filterGroup: {
-            marginBottom: "20px",
+            marginBottom: "25px",
+            paddingBottom: "20px",
+            borderBottom: "1px dashed #e0e0e0"
         },
         filterLabel: {
             fontSize: "16px",
-            fontWeight: "500",
-            marginBottom: "10px",
+            fontWeight: "600",
+            marginBottom: "15px",
+            color: "#34495e",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px"
+        },
+        productGrid: {
+            flex: 1,
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+            gap: "25px",
+            alignContent: "start"
         },
         productCard: {
             backgroundColor: "#ffffff",
-            borderRadius: "16px",
-            boxShadow: "0px 6px 14px rgba(0, 0, 0, 0.1)",
-            padding: "18px",
+            borderRadius: "14px",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+            padding: "20px",
             textAlign: "center",
             cursor: "pointer",
             position: "relative",
-            transition: "all 0.3s ease-in-out",
+            transition: "all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)",
+            overflow: "hidden",
+            border: "1px solid rgba(0,0,0,0.05)"
+        },
+        productImageContainer: {
+            width: "100%",
+            height: "240px",
+            position: "relative",
+            marginBottom: "15px",
+            overflow: "hidden",
+            borderRadius: "10px",
+            backgroundColor: "#f8f9fa"
         },
         productImage: {
             width: "100%",
-            height: "260px",
+            height: "100%",
             objectFit: "contain",
-            borderRadius: "10px",
-            backgroundColor: "#f8f8f8",
+            transition: "transform 0.5s ease"
         },
         wishlistButton: {
             position: "absolute",
-            top: "12px",
-            right: "12px",
-            backgroundColor: "#ffffff",
-            padding: "8px",
+            top: "15px",
+            right: "15px",
+            backgroundColor: "rgba(255,255,255,0.9)",
+            width: "36px",
+            height: "36px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             borderRadius: "50%",
-            boxShadow: "0px 3px 6px rgba(0,0,0,0.2)",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
             cursor: "pointer",
             zIndex: 2,
-            transition: "transform 0.2s ease-in-out",
+            transition: "all 0.2s ease",
+            border: "none",
+            outline: "none"
         },
         discountBadge: {
             position: "absolute",
-            top: "12px",
-            left: "12px",
-            backgroundColor: "#ff3f6c",
+            top: "15px",
+            left: "15px",
+            backgroundColor: "#ff4757",
             color: "#fff",
             fontSize: "12px",
-            padding: "4px 8px",
-            borderRadius: "4px",
-            fontWeight: "bold",
+            padding: "5px 10px",
+            borderRadius: "20px",
+            fontWeight: "700",
+            zIndex: 2
         },
         cartButton: {
             width: "100%",
-            background: "linear-gradient(90deg, #ff416c, #ff4b2b)",
+            background: "linear-gradient(135deg, #ff416c, #ff4b2b)",
             color: "#fff",
             border: "none",
             padding: "12px",
             borderRadius: "8px",
             fontSize: "16px",
             fontWeight: 600,
-            marginTop: "12px",
+            marginTop: "15px",
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             gap: "10px",
-            transition: "background 0.3s ease",
+            transition: "all 0.3s ease",
+            boxShadow: "0 4px 8px rgba(255, 65, 108, 0.3)"
+        },
+        priceContainer: {
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "10px",
+            marginTop: "10px",
+            flexWrap: "wrap"
+        },
+        currentPrice: {
+            fontSize: "18px",
+            fontWeight: "700",
+            color: "#2ecc71"
+        },
+        originalPrice: {
+            fontSize: "14px",
+            color: "#95a5a6",
+            textDecoration: "line-through"
+        },
+        ratingContainer: {
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "5px",
+            marginTop: "10px"
         },
         pagination: {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            margin: "40px 0 20px",
-            gap: "16px",
+            margin: "50px 0 30px",
+            gap: "15px"
         },
         paginationButton: {
-            backgroundColor: "#ff416c",
+            backgroundColor: "#ff4757",
             color: "white",
             border: "none",
-            padding: "10px 18px",
-            borderRadius: "6px",
-            fontSize: "16px",
-            fontWeight: 500,
+            padding: "10px 20px",
+            borderRadius: "8px",
+            fontSize: "15px",
+            fontWeight: 600,
             cursor: "pointer",
             transition: "all 0.3s ease",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            boxShadow: "0 2px 5px rgba(0,0,0,0.1)"
         },
         disabledButton: {
-            backgroundColor: "#ccc",
+            backgroundColor: "#bdc3c7",
             cursor: "not-allowed",
+            boxShadow: "none"
         },
+        pageIndicator: {
+            fontSize: "16px",
+            fontWeight: "600",
+            color: "#34495e",
+            padding: "0 15px"
+        },
+        loadingContainer: {
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "300px",
+            gridColumn: "1 / -1"
+        },
+        errorContainer: {
+            gridColumn: "1 / -1",
+            textAlign: "center",
+            padding: "40px",
+            backgroundColor: "#fff8f8",
+            borderRadius: "10px",
+            border: "1px solid #ffdddd"
+        },
+        noProductsContainer: {
+            gridColumn: "1 / -1",
+            textAlign: "center",
+            padding: "50px",
+            backgroundColor: "#f8f9fa",
+            borderRadius: "10px"
+        },
+        filterSelect: {
+            width: "100%",
+            padding: "12px 15px",
+            borderRadius: "8px",
+            border: "1px solid #dfe6e9",
+            backgroundColor: "#f8f9fa",
+            fontSize: "14px",
+            color: "#2d3436",
+            cursor: "pointer",
+            appearance: "none",
+            outline: "none",
+            transition: "all 0.3s ease"
+        },
+        rangeInput: {
+            width: "100%",
+            margin: "10px 0",
+            WebkitAppearance: "none",
+            height: "6px",
+            borderRadius: "3px",
+            background: "#dfe6e9",
+            outline: "none"
+        },
+        rangeInputThumb: {
+            WebkitAppearance: "none",
+            width: "18px",
+            height: "18px",
+            borderRadius: "50%",
+            background: "#ff4757",
+            cursor: "pointer"
+        },
+        rangeValues: {
+            display: "flex",
+            justifyContent: "space-between",
+            fontSize: "14px",
+            color: "#7f8c8d"
+        },
+        mobileFilterButton: {
+            display: "none",
+            position: "fixed",
+            bottom: "30px",
+            right: "30px",
+            backgroundColor: "#ff4757",
+            color: "white",
+            width: "60px",
+            height: "60px",
+            borderRadius: "50%",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 4px 15px rgba(255, 71, 87, 0.4)",
+            zIndex: 100,
+            border: "none",
+            fontSize: "24px",
+            cursor: "pointer"
+        },
+        filterContainerMobile: {
+            display: "none"
+        },
+        "@media (max-width: 1024px)": {
+            filterContainer: {
+                display: "none"
+            },
+            filterContainerMobile: {
+                display: "block",
+                position: "fixed",
+                top: "0",
+                left: "0",
+                width: "100%",
+                height: "100%",
+                backgroundColor: "rgba(0,0,0,0.5)",
+                zIndex: 1000,
+                overflowY: "auto",
+                padding: "20px",
+                boxSizing: "border-box",
+                transform: "translateX(-100%)",
+                transition: "transform 0.3s ease"
+            },
+            filterContainerMobileActive: {
+                transform: "translateX(0)"
+            },
+            mobileFilterButton: {
+                display: "flex"
+            },
+            contentContainer: {
+                flexDirection: "column",
+                padding: "15px"
+            },
+            productGrid: {
+                gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))"
+            }
+        },
+        "@media (max-width: 600px)": {
+            productGrid: {
+                gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+                gap: "15px"
+            },
+            productCard: {
+                padding: "15px"
+            },
+            productImageContainer: {
+                height: "160px"
+            },
+            cartButton: {
+                fontSize: "14px",
+                padding: "10px"
+            }
+        }
     };
 
     const [products, setProducts] = useState([]);
@@ -128,6 +338,7 @@ const ProductList = () => {
         priceRange: [0, 10000],
         discount: 0,
     });
+    const [showMobileFilters, setShowMobileFilters] = useState(false);
 
     const productsPerPage = 12;
     const location = useLocation();
@@ -140,7 +351,7 @@ const ProductList = () => {
             const isAlreadyWishlisted = wishlist.includes(product._id);
             const method = isAlreadyWishlisted ? "DELETE" : "POST";
 
-            const response = await fetch("https://shopping-portal-backend.onrender.com/api/wishlist", {
+            const response = await fetch("http://localhost:5000/api/wishlist", {
                 method,
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(product),
@@ -166,8 +377,8 @@ const ProductList = () => {
                 setLoading(true);
                 setError(null);
                 const url = category
-                    ? `https://shopping-portal-backend.onrender.com/api/products?category=${category}`
-                    : "https://shopping-portal-backend.onrender.com/api/products";
+                    ? `http://localhost:5000/api/products?category=${category}`
+                    : "http://localhost:5000/api/products";
 
                 const response = await fetch(url);
                 if (!response.ok) throw new Error(`Server Error: ${response.statusText}`);
@@ -218,49 +429,85 @@ const ProductList = () => {
     const ProductCard = ({ product }) => {
         const [isHovered, setIsHovered] = useState(false);
         const imageUrl = product.image?.startsWith("/uploads/")
-            ? `https://shopping-portal-backend.onrender.com${product.image}`
+            ? `http://localhost:5000${product.image}`
             : product.image || "https://via.placeholder.com/240";
         const isWishlisted = wishlist.includes(product._id);
+
+        // Generate star ratings (1-5)
+        const rating = product.rating || Math.floor(Math.random() * 3) + 3; // Random rating for demo
+        const stars = [];
+        for (let i = 1; i <= 5; i++) {
+            stars.push(i <= rating ? <FaStar key={i} color="#f39c12" /> : <FaRegStar key={i} color="#f39c12" />);
+        }
 
         return (
             <div
                 style={{
                     ...styles.productCard,
-                    transform: isHovered ? "scale(1.03)" : "scale(1)",
-                    boxShadow: isHovered ? "0px 8px 16px rgba(0,0,0,0.15)" : styles.productCard.boxShadow,
+                    transform: isHovered ? "translateY(-5px)" : "translateY(0)",
+                    boxShadow: isHovered ? "0 10px 20px rgba(0,0,0,0.12)" : styles.productCard.boxShadow,
                 }}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
                 onClick={() => navigate(`/product/${product._id}`)}
             >
-                {product.discount > 0 && <div style={styles.discountBadge}>{product.discount}% OFF</div>}
-                <div
-                    style={styles.wishlistButton}
+                {product.discount > 0 && (
+                    <div style={styles.discountBadge}>{product.discount}% OFF</div>
+                )}
+                <button
+                    style={{
+                        ...styles.wishlistButton,
+                        backgroundColor: isWishlisted ? "rgba(255, 71, 87, 0.1)" : "rgba(255,255,255,0.9)",
+                    }}
                     onClick={(e) => {
                         e.stopPropagation();
                         toggleWishlist(product);
                     }}
                 >
-                    <FaHeart color={isWishlisted ? "#ff3f6c" : "gray"} size={18} />
+                    <FaHeart color={isWishlisted ? "#ff4757" : "#bdc3c7"} size={16} />
+                </button>
+                <div style={styles.productImageContainer}>
+                    <img 
+                        src={imageUrl} 
+                        alt={product.name} 
+                        style={{
+                            ...styles.productImage,
+                            transform: isHovered ? "scale(1.05)" : "scale(1)"
+                        }} 
+                    />
                 </div>
-                <img src={imageUrl} alt={product.name} style={styles.productImage} />
                 <h3 style={{
-                    fontSize: "18px", fontWeight: "bold", marginTop: "12px", color: "#333",
-                    display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
-                    overflow: "hidden", textOverflow: "ellipsis", maxHeight: "48px",
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    margin: "10px 0",
+                    color: "#2c3e50",
+                    minHeight: "40px",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis"
                 }}>
                     {product.name}
                 </h3>
-                <div style={{ display: "flex", justifyContent: "center", gap: "8px", marginTop: "6px", flexWrap: "wrap" }}>
-                    <span style={{ fontSize: "16px", fontWeight: "bold", color: "green" }}>Rs. {product.price}</span>
+                <div style={styles.ratingContainer}>
+                    {stars}
+                    <span style={{ fontSize: "12px", marginLeft: "5px", color: "#7f8c8d" }}>
+                        ({Math.floor(Math.random() * 100) + 1}) {/* Random review count */}
+                    </span>
+                </div>
+                <div style={styles.priceContainer}>
+                    <span style={styles.currentPrice}>Rs. {product.price.toLocaleString()}</span>
                     {product.originalPrice && (
-                        <span style={{ fontSize: "14px", color: "gray", textDecoration: "line-through" }}>
-                            Rs. {product.originalPrice}
-                        </span>
+                        <span style={styles.originalPrice}>Rs. {product.originalPrice.toLocaleString()}</span>
                     )}
                 </div>
                 <button
-                    style={styles.cartButton}
+                    style={{
+                        ...styles.cartButton,
+                        transform: isHovered ? "scale(1.02)" : "scale(1)",
+                        boxShadow: isHovered ? "0 6px 12px rgba(255, 65, 108, 0.4)" : styles.cartButton.boxShadow
+                    }}
                     onClick={(e) => {
                         e.stopPropagation();
                         setSelectedProduct(product);
@@ -273,23 +520,28 @@ const ProductList = () => {
     };
 
     return (
-        <>
+        <div style={styles.mainContainer}>
             <Header />
-            <div style={{ display: "flex", gap: "40px", marginBottom: "40px" }}>
+            <div style={styles.contentContainer}>
+                {/* Desktop Filters */}
                 <div style={styles.filterContainer}>
-                    <div style={styles.filterHeader}>Filter Products</div>
+                    <div style={styles.filterHeader}>
+                        <FaFilter /> Filters
+                    </div>
 
                     <div style={styles.filterGroup}>
                         <div style={styles.filterLabel}>Category</div>
                         <select
                             value={filters.category}
                             onChange={(e) => setFilters({ ...filters, category: e.target.value })}
-                            style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ddd" }}
+                            style={styles.filterSelect}
                         >
-                            <option value="">All</option>
+                            <option value="">All Categories</option>
                             <option value="electronics">Electronics</option>
                             <option value="fashion">Fashion</option>
-                            <option value="home">Home</option>
+                            <option value="home">Home & Kitchen</option>
+                            <option value="beauty">Beauty</option>
+                            <option value="sports">Sports</option>
                         </select>
                     </div>
 
@@ -299,36 +551,40 @@ const ProductList = () => {
                             type="range"
                             min="0"
                             max="10000"
-                            step="500"
+                            step="100"
                             value={filters.priceRange[0]}
                             onChange={(e) =>
                                 setFilters({ ...filters, priceRange: [parseInt(e.target.value), filters.priceRange[1]] })
                             }
-                            style={{ width: "100%" }}
+                            style={styles.rangeInput}
                         />
                         <input
                             type="range"
                             min="0"
                             max="10000"
-                            step="500"
+                            step="100"
                             value={filters.priceRange[1]}
                             onChange={(e) =>
                                 setFilters({ ...filters, priceRange: [filters.priceRange[0], parseInt(e.target.value)] })
                             }
-                            style={{ width: "100%" }}
+                            style={styles.rangeInput}
                         />
-                        <div>Rs. {filters.priceRange[0]} - Rs. {filters.priceRange[1]}</div>
+                        <div style={styles.rangeValues}>
+                            <span>Rs. {filters.priceRange[0].toLocaleString()}</span>
+                            <span>Rs. {filters.priceRange[1].toLocaleString()}</span>
+                        </div>
                     </div>
 
                     <div style={styles.filterGroup}>
-                        <div style={styles.filterLabel}>Minimum Discount (%)</div>
+                        <div style={styles.filterLabel}>Minimum Discount</div>
                         <input
                             type="number"
                             min="0"
                             max="100"
                             value={filters.discount}
-                            onChange={(e) => setFilters({ ...filters, discount: parseInt(e.target.value) })}
-                            style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ddd" }}
+                            onChange={(e) => setFilters({ ...filters, discount: parseInt(e.target.value) || 0 })}
+                            style={styles.filterSelect}
+                            placeholder="0%"
                         />
                     </div>
 
@@ -337,24 +593,190 @@ const ProductList = () => {
                         <select
                             value={sortOption}
                             onChange={(e) => setSortOption(e.target.value)}
-                            style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ddd" }}
+                            style={styles.filterSelect}
                         >
-                            <option value="">Default</option>
+                            <option value="">Recommended</option>
                             <option value="priceLowToHigh">Price: Low to High</option>
                             <option value="priceHighToLow">Price: High to Low</option>
                             <option value="nameAZ">Name: A-Z</option>
                             <option value="nameZA">Name: Z-A</option>
                             <option value="discount">Discount: High to Low</option>
+                            <option value="rating">Highest Rated</option>
                         </select>
                     </div>
                 </div>
 
-                <div style={styles.container}>
-                    {loading && <p>Loading products...</p>}
-                    {error && <p style={{ color: "red" }}>{error}</p>}
+                {/* Mobile Filter Button */}
+                <button 
+                    style={styles.mobileFilterButton}
+                    onClick={() => setShowMobileFilters(true)}
+                >
+                    <FaFilter />
+                </button>
+
+                {/* Mobile Filters */}
+                <div style={{
+                    ...styles.filterContainerMobile,
+                    ...(showMobileFilters && styles.filterContainerMobileActive)
+                }}>
+                    <div style={{
+                        backgroundColor: "#fff",
+                        borderRadius: "12px",
+                        padding: "25px",
+                        maxWidth: "500px",
+                        margin: "0 auto",
+                        position: "relative"
+                    }}>
+                        <button 
+                            style={{
+                                position: "absolute",
+                                top: "15px",
+                                right: "15px",
+                                background: "none",
+                                border: "none",
+                                fontSize: "20px",
+                                cursor: "pointer",
+                                color: "#7f8c8d"
+                            }}
+                            onClick={() => setShowMobileFilters(false)}
+                        >
+                            ×
+                        </button>
+                        <div style={styles.filterHeader}>
+                            <FaFilter /> Filters
+                        </div>
+
+                        <div style={styles.filterGroup}>
+                            <div style={styles.filterLabel}>Category</div>
+                            <select
+                                value={filters.category}
+                                onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+                                style={styles.filterSelect}
+                            >
+                                <option value="">All Categories</option>
+                                <option value="electronics">Electronics</option>
+                                <option value="fashion">Fashion</option>
+                                <option value="home">Home & Kitchen</option>
+                            </select>
+                        </div>
+
+                        <div style={styles.filterGroup}>
+                            <div style={styles.filterLabel}>Price Range</div>
+                            <input
+                                type="range"
+                                min="0"
+                                max="10000"
+                                step="100"
+                                value={filters.priceRange[0]}
+                                onChange={(e) =>
+                                    setFilters({ ...filters, priceRange: [parseInt(e.target.value), filters.priceRange[1]] })
+                                }
+                                style={styles.rangeInput}
+                            />
+                            <input
+                                type="range"
+                                min="0"
+                                max="10000"
+                                step="100"
+                                value={filters.priceRange[1]}
+                                onChange={(e) =>
+                                    setFilters({ ...filters, priceRange: [filters.priceRange[0], parseInt(e.target.value)] })
+                                }
+                                style={styles.rangeInput}
+                            />
+                            <div style={styles.rangeValues}>
+                                <span>Rs. {filters.priceRange[0].toLocaleString()}</span>
+                                <span>Rs. {filters.priceRange[1].toLocaleString()}</span>
+                            </div>
+                        </div>
+
+                        <div style={styles.filterGroup}>
+                            <div style={styles.filterLabel}>Minimum Discount</div>
+                            <input
+                                type="number"
+                                min="0"
+                                max="100"
+                                value={filters.discount}
+                                onChange={(e) => setFilters({ ...filters, discount: parseInt(e.target.value) || 0 })}
+                                style={styles.filterSelect}
+                                placeholder="0%"
+                            />
+                        </div>
+
+                        <div style={styles.filterGroup}>
+                            <div style={styles.filterLabel}>Sort By</div>
+                            <select
+                                value={sortOption}
+                                onChange={(e) => setSortOption(e.target.value)}
+                                style={styles.filterSelect}
+                            >
+                                <option value="">Recommended</option>
+                                <option value="priceLowToHigh">Price: Low to High</option>
+                                <option value="priceHighToLow">Price: High to Low</option>
+                                <option value="nameAZ">Name: A-Z</option>
+                                <option value="nameZA">Name: Z-A</option>
+                                <option value="discount">Discount: High to Low</option>
+                            </select>
+                        </div>
+
+                        <button
+                            style={{
+                                ...styles.cartButton,
+                                marginTop: "20px",
+                                background: "linear-gradient(135deg, #2ecc71, #27ae60)"
+                            }}
+                            onClick={() => setShowMobileFilters(false)}
+                        >
+                            Apply Filters
+                        </button>
+                    </div>
+                </div>
+
+                {/* Product Grid */}
+                <div style={styles.productGrid}>
+                    {loading && (
+                        <div style={styles.loadingContainer}>
+                            <div style={{ fontSize: "18px", color: "#7f8c8d" }}>Loading products...</div>
+                        </div>
+                    )}
+                    {error && (
+                        <div style={styles.errorContainer}>
+                            <h3 style={{ color: "#e74c3c", marginBottom: "15px" }}>Error Loading Products</h3>
+                            <p style={{ color: "#7f8c8d" }}>{error}</p>
+                            <button
+                                style={{
+                                    ...styles.cartButton,
+                                    marginTop: "20px",
+                                    background: "linear-gradient(135deg, #3498db, #2980b9)"
+                                }}
+                                onClick={() => window.location.reload()}
+                            >
+                                Try Again
+                            </button>
+                        </div>
+                    )}
                     {!loading && !error && filteredProducts.length === 0 && (
-                        <div style={{ textAlign: "center", fontSize: "18px", padding: "40px" }}>
-                            <p>😕 Oops! No products found.</p>
+                        <div style={styles.noProductsContainer}>
+                            <h3 style={{ color: "#2c3e50", marginBottom: "15px" }}>No Products Found</h3>
+                            <p style={{ color: "#7f8c8d", marginBottom: "20px" }}>
+                                We couldn't find any products matching your filters.
+                            </p>
+                            <button
+                                style={{
+                                    ...styles.cartButton,
+                                    background: "linear-gradient(135deg, #9b59b6, #8e44ad)"
+                                }}
+                                onClick={() => {
+                                    setFilters({
+                                        category: "",
+                                        priceRange: [0, 10000],
+                                        discount: 0,
+                                    });
+                                    setSortOption("");
+                                }}
+                            >
+                                Reset Filters
+                            </button>
                         </div>
                     )}
                     {!loading && !error && currentProducts.map((product) => (
@@ -363,29 +785,40 @@ const ProductList = () => {
                 </div>
             </div>
 
-            <div style={styles.pagination}>
-                <button
-                    style={{ ...styles.paginationButton, ...(currentPage === 1 && styles.disabledButton) }}
-                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                >
-                    Previous
-                </button>
-                <span>Page {currentPage} of {totalPages}</span>
-                <button
-                    style={{ ...styles.paginationButton, ...(currentPage === totalPages && styles.disabledButton) }}
-                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                >
-                    Next
-                </button>
-            </div>
+            {/* Pagination */}
+            {filteredProducts.length > 0 && (
+                <div style={styles.pagination}>
+                    <button
+                        style={{
+                            ...styles.paginationButton,
+                            ...(currentPage === 1 && styles.disabledButton)
+                        }}
+                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                    >
+                        <IoIosArrowBack /> Previous
+                    </button>
+                    <span style={styles.pageIndicator}>
+                        Page {currentPage} of {totalPages}
+                    </span>
+                    <button
+                        style={{
+                            ...styles.paginationButton,
+                            ...(currentPage === totalPages && styles.disabledButton)
+                        }}
+                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                    >
+                        Next <IoIosArrowForward />
+                    </button>
+                </div>
+            )}
 
             <Footer />
             {selectedProduct && (
                 <AddToCartModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />
             )}
-        </>
+        </div>
     );
 };
 

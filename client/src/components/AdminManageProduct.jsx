@@ -34,7 +34,7 @@ const AdminManageProduct = () => {
       useEffect(() => {
         const verifyAdminSession = async () => {
           try {
-            const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { withCredentials: true });
+            const response = await axios.get("http://localhost:5000/admin-verify", { withCredentials: true });
             if (!response.data.isAdmin) {
               navigate("/admin-login", { replace: true });
             }
@@ -54,7 +54,7 @@ const AdminManageProduct = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const response = await fetch("https://shopping-portal-backend.onrender.com/api/products");
+      const response = await fetch("http://localhost:5000/api/products");
       const data = await response.json();
       setProducts(data);
     } catch (error) {
@@ -66,7 +66,7 @@ const AdminManageProduct = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
-        const response = await fetch(`https://shopping-portal-backend.onrender.com/api/products/${id}`, { method: "DELETE" });
+        const response = await fetch(`http://localhost:5000/api/products/${id}`, { method: "DELETE" });
         if (response.ok) {
           setMessage("Product deleted successfully.");
           fetchProducts();
@@ -89,7 +89,7 @@ const AdminManageProduct = () => {
 
   const handleSave = async (product) => {
     try {
-      const response = await fetch(`https://shopping-portal-backend.onrender.com/api/products/${product._id}`, {
+      const response = await fetch(`http://localhost:5000/api/products/${product._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(product),
@@ -152,7 +152,7 @@ const AdminManageProduct = () => {
                           src={
                             product.image
                               ? product.image.startsWith("/uploads/")
-                                ? `https://shopping-portal-backend.onrender.com${product.image}`
+                                ? `http://localhost:5000${product.image}`
                                 : product.image
                               : "https://via.placeholder.com/240"
                           }
