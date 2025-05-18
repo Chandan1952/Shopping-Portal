@@ -6,7 +6,7 @@ import axios from "axios";
 import { FiPieChart, FiImage, FiTag, FiShoppingBag, FiLayers } from "react-icons/fi";
 import { BsGraphUp, BsPeople } from "react-icons/bs";
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = "https://shopping-portal-backend.onrender.com";
 
 const DashboardCard = ({ title, count, color, icon }) => {
   const IconComponent = icon;
