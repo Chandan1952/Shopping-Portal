@@ -18,7 +18,7 @@ export default function BrandsSection() {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const response = await axios.get("https://shopping-portal-backend.onrender.com/api/brands");
+        const response = await axios.get("https://myntra-clone-api.vercel.app/api/brands");
         setBrands(response.data);
       } catch (err) {
         setError("Failed to load brands. Please try again later.");
