@@ -17,7 +17,7 @@ const app = express();
 // ✅ CORS (Fix Frontend URL)
 app.use(
   cors({
-    origin: "https://myntra-clone-front.vercel.app", // Ensure correct frontend URL
+    origin: "https://shopping-portal-client.onrender.com", // Ensure correct frontend URL
     credentials: true, // Allow cookies/session sharing
   })
 );
