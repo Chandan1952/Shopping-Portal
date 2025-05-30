@@ -53,7 +53,7 @@ const LoginForm = ({ isOpen, onClose, onSwitch, setUser }) => {
 
       localStorage.setItem("user", JSON.stringify(data));
       onClose();
-      navigate("/user-dashboard");
+      navigate("/");
     } catch (error) {
       setError(error.message);
       // Shake animation trigger
