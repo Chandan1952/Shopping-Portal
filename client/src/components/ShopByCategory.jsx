@@ -151,7 +151,7 @@ export default function ShopByCategory() {
 
   useEffect(() => {
     axios
-      .get("https://myntra-clone-api.vercel.app/categories")
+      .get("https://shopping-portal-backend.onrender.com/categories")
       .then((res) => {
         setCategories(res.data);
         setLoading(false);
@@ -189,7 +189,7 @@ export default function ShopByCategory() {
         {categories.map((category) => (
           <CategoryCard key={category._id}>
             <CategoryImg
-              src={`https://myntra-clone-api.vercel.app${category.img}`}
+              src={`https://shopping-portal-backend.onrender.com${category.img}`}
               alt={category.title}
               loading="lazy"
             />
