@@ -18,7 +18,7 @@ export default function Header() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch("https://shopping-portal-backend.onrender.com/api/user", { credentials: "include" });
+        const response = await fetch("https://myntra-clone-api.vercel.app/api/user", { credentials: "include" });
         const data = await response.json();
         if (response.ok) {
           setUser(data);
