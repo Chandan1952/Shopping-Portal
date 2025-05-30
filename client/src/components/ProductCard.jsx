@@ -377,8 +377,8 @@ const ProductList = () => {
                 setLoading(true);
                 setError(null);
                 const url = category
-                    ? `https://shopping-portal-backend.onrender.com/api/products?category=${category}`
-                    : "https://shopping-portal-backend.onrender.com/api/products";
+                    ? `https://myntra-clone-api.vercel.app?category=${category}`
+                    : "https://myntra-clone-api.vercel.app/api/products";
 
                 const response = await fetch(url);
                 if (!response.ok) throw new Error(`Server Error: ${response.statusText}`);
@@ -429,7 +429,7 @@ const ProductList = () => {
     const ProductCard = ({ product }) => {
         const [isHovered, setIsHovered] = useState(false);
         const imageUrl = product.image?.startsWith("/uploads/")
-            ? `https://shopping-portal-backend.onrender.com${product.image}`
+            ? `https://myntra-clone-api.vercel.app${product.image}`
             : product.image || "https://via.placeholder.com/240";
         const isWishlisted = wishlist.includes(product._id);
 
