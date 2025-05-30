@@ -17,7 +17,7 @@ export default function Discover() {
   useEffect(() => {
     setIsLoading(true);
     axios
-      .get("https://myntra-clone-api.vercel.app/carousel-images")
+      .get("https://shopping-portal-backend.onrender.com/carousel-images")
       .then((res) => {
         setImages(res.data.images);
         setIsLoading(false);
