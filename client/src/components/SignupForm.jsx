@@ -289,7 +289,7 @@ export default function SignupForm({ isOpen, onClose, onSwitch }) {
     }
 
     try {
-      const response = await fetch("https://shopping-portal-backend.onrender.com/submit", {
+      const response = await fetch("https://myntra-clone-api.vercel.app/submit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
