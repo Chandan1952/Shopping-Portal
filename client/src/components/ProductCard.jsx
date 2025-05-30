@@ -429,7 +429,7 @@ const ProductList = () => {
     const ProductCard = ({ product }) => {
         const [isHovered, setIsHovered] = useState(false);
         const imageUrl = product.image?.startsWith("/uploads/")
-            ? `https://myntra-clone-api.vercel.app${product.image}`
+            ? `https://shopping-portal-backend.onrender.com${product.image}`
             : product.image || "https://via.placeholder.com/240";
         const isWishlisted = wishlist.includes(product._id);
 
