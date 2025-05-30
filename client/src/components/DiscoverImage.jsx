@@ -18,7 +18,7 @@ export default function BrandsSection() {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const response = await axios.get("https://shopping-portal-backend.onrender.com/api/brands");
+        const response = await axios.get("https://myntra-clone-api.vercel.app/api/brands");
         setBrands(response.data);
       } catch (err) {
         setError("Failed to load brands. Please try again later.");
@@ -191,7 +191,7 @@ function BrandCard({ brand }) {
       {brand?.img ? (
         <Box
           component="img"
-          src={`https://shopping-portal-backend.onrender.com${brand.img}`}
+          src={`https://myntra-clone-api.vercel.app${brand.img}`}
           alt={brand?.brand || "Brand"}
           sx={{
             maxWidth: "100%",
