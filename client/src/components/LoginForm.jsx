@@ -35,7 +35,7 @@ const LoginForm = ({ isOpen, onClose, onSwitch, setUser }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("https://myntra-clone-api.vercel.app/user-login", {
+      const response = await fetch("https://shopping-portal-backend.onrender.com/user-login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
