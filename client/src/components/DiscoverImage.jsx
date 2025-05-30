@@ -191,7 +191,7 @@ function BrandCard({ brand }) {
       {brand?.img ? (
         <Box
           component="img"
-          src={`https://shopping-portal-backend.onrender.com${brand.img}`}
+          src={https://myntra-clone-api.vercel.app${brand.img}`}
           alt={brand?.brand || "Brand"}
           sx={{
             maxWidth: "100%",
