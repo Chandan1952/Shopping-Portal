@@ -20,7 +20,7 @@ const ProductDetail = () => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`https://myntra-clone-api.vercel.app/api/products/${id}`);
+        const response = await fetch(`https://shopping-portal-backend.onrender.com/api/products/${id}`);
         if (!response.ok) throw new Error("Product not found");
 
         const data = await response.json();
@@ -55,7 +55,7 @@ const ProductDetail = () => {
         image: product.image,
       };
 
-      const response = await fetch("https://myntra-clone-api.vercel.app/api/cart", {
+      const response = await fetch("https://shopping-portal-backend.onrender.com/api/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(cartItem),
@@ -72,7 +72,7 @@ const ProductDetail = () => {
 
   const handleAddToWishlist = async () => {
     try {
-      const response = await fetch("https://myntra-clone-api.vercel.app/api/wishlist", {
+      const response = await fetch("https://shopping-portal-backend.onrender.com/api/wishlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
