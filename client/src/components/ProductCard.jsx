@@ -377,7 +377,7 @@ const ProductList = () => {
                 setLoading(true);
                 setError(null);
                 const url = category
-                    ? `https://shopping-portal-backend.onrender.com?category=${category}`
+                    ? `https://shopping-portal-backend.onrender.com/api/products?category=${category}`
                     : "https://shopping-portal-backend.onrender.com/api/products";
 
                 const response = await fetch(url);
