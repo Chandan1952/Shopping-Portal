@@ -7,19 +7,19 @@ const AdminHeader = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate(); 
   
-  useEffect(() => {
-    const verifyAdminSession = async () => {
-      try {
-        const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { withCredentials: true });
-        if (!response.data.isAdmin) {
-          navigate("/admin-login", { replace: true });
-        }
-      } catch {
-        navigate("/admin-login", { replace: true });
-      }
-    };
-    verifyAdminSession();
-  }, [navigate]);
+  // useEffect(() => {
+  //   const verifyAdminSession = async () => {
+  //     try {
+  //       const response = await axios.get("https://shopping-portal-backend.onrender.com/admin-verify", { withCredentials: true });
+  //       if (!response.data.isAdmin) {
+  //         navigate("/admin-login", { replace: true });
+  //       }
+  //     } catch {
+  //       navigate("/admin-login", { replace: true });
+  //     }
+  //   };
+  //   verifyAdminSession();
+  // }, [navigate]);
 
   useEffect(() => {
     axios
